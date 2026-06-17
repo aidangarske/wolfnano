@@ -34,5 +34,6 @@
 #include <wolfssl/wolfcrypt/sha512.h>
 #include <wolfssl/wolfcrypt/hmac.h>
 #include <wolfssl/wolfcrypt/kdf.h>
+#include <wolfssl/wolfcrypt/aes.h>
 
 #endif /* WOLFNANOTLS_CRYPTO_H */
