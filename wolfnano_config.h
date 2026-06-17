@@ -48,6 +48,11 @@
     #define NO_ASN_TIME
 #endif
 
+/* ---- side-channel hardening (constant-time) ---- */
+#define ECC_TIMING_RESISTANT
+#define TFM_TIMING_RESISTANT
+#define WC_RSA_BLINDING
+
 /* ---- RNG: Hash-DRBG seeded through a pluggable wolfNanoTLS seed hook ----
  * The seed source is supplied by the integration (getentropy on a host now; a
  * hardware TRNG / wolfHAL RNG driver later). The DRBG itself stays the
