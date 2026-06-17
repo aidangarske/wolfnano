@@ -54,8 +54,8 @@ HS_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
 WCT_SRC := $(FLOOR_SRC) $(WC)/sp_int.c wolfssl/wolfcrypt/test/test.c \
   tests/wn_host_seed.c
 
-.PHONY: host kstest tstest rectest ksharetest hstest wctest test clean
-test: host kstest tstest rectest ksharetest hstest wctest ## build + run all local self-tests
+.PHONY: host kstest tstest rectest ksharetest hstest wctest msgtest test clean
+test: host kstest tstest rectest ksharetest hstest wctest msgtest ## build + run all local self-tests
 
 host: ## build + run the crypto floor self-test locally (PORTABLE_C)
 	@mkdir -p $(BUILD)
@@ -105,6 +105,13 @@ wctest: ## run wolfSSL's wolfcrypt test against the floor (config-trimmed)
 	   $(WCT_SRC) tests/wolfcrypt_test_main.c -o $(BUILD)/wctest
 	@echo "---- run ----"
 	@./$(BUILD)/wctest | tail -3
+
+msgtest: ## build + run the wire encode/decode primitive tests (PORTABLE_C)
+	@mkdir -p $(BUILD)
+	cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
+	   src/shell_slim/wn_msg.c tests/msg_test.c -o $(BUILD)/msg_test
+	@echo "---- run ----"
+	@./$(BUILD)/msg_test
 
 clean:
 	rm -rf $(BUILD) *.o
