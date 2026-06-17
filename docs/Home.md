@@ -34,7 +34,9 @@ Early development, but the TLS 1.3 client works end to end.
   record protection, key share, ClientHello/ServerHello, handshake driver);
   side-channel hardening; and a **live TLS 1.3 PSK+ECDHE handshake against both
   OpenSSL and wolfSSL**.
-- Next: Raw-Public-Key auth, PQC adders, X.509 (Phase 4), the FIPS backend.
+- Done (PQC): ML-KEM-768 and ML-DSA-65 adders (both verify paths
+  allocation-free) plus the X25519MLKEM768 hybrid key share.
+- Next: Raw-Public-Key auth, X.509 (Phase 4), the FIPS backend.
 - Deferred: hardware targets and on-device assembly benchmarks.
 
 See [Getting Started](Getting-Started.md).
