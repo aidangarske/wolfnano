@@ -16,14 +16,26 @@ locally:
 
 ChaCha20-Poly1305 is available behind `WOLFNANO_HAVE_CHACHA`.
 
+## PQC adders (done)
+
+| Adder | Algorithm | Status |
+|---|---|---|
+| `WOLFNANO_MLKEM` | ML-KEM-768 (KEM) | done, allocation-free |
+| `WOLFNANO_MLKEM` | X25519MLKEM768 hybrid key share (group 0x11ec) | done, client+server agreement |
+| `WOLFNANO_MLDSA` | ML-DSA-65 verify (no-malloc) | done, allocation-free |
+| `WOLFNANO_MLDSA` + `WOLFNANO_MLDSA_SIGN` | ML-DSA-65 keygen/sign | done (needs working memory) |
+
+ML-KEM-768 and ML-DSA-65 verify are both **allocation-free** under
+`WOLFSSL_NO_MALLOC`. ML-DSA keygen/sign (server side) needs working memory, so
+it is gated behind `WOLFNANO_MLDSA_SIGN`. The hybrid concatenation is ML-KEM
+component first, then X25519 (draft-kwiatkowski-tls-ecdhe-mlkem).
+
 ## Planned adders
 
 | Adder | Algorithm | Status |
 |---|---|---|
-| `WOLFNANO_MLKEM` | ML-KEM-768, X25519MLKEM768 hybrid | planned |
-| `WOLFNANO_MLDSA` | ML-DSA verify | planned |
-| `WOLFNANO_X509` | minimal cert path validation | planned |
-| `WOLFNANO_HAVE_RSA_VERIFY` | RSA verify for real-world chains | planned |
+| `WOLFNANO_X509` | minimal cert path validation | planned (Phase 4) |
+| `WOLFNANO_HAVE_RSA_VERIFY` | RSA verify for real-world chains | planned (Phase 4) |
 
 ## Backend boundary note
 
