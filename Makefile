@@ -33,6 +33,14 @@ CONN_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   src/shell_slim/wn_transcript.c src/shell_slim/wn_record.c \
   src/shell_slim/wn_keyshare.c src/shell_slim/wn_serverhello.c \
   src/shell_slim/wn_connect.c tests/wn_host_seed.c
+
+# Cert handshake build (adds ECDHE non-PSK ClientHello + cert/CertVerify deps).
+CONN_CERT_SRC := $(FLOOR_SRC) $(WC)/sp_int.c \
+  src/shell_slim/wn_msg.c src/shell_slim/wn_keyschedule.c \
+  src/shell_slim/wn_transcript.c src/shell_slim/wn_record.c \
+  src/shell_slim/wn_keyshare.c src/shell_slim/wn_serverhello.c \
+  src/shell_slim/wn_clienthello.c src/shell_slim/wn_connect.c \
+  tests/wn_host_seed.c
 KS_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   $(WC)/logging.c $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c \
   $(WC)/hmac.c $(WC)/kdf.c \
@@ -190,8 +198,12 @@ interop: ## live TLS 1.3 PSK handshake vs OpenSSL and wolfSSL
 	@mkdir -p $(BUILD)
 	cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_SRC) tests/interop_psk_test.c -o $(BUILD)/interop_psk_client
-	@echo "== vs OpenSSL =="; sh tests/interop_psk.sh
-	@echo "== vs wolfSSL =="; sh tests/interop_wolfssl.sh
+	@echo "== PSK vs OpenSSL =="; sh tests/interop_psk.sh
+	@echo "== PSK vs wolfSSL =="; sh tests/interop_wolfssl.sh
+	cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 -DWOLFNANO_ALLOW_MALLOC \
+	   -DWOLFNANO_TARGET_PORTABLE_C \
+	   $(CONN_CERT_SRC) tests/interop_cert_test.c -o $(BUILD)/interop_cert_client
+	@echo "== cert vs OpenSSL =="; sh tests/interop_cert.sh
 
 clean:
 	rm -rf $(BUILD) *.o
