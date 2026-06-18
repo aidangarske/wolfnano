@@ -122,6 +122,14 @@ extern int wn_seed(unsigned char* output, unsigned int sz);
     #define HAVE_CURVE25519
 #endif
 
+/* ---- approved-mode (fips backend): X25519/ChaCha are outside the wolfCrypt
+ * FIPS boundary, so an approved build negotiates ECDHE P-256 + AES-GCM only. */
+#ifdef WOLFNANOTLS_FIPS
+    #ifndef WOLFNANOTLS_HAVE_ECDHE_P256
+        #define WOLFNANOTLS_HAVE_ECDHE_P256
+    #endif
+#endif
+
 /* ---- Ed25519 (requires SHA-512) ---- */
 #ifdef WOLFNANOTLS_HAVE_ED25519
     #define HAVE_ED25519

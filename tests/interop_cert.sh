@@ -31,7 +31,7 @@ if ! kill -0 "$SPID" 2>/dev/null; then
     exit 0
 fi
 
-./build/interop_cert_client "$PORT" "$ANCHOR"
+"./build/${WN_CERT_CLIENT:-interop_cert_client}" "$PORT" "$ANCHOR"
 RC=$?
 
 kill "$SPID" 2>/dev/null

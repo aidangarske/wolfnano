@@ -28,13 +28,32 @@
 
 #include "wolfnano.h"
 #include "wolfnano_crypto.h"
+#ifdef WOLFNANOTLS_HAVE_ECDHE_P256
+    #include <wolfssl/wolfcrypt/ecc.h>
+#endif
 
 /* TLS supported_groups code points. */
-#define WN_GROUP_X25519 0x001d
+#define WN_GROUP_X25519    0x001d
+#define WN_GROUP_SECP256R1 0x0017
 
 #define WN_X25519_KEY_SZ 32
 
+#ifdef WOLFNANOTLS_HAVE_ECDHE_P256
+    #define WN_SECP256R1_PUB_SZ    65   /* uncompressed point 0x04||X||Y */
+    #define WN_SECP256R1_SECRET_SZ 32   /* X coordinate */
+    #define WN_KEYSHARE_MAX_PUB    65
+    #define WN_DEFAULT_GROUP       WN_GROUP_SECP256R1
+    #define WN_DEFAULT_PUB_SZ      WN_SECP256R1_PUB_SZ
+#else
+    #define WN_KEYSHARE_MAX_PUB    32
+    #define WN_DEFAULT_GROUP       WN_GROUP_X25519
+    #define WN_DEFAULT_PUB_SZ      WN_X25519_KEY_SZ
+#endif
+
 typedef struct wn_KeyShare {
+#ifdef WOLFNANOTLS_HAVE_ECDHE_P256
+    ecc_key ecc;
+#endif
     curve25519_key x25519;
     int group;
 } wn_KeyShare;
