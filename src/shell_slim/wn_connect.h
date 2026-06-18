@@ -41,4 +41,13 @@ WOLFNANOTLS_API int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRe
                                 const char* identity, byte* scratch,
                                 word32 scratchLen);
 
+/* Perform a TLS 1.3 ECDHE handshake with server certificate authentication.
+ * anchor is a pinned trust anchor (DER); the server's leaf must verify against
+ * it and the CertificateVerify signature must verify with the leaf key.
+ * Requires WOLFNANOTLS_X509. Returns WOLFNANOTLS_SUCCESS on a completed handshake. */
+WOLFNANOTLS_API int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend,
+                                 wn_IoRecv ioRecv, void* ioCtx,
+                                 const byte* anchor, word32 anchorLen,
+                                 byte* scratch, word32 scratchLen);
+
 #endif /* WN_CONNECT_H */
