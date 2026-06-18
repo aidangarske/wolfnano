@@ -1,16 +1,17 @@
 #!/bin/sh
-# Live interop: stock wolfSSL example server presenting the pinned ECDSA P-256
-# cert, wolfNanoTLS certificate client against it.
+# Live interop: stock wolfSSL example server presenting a pinned server cert,
+# wolfNanoTLS cert client against it. $1 selects the cert type (ecdsa | rsa | ed).
 set -u
+TYPE=${1:-ecdsa}
 PORT=14436
 SERVER=${WOLFSSL_SERVER:-$HOME/wolfssl/examples/server/server}
 WOLFSSL_DIR=$(dirname "$(dirname "$(dirname "$SERVER")")")
-CERT="$(pwd)/test-pki/server/ec-cert.pem"
-KEY="$(pwd)/test-pki/server/ec-key.pem"
-ANCHOR="$(pwd)/test-pki/server/ec-cert.der"
+CERT="$(pwd)/test-pki/server/$TYPE-cert.pem"
+KEY="$(pwd)/test-pki/server/$TYPE-key.pem"
+ANCHOR="$(pwd)/test-pki/server/$TYPE-cert.der"
 
 if [ ! -x "$SERVER" ] || [ ! -f "$CERT" ]; then
-    echo "SKIP wolfSSL cert interop (server or cert not found)"
+    echo "SKIP wolfSSL cert interop ($TYPE: server or cert not found)"
     exit 0
 fi
 
@@ -20,7 +21,8 @@ SPID=$!
 
 sleep 1
 if ! kill -0 "$SPID" 2>/dev/null; then
-    echo "SKIP wolfSSL cert interop (server did not start)"
+    echo "SKIP wolfSSL cert interop ($TYPE: server did not start; may lack the"
+    echo "     key type). See /tmp/wn_cert_wssl.log"
     exit 0
 fi
 
