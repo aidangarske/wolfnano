@@ -670,7 +670,7 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
     wn_KeyShare ks;
     wn_ServerHello sh;
     wn_Reader hr;
-    byte random32[32], sid[32], cliPub[32];
+    byte random32[32], sid[32], cliPub[WN_KEYSHARE_MAX_PUB];
     byte ecdhe[32], emptyHash[32], th[32], thCert[32];
     byte zeros[32];
     byte early[32], derived[32], hs[32], cHs[32], sHs[32];
@@ -702,7 +702,7 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
         }
     }
     if (ret == WOLFNANO_SUCCESS) {
-        ret = wn_KeyShare_Init(&ks, WN_GROUP_X25519);
+        ret = wn_KeyShare_Init(&ks, WN_DEFAULT_GROUP);
     }
     if (ret == WOLFNANO_SUCCESS) {
         ret = wn_KeyShare_Generate(&ks, rng, cliPub, &pubLen);
@@ -714,7 +714,7 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
     /* ClientHello (ECDHE, no PSK) */
     if (ret == WOLFNANO_SUCCESS) {
         ret = wn_ClientHello_Build(scratch, &chLen, scratchLen, random32, sid,
-                                   32, cliPub, 32);
+                                   32, cliPub, pubLen);
     }
     if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Transcript_Update(&tc, scratch, chLen);
@@ -744,7 +744,7 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
         ret = wn_Transcript_Update(&tc, scratch + 5, recLen - 5);
     }
     if ((ret == WOLFNANO_SUCCESS) &&
-        ((sh.keyShare == NULL) || (sh.keyShareLen != 32))) {
+        ((sh.keyShare == NULL) || (sh.keyShareLen != WN_DEFAULT_PUB_SZ))) {
         ret = WOLFNANO_E_CRYPTO;
     }
     if (ret == WOLFNANO_SUCCESS) {

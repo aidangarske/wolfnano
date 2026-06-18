@@ -24,6 +24,7 @@
  */
 
 #include "wn_clienthello.h"
+#include "wn_keyshare.h"
 #include "wn_msg.h"
 
 #define WN_HS_CLIENT_HELLO   1
@@ -31,12 +32,11 @@
 #define WN_EXT_SIG_ALGS      13
 #define WN_EXT_SUPPORTED_VER 43
 #define WN_EXT_KEY_SHARE     51
-#define WN_GROUP_X25519_CP   0x001d
 
 int wn_ClientHello_Build(byte* out, word32* outLen, word32 outCap,
                          const byte* random32, const byte* sessionId,
-                         word32 sessionIdLen, const byte* x25519Pub,
-                         word32 x25519PubLen)
+                         word32 sessionIdLen, const byte* pub,
+                         word32 pubLen)
 {
     wn_Writer w;
     word32 hsLen;
@@ -44,7 +44,7 @@ int wn_ClientHello_Build(byte* out, word32* outLen, word32 outCap,
     int ret = WOLFNANO_SUCCESS;
 
     if ((out == NULL) || (outLen == NULL) || (random32 == NULL) ||
-        (x25519Pub == NULL) || (x25519PubLen != 32) || (sessionIdLen > 32)) {
+        (pub == NULL) || (pubLen != WN_DEFAULT_PUB_SZ) || (sessionIdLen > 32)) {
         ret = WOLFNANO_E_INVALID_ARG;
     }
 
@@ -76,27 +76,34 @@ int wn_ClientHello_Build(byte* out, word32* outLen, word32 outCap,
         wn_Write_U8(&w, 2);
         wn_Write_U16(&w, 0x0304);
 
-        /* supported_groups: [x25519] */
+        /* supported_groups: [configured (EC)DHE group] */
         wn_Write_U16(&w, WN_EXT_SUPPORTED_GRP);
         wn_Write_U16(&w, 4);
         wn_Write_U16(&w, 2);
-        wn_Write_U16(&w, WN_GROUP_X25519_CP);
+        wn_Write_U16(&w, WN_DEFAULT_GROUP);
 
         /* signature_algorithms */
         wn_Write_U16(&w, WN_EXT_SIG_ALGS);
+#ifdef WOLFNANO_FIPS
+        wn_Write_U16(&w, 6);
+        wn_Write_U16(&w, 4);
+        wn_Write_U16(&w, 0x0403);              /* ecdsa_secp256r1_sha256 */
+        wn_Write_U16(&w, 0x0804);              /* rsa_pss_rsae_sha256 */
+#else
         wn_Write_U16(&w, 8);
         wn_Write_U16(&w, 6);
         wn_Write_U16(&w, 0x0807);              /* ed25519 */
         wn_Write_U16(&w, 0x0403);              /* ecdsa_secp256r1_sha256 */
         wn_Write_U16(&w, 0x0804);              /* rsa_pss_rsae_sha256 */
+#endif
 
-        /* key_share: one X25519 entry */
+        /* key_share: one entry for the configured group */
         wn_Write_U16(&w, WN_EXT_KEY_SHARE);
-        wn_Write_U16(&w, (word16)(2 + 2 + 2 + x25519PubLen));
-        wn_Write_U16(&w, (word16)(2 + 2 + x25519PubLen));
-        wn_Write_U16(&w, WN_GROUP_X25519_CP);
-        wn_Write_U16(&w, (word16)x25519PubLen);
-        wn_Write_Bytes(&w, x25519Pub, x25519PubLen);
+        wn_Write_U16(&w, (word16)(2 + 2 + 2 + pubLen));
+        wn_Write_U16(&w, (word16)(2 + 2 + pubLen));
+        wn_Write_U16(&w, WN_DEFAULT_GROUP);
+        wn_Write_U16(&w, (word16)pubLen);
+        wn_Write_Bytes(&w, pub, pubLen);
 
         wn_Write_LenEnd(&w, extLen, 2);        /* extensions length */
         wn_Write_LenEnd(&w, hsLen, 3);         /* handshake length */

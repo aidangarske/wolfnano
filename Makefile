@@ -217,6 +217,14 @@ interop: ## live TLS 1.3 PSK handshake vs OpenSSL and wolfSSL
 	@echo "== cert(RSA-PSS) vs wolfSSL =="; sh tests/interop_cert_wolfssl.sh rsa
 	@echo "== cert(Ed25519) vs wolfSSL =="; sh tests/interop_cert_wolfssl.sh ed
 	@echo "== cert(chain leaf<-inter<-root) vs wolfSSL =="; sh tests/interop_cert_wolfssl.sh chain
+	cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_FIPS -DWOLFNANO_TARGET_PORTABLE_C \
+	   $(CONN_CERT_SRC) $(WC)/rsa.c tests/interop_cert_test.c \
+	   -o $(BUILD)/interop_cert_fips_client
+	@echo "== cert(ECDSA, approved ECDHE P-256 suites) vs OpenSSL =="; \
+	   WN_CERT_CLIENT=interop_cert_fips_client sh tests/interop_cert.sh ecdsa
+	@echo "== cert(ECDSA, approved ECDHE P-256 suites) vs wolfSSL =="; \
+	   WN_CERT_CLIENT=interop_cert_fips_client sh tests/interop_cert_wolfssl.sh ecdsa
 
 fipsproof: ## Phase 5: same shell sources link against the FIPS backend; CASTs pass
 	@mkdir -p $(BUILD)
