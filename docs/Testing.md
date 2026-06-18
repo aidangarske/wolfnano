@@ -68,11 +68,13 @@ The wolfSSL server must be built with PSK + X25519:
 `WOLFSSL_SERVER` at the example server, or it skips cleanly. Requires `openssl`
 for the OpenSSL leg.
 
-The cert leg runs OpenSSL with a generated ECDSA P-256 cert
-(`test-pki/server/`) and the wolfNano client pins it as the trust anchor:
-ECDHE handshake, parse the server Certificate, verify the leaf against the
-anchor, verify the ECDSA CertificateVerify over the transcript, verify the
-server Finished, send the client Finished.
+The cert leg runs against **both OpenSSL and wolfSSL** with a generated ECDSA
+P-256 cert (`test-pki/server/`); the wolfNano client pins it as the trust
+anchor: ECDHE handshake, parse the server Certificate, verify the leaf against
+the anchor, verify the ECDSA CertificateVerify over the transcript, verify the
+server Finished, send the client Finished (preceded by the compat CCS). The
+wolfSSL server runs with `-d` (server-auth only; wolfNano does not present a
+client cert).
 
 ## Still ahead
 
