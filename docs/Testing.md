@@ -42,7 +42,8 @@ for the `src` floor statically (independent of any runtime malloc trap).
 | `make wctest` | wolfSSL's own `wolfcrypt/test/test.c`, config-trimmed to the floor |
 | `make msgtest` | wire encode/decode primitives |
 | `make chtest` / `make shtest` | ClientHello encoder / ServerHello parser (RFC 8448) |
-| `make interop` | **live TLS 1.3 PSK+ECDHE handshake vs OpenSSL and wolfSSL** |
+| `make interop` | **live TLS 1.3 handshakes vs OpenSSL/wolfSSL: PSK + cert** |
+| `make certtest` | X.509 cert chain-link verify (ECC + RSA) |
 
 `make wctest` reuses wolfSSL's comprehensive crypto test verbatim from the
 submodule. Compiled with the wolfNano config, its `#ifdef` guards trim it to
@@ -66,6 +67,12 @@ The wolfSSL server must be built with PSK + X25519:
 `./configure --enable-tls13 --enable-psk --enable-curve25519`. Point
 `WOLFSSL_SERVER` at the example server, or it skips cleanly. Requires `openssl`
 for the OpenSSL leg.
+
+The cert leg runs OpenSSL with a generated ECDSA P-256 cert
+(`test-pki/server/`) and the wolfNano client pins it as the trust anchor:
+ECDHE handshake, parse the server Certificate, verify the leaf against the
+anchor, verify the ECDSA CertificateVerify over the transcript, verify the
+server Finished, send the client Finished.
 
 ## Still ahead
 

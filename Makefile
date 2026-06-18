@@ -204,6 +204,7 @@ interop: ## live TLS 1.3 PSK handshake vs OpenSSL and wolfSSL
 	   -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_CERT_SRC) tests/interop_cert_test.c -o $(BUILD)/interop_cert_client
 	@echo "== cert vs OpenSSL =="; sh tests/interop_cert.sh
+	@echo "== cert vs wolfSSL =="; sh tests/interop_cert_wolfssl.sh
 
 clean:
 	rm -rf $(BUILD) *.o
