@@ -91,6 +91,9 @@ static int recv_record(wn_IoRecv recv, void* ctx, byte* rec, word32 cap,
     return ret;
 }
 
+/* Send the TLS 1.3 middlebox-compatibility ChangeCipherSpec (RFC 8446 D.4). */
+static int send_ccs(wn_IoSend send, void* ctx);
+
 static int send_plain_record(wn_IoSend send, void* ctx, byte type,
                              const byte* body, word32 bodyLen)
 {
@@ -116,6 +119,13 @@ static int send_plain_record(wn_IoSend send, void* ctx, byte type,
     }
 
     return ret;
+}
+
+static int send_ccs(wn_IoSend send, void* ctx)
+{
+    static const byte ccs = 0x01;
+
+    return send_plain_record(send, ctx, WN_REC_CHANGE_CIPHER, &ccs, 1);
 }
 
 /* Build a PSK+ECDHE ClientHello body+header into w. Records the offset to hash
@@ -263,6 +273,9 @@ int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv, void* ioCtx,
     }
     if (ret == WOLFNANOTLS_SUCCESS) {
         ret = send_plain_record(ioSend, ioCtx, WN_REC_HANDSHAKE, scratch, chLen);
+    }
+    if (ret == WOLFNANOTLS_SUCCESS) {
+        ret = send_ccs(ioSend, ioCtx);     /* compat CCS after ClientHello */
     }
 
     /* ----- ServerHello ----- */
@@ -556,6 +569,9 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
     if (ret == WOLFNANOTLS_SUCCESS) {
         ret = send_plain_record(ioSend, ioCtx, WN_REC_HANDSHAKE, scratch,
                                 chLen);
+    }
+    if (ret == WOLFNANOTLS_SUCCESS) {
+        ret = send_ccs(ioSend, ioCtx);     /* compat CCS after ClientHello */
     }
 
     /* ServerHello */

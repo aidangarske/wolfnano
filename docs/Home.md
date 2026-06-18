@@ -36,7 +36,10 @@ Early development, but the TLS 1.3 client works end to end.
   OpenSSL and wolfSSL**.
 - Done (PQC): ML-KEM-768 and ML-DSA-65 adders (both verify paths
   allocation-free) plus the X25519MLKEM768 hybrid key share.
-- Next: Raw-Public-Key auth, X.509 (Phase 4), the FIPS backend.
-- Deferred: hardware targets and on-device assembly benchmarks.
+- Done (cert auth): X.509 chain-link verify (ECC + RSA) and a **cert-based
+  TLS 1.3 handshake (ECDSA CertVerify) live against OpenSSL** (`WOLFNANOTLS_X509`,
+  needs working memory).
+- Next: the FIPS provider-seam build, benchmarks/positioning.
+- Deferred: full multi-cert path validation, hardware/on-device asm benchmarks.
 
 See [Getting Started](Getting-Started.md).
