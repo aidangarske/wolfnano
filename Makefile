@@ -151,9 +151,9 @@ ASM_CC    := $(CC_$(WOLFNANOTLS_ASM))
 ASM_FLAGS := $(FLAGS_$(WOLFNANOTLS_ASM))
 ASM_SRC   := $(SPSRC_$(WOLFNANOTLS_ASM)) $(ASMSRC_$(WOLFNANOTLS_ASM))
 
-.PHONY: host kstest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test test-core clean
+.PHONY: host kstest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test test-core clean
 test: test-core mlkemtest mldsatest hybridtest wctestpqc ## build + run all local self-tests
-test-core: host kstest tstest rectest ksharetest hstest wctest msgtest chtest shtest certtest ## non-PQC suites (wolfSSL without the wc_mlkem/wc_mldsa API)
+test-core: host kstest tstest rectest ksharetest hstest wctest msgtest chtest shtest negtest certtest ## non-PQC suites (wolfSSL without the wc_mlkem/wc_mldsa API)
 
 host: ## build + run the crypto floor self-test locally (PORTABLE_C)
 	@mkdir -p $(BUILD)
@@ -234,6 +234,14 @@ shtest: ## build + run the ServerHello parser test (PORTABLE_C)
 	   tests/serverhello_test.c -o $(BUILD)/serverhello_test
 	@echo "---- run ----"
 	@./$(BUILD)/serverhello_test
+
+negtest: ## build + run negative/malformed parser tests (PORTABLE_C)
+	@mkdir -p $(BUILD)
+	cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	   src/wn_msg.c src/wn_serverhello.c \
+	   tests/parser_negative_test.c -o $(BUILD)/parser_negative_test
+	@echo "---- run ----"
+	@./$(BUILD)/parser_negative_test
 
 mlkemtest: ## build + run the ML-KEM-768 KEM test (WOLFNANOTLS_MLKEM)
 	@mkdir -p $(BUILD)
