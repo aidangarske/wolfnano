@@ -48,7 +48,7 @@ wolfSSL while `main` rides known-good master.
 
 ### Analysis
 - `sanitizer.yml` - ASAN/UBSAN of `make test`.
-- `codeql.yml`, `semgrep.yml`, `codespell.yml`, `static-analysis.yml` (cppcheck).
+- `semgrep.yml`, `codespell.yml`, `static-analysis.yml` (cppcheck).
 - `coverage.yml` - lcov of `make test`.
 - `stack-bounds.yml` - `-fstack-usage` report.
 - `coverity.yml` - Coverity Scan (token-gated; skips without `COVERITY_TOKEN`).
