@@ -31,10 +31,17 @@
 #define WOLFNANO_API
 #define WOLFNANO_LOCAL
 
-/* Return codes: success is 0, errors are negative. */
-#define WOLFNANO_SUCCESS         0
-#define WOLFNANO_E_INVALID_ARG (-1)
-#define WOLFNANO_E_CRYPTO      (-2)
-#define WOLFNANO_E_UNSUPPORTED (-3)
+/* Return codes: success is 0, errors are negative. The first four are stable;
+ * the granular handshake codes (-4..-9) map to TLS alerts (see wn_connect.c). */
+#define WOLFNANO_SUCCESS          0
+#define WOLFNANO_E_INVALID_ARG  (-1)
+#define WOLFNANO_E_CRYPTO       (-2)
+#define WOLFNANO_E_UNSUPPORTED  (-3)
+#define WOLFNANO_E_BAD_STATE    (-4)   /* internal handshake-state error */
+#define WOLFNANO_E_UNEXPECTED_MSG (-5) /* message not allowed in this state */
+#define WOLFNANO_E_DECODE       (-6)   /* malformed handshake message */
+#define WOLFNANO_E_BAD_MAC      (-7)   /* Finished / record auth failure */
+#define WOLFNANO_E_ILLEGAL_PARAM (-8)  /* bad group / version / param */
+#define WOLFNANO_E_BAD_CERT     (-9)   /* certificate / CertVerify failure */
 
 #endif /* WOLFNANO_H */
