@@ -36,6 +36,13 @@ CONN_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   src/wn_keyshare.c src/wn_serverhello.c \
   src/wn_connect.c tests/wn_host_seed.c
 
+# P-256 PSK handshake build (ECDHE secp256r1; FLOOR_SRC links ecc/asn/sp).
+CONN_P256_SRC := $(FLOOR_SRC) $(WC)/sp_int.c \
+  src/wn_msg.c src/wn_keyschedule.c \
+  src/wn_transcript.c src/wn_record.c \
+  src/wn_keyshare.c src/wn_serverhello.c \
+  src/wn_connect.c tests/wn_host_seed.c
+
 # Cert handshake build (adds ECDHE non-PSK ClientHello + cert/CertVerify deps).
 CONN_CERT_SRC := $(FLOOR_SRC) $(WC)/sp_int.c \
   src/wn_msg.c src/wn_keyschedule.c \
@@ -339,9 +346,15 @@ interop: ## live TLS 1.3 PSK handshake vs OpenSSL and wolfSSL
 	@mkdir -p $(BUILD)
 	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
 	   $(CONN_SRC) tests/interop_psk_test.c -o $(BUILD)/interop_psk_client
-	@echo "== PSK vs OpenSSL =="; sh tests/interop_psk.sh
-	@echo "== PSK vs wolfSSL =="; sh tests/interop_wolfssl.sh
-	@echo "== PSK vs mbedTLS =="; sh tests/interop_mbedtls.sh
+	@echo "== PSK (X25519) vs OpenSSL =="; sh tests/interop_psk.sh
+	@echo "== PSK (X25519) vs wolfSSL =="; sh tests/interop_wolfssl.sh
+	@echo "== PSK (X25519) vs mbedTLS =="; sh tests/interop_mbedtls.sh
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_HAVE_ECDHE_P256 \
+	   -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	   $(CONN_P256_SRC) tests/interop_psk_test.c -o $(BUILD)/interop_psk_p256_client
+	@echo "== PSK (P-256) vs OpenSSL =="; CLIENT=$(BUILD)/interop_psk_p256_client sh tests/interop_psk.sh
+	@echo "== PSK (P-256) vs wolfSSL =="; CLIENT=$(BUILD)/interop_psk_p256_client sh tests/interop_wolfssl.sh
+	@echo "== PSK (P-256) vs mbedTLS =="; CLIENT=$(BUILD)/interop_psk_p256_client sh tests/interop_mbedtls.sh
 	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY \
 	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
 	   $(CONN_CERT_SRC) $(WC)/rsa.c tests/interop_cert_test.c \

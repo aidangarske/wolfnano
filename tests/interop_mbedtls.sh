@@ -20,7 +20,7 @@ while [ $i -lt 50 ]; do
     i=$((i + 1))
 done
 
-./build/interop_psk_client "$PORT" "$PSK" Client_identity
+"${CLIENT:-./build/interop_psk_client}" "$PORT" "$PSK" Client_identity
 RC=$?
 
 kill "$SPID" 2>/dev/null
