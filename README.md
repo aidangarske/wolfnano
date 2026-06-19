@@ -28,8 +28,8 @@ interop stays identical to wolfSSL.
   entirely on caller-provided / static buffers (`WOLFSSL_NO_MALLOC`), verified
   with a malloc trap. Nothing on the heap.
 - **Tiny footprint**: a complete Cortex-M33 TLS 1.3 PSK + ECDHE client is
-  **17.2 KB** of `.text` (X25519) or **24.8 KB** (P-256) - **~52-58% smaller
-  than a hard-minimized mbedTLS** (41-52 KB), and far smaller against a stock
+  **17.2 KB** of `.text` (X25519) or **24.8 KB** (P-256) - **~50-58% smaller
+  than a hard-minimized mbedTLS** (41-50 KB), and far smaller against a stock
   mbedTLS (~80 KB). The slim shell itself is ~8.7 KB vs wolfSSL's ~52 KB layer.
 - **Full wolfSSL asm speed**: target assembly is linked unchanged from the
   submodule. On x86_64, AES-128-GCM hits **2.7 GB/s** and ECDSA P-256 verify
@@ -64,7 +64,7 @@ mbedTLS 3.6 **both hard-minimized to the identical scope** (minimal PSA
 
 | Client | wolfNano | mbedTLS (hard-min) | full wolfSSL | smaller by |
 |---|--:|--:|--:|--:|
-| PSK + ECDHE, **P-256** | **24.8 KB** | 51.8 KB | - | 52% |
+| PSK + ECDHE, **P-256** | **24.8 KB** | 49.7 KB | - | 50% |
 | PSK + ECDHE, X25519 | **17.2 KB** | 41.1 KB | - | 58% |
 | cert / X.509, P-256 | **59.6 KB** | 98.9 KB | 147.4 KB | 40% |
 

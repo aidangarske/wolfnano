@@ -48,8 +48,11 @@ SHA-256), `arm-none-eabi-gcc -Os -flto -ffunction-sections -fdata-sections
 | Client | wolfNano | mbedTLS (hard-min) | full wolfSSL | smaller by |
 |---|--:|--:|--:|--:|
 | PSK + ECDHE, X25519 | **17612** | 42100 | - | 58% |
-| PSK + ECDHE, P-256 | **25432** | 53024 | - | 52% |
+| PSK + ECDHE, P-256 | **25432** | 50848 | - | 50% |
 | cert / X.509, P-256 | **61007** | 101232 | 150913 | 40% |
+
+mbedTLS is given its smallest config too (`MBEDTLS_ECP_FIXED_POINT_OPTIM 0`,
+`ECP_WINDOW_SIZE 2`) so the comparison is not inflated in wolfNano's favor.
 
 Both sides are hard-minimized to **SHA-256 only** (verified: zero SHA-384/512/3,
 MD5, SHA-1, DES, ChaCha, CBC/CTR, RSA, ECDSA symbols in either PSK binary).
