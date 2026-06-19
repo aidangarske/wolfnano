@@ -19,3 +19,4 @@ jobs:
         with:
           path: src include tests bench docs README.md
           skip: ./wolfssl,./build,*.der,*.pem
+          ignore_words_list: shs,gotee

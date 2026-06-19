@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     int fd, port, rc, tries;
 
     port = (argc > 1) ? atoi(argv[1]) : 4433;
-    anchorPath = (argc > 2) ? argv[2] : "test-pki/server/ec-cert.der";
+    anchorPath = (argc > 2) ? argv[2] : "tests/pki/server/ec-cert.der";
 
     f = fopen(anchorPath, "rb");
     if (f == NULL) {

@@ -21,10 +21,10 @@ jobs:
       - name: shell compiles as C89 (-Werror)
         run: |
           set -eux
-          for f in src/shell_slim/*.c; do
-            cc -std=c89 -Wall -Wextra -Wdeclaration-after-statement -Werror -fsyntax-only \
+          for f in src/*.c; do
+            cc -std=gnu89 -Wall -Wextra -Wdeclaration-after-statement -Werror -fsyntax-only \
               -DWOLFSSL_USER_SETTINGS -DWOLFNANOTLS_TARGET_PORTABLE_C \
               -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY -DWOLFNANOTLS_MLKEM \
               -DWOLFNANOTLS_MLDSA -DWOLFNANOTLS_ALLOW_MALLOC \
-              -I. -Iwolfssl -Iinclude/wolfnano -Isrc/shell_slim "$f"
+              -I. -Iwolfssl -Iinclude/wolfnano -Isrc "$f"
           done

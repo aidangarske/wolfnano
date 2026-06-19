@@ -23,12 +23,12 @@ command -v "$CC" >/dev/null 2>&1 || { echo "SKIP (no complete arm-none-eabi-gcc;
 textsz() { "$SIZE" "$1" 2>/dev/null | awk 'NR==2{print $1}'; }
 
 # ---- wolfNanoTLS (minimal config in bench/min/wnc) ----
-WN_CF="$OPT $ARCH -DWOLFSSL_USER_SETTINGS -DWOLFNANOTLS_TARGET_PORTABLE_C -Ibench/min/wnc -I. -Iwolfssl -Iinclude/wolfnano -Isrc/shell_slim"
+WN_CF="$OPT $ARCH -DWOLFSSL_USER_SETTINGS -DWOLFNANOTLS_TARGET_PORTABLE_C -Ibench/min/wnc -I. -Iwolfssl -Iinclude/wolfnano -Isrc"
 WN_SUP="$WC/wc_port.c $WC/memory.c $WC/error.c $WC/hash.c $WC/random.c $WC/wolfmath.c $WC/logging.c $WC/coding.c $WC/sha256.c $WC/sha512.c $WC/hmac.c $WC/kdf.c $WC/aes.c $WC/curve25519.c $WC/fe_operations.c $WC/sp_int.c"
-WN_SHELL="src/shell_slim/wn_msg.c src/shell_slim/wn_keyschedule.c src/shell_slim/wn_transcript.c src/shell_slim/wn_record.c src/shell_slim/wn_keyshare.c src/shell_slim/wn_serverhello.c src/shell_slim/wn_connect.c"
+WN_SHELL="src/wn_msg.c src/wn_keyschedule.c src/wn_transcript.c src/wn_record.c src/wn_keyshare.c src/wn_serverhello.c src/wn_connect.c"
 $CC $WN_CF $WN_SUP $WN_SHELL bench/min/wn_psk_client.c $LINK -o "$OUT/wn_psk.elf" 2>/dev/null
 $CC $WN_CF -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY -DWOLFNANOTLS_FIPS -DWOLFNANOTLS_ALLOW_MALLOC \
-   $WN_SUP $WC/ecc.c $WC/asn.c $WC/rsa.c src/shell_slim/wn_clienthello.c $WN_SHELL \
+   $WN_SUP $WC/ecc.c $WC/asn.c $WC/rsa.c src/wn_clienthello.c $WN_SHELL \
    bench/min/wn_client.c $LINK -o "$OUT/wn_cert.elf" 2>/dev/null
 
 # ---- MbedTLS (minimal configs in bench/min) ----
