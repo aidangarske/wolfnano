@@ -1,0 +1,28 @@
+name: compilers
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compiler-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: [gcc-11, gcc-12, gcc-13, gcc-14, clang-16, clang-17, clang-18]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup
+      - name: install ${{ matrix.cc }}
+        run: sudo apt-get install -y --no-install-recommends ${{ matrix.cc }}
+      - name: make test with ${{ matrix.cc }}
+        run: make test CC=${{ matrix.cc }}

@@ -1,0 +1,50 @@
+name: valgrind-msan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  memcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup
+      - run: sudo apt-get install -y --no-install-recommends valgrind
+      - name: build the suites
+        run: make test
+      - name: valgrind memcheck the offline suites
+        run: |
+          set -eux
+          for b in floor_test_host keyschedule_test rfc8448_test transcript_test \
+                   record_test keyshare_test handshake_crypto_test msg_test \
+                   clienthello_test serverhello_test parser_negative_test \
+                   suites_matrix cert_test; do
+            valgrind --error-exitcode=1 --leak-check=full --errors-for-leak-kinds=definite \
+                     -q ./build/$b
+          done
+
+  msan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true   # MemorySanitizer over wolfcrypt is FP-prone; informational
+    env:
+      MSAN: "-fsanitize=memory -fno-sanitize-recover=all -fPIE -pie -O1 -g"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/setup
+      - name: shell + floor suites under MemorySanitizer (clang)
+        run: |
+          make host kstest rfctest tstest rectest ksharetest hstest msgtest \
+               chtest shtest negtest matrixtest \
+               CC=clang EXTRA_CFLAGS="$MSAN"
