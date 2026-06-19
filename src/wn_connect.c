@@ -36,6 +36,9 @@
 #ifdef WOLFNANO_X509
 #include "wn_flight.h"
 #endif
+#ifdef WOLFNANO_SEND_ALERTS
+#include "wn_alert.h"
+#endif
 #include <wolfssl/wolfcrypt/asn_public.h>
 #include <wolfssl/wolfcrypt/asn.h>
 #include <wolfssl/wolfcrypt/ecc.h>
@@ -213,21 +216,6 @@ static void build_client_hello(wn_Writer* w, const byte* random32,
 }
 
 #ifdef WOLFNANO_SEND_ALERTS
-/* Map an internal error to a TLS 1.3 alert description (RFC 8446 6.2). */
-static byte wn_ErrToAlert(int ret)
-{
-    byte d;
-    switch (ret) {
-        case WOLFNANO_E_UNEXPECTED_MSG: d = 10; break;  /* unexpected_message */
-        case WOLFNANO_E_BAD_MAC:        d = 20; break;  /* bad_record_mac */
-        case WOLFNANO_E_DECODE:         d = 50; break;  /* decode_error */
-        case WOLFNANO_E_ILLEGAL_PARAM:  d = 47; break;  /* illegal_parameter */
-        case WOLFNANO_E_BAD_CERT:       d = 42; break;  /* bad_certificate */
-        default:                        d = 80; break;  /* internal_error */
-    }
-    return d;
-}
-
 /* Send a fatal, encrypted alert with the client handshake key (best effort). */
 static void wn_SendAlert(wn_IoSend ioSend, void* ioCtx, const byte* key,
                          const byte* iv, int ret)
