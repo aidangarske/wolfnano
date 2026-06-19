@@ -25,7 +25,7 @@ if ! kill -0 "$SPID" 2>/dev/null; then
     exit 0
 fi
 
-./build/interop_psk_client "$PORT" "$PSK" Client_identity
+"${CLIENT:-./build/interop_psk_client}" "$PORT" "$PSK" Client_identity
 RC=$?
 
 kill "$SPID" 2>/dev/null
