@@ -312,6 +312,7 @@ interop: ## live TLS 1.3 PSK handshake vs OpenSSL and wolfSSL
 	   $(CONN_SRC) tests/interop_psk_test.c -o $(BUILD)/interop_psk_client
 	@echo "== PSK vs OpenSSL =="; sh tests/interop_psk.sh
 	@echo "== PSK vs wolfSSL =="; sh tests/interop_wolfssl.sh
+	@echo "== PSK vs mbedTLS =="; sh tests/interop_mbedtls.sh
 	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
 	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_CERT_SRC) $(WC)/rsa.c tests/interop_cert_test.c \
