@@ -33,6 +33,9 @@
 #include "wn_keyshare.h"
 #include "wn_serverhello.h"
 #include "wn_clienthello.h"
+#ifdef WOLFNANOTLS_X509
+#include "wn_flight.h"
+#endif
 #include <wolfssl/wolfcrypt/asn_public.h>
 #include <wolfssl/wolfcrypt/asn.h>
 #include <wolfssl/wolfcrypt/ecc.h>
@@ -855,27 +858,8 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
             if ((off + 4 + mLen) > accLen) {
                 break;                          /* message not complete yet */
             }
-            /* enforce the legal flight order EE [CertReq] Cert CertVerify
-             * Finished; reject out-of-order / unexpected types (RFC 8446 4.4). */
-            if (mType == WN_HS_ENCRYPTED_EXT) {
-                if (gotEE) { ret = WOLFNANOTLS_E_UNEXPECTED_MSG; }
-                gotEE = 1;
-            }
-            else if (mType == WN_HS_CERT_REQUEST) {
-                if ((gotEE == 0) || gotCert) { ret = WOLFNANOTLS_E_UNEXPECTED_MSG; }
-            }
-            else if (mType == WN_HS_CERTIFICATE) {
-                if ((gotEE == 0) || gotCert) { ret = WOLFNANOTLS_E_UNEXPECTED_MSG; }
-            }
-            else if (mType == WN_HS_CERT_VERIFY) {
-                if ((gotCert == 0) || gotCv) { ret = WOLFNANOTLS_E_UNEXPECTED_MSG; }
-            }
-            else if (mType == WN_HS_FINISHED) {
-                if (gotCv == 0) { ret = WOLFNANOTLS_E_UNEXPECTED_MSG; }
-            }
-            else {
-                ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
-            }
+            /* enforce the legal flight order (RFC 8446 4.4); see wn_flight.h */
+            ret = wn_FlightOrder(mType, &gotEE, &gotCert, &gotCv);
             if ((ret == WOLFNANOTLS_SUCCESS) && (mType == WN_HS_CERT_VERIFY)) {
                 ret = wn_Transcript_GetHash(&tc, thCert, &thLen);
             }
@@ -910,7 +894,6 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
                     ret = wn_VerifyChain(certs, certLens, nc, anchor, anchorLen,
                                          leafSpki, &spkiLen);
                 }
-                gotCert = 1;
             }
             if ((ret == WOLFNANOTLS_SUCCESS) && (mType == WN_HS_CERT_VERIFY)) {
                 word16 scheme;
@@ -925,7 +908,6 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
                     ret = wn_CertVerify(scheme, leafSpki, spkiLen, thCert, 32,
                               hsacc + off + 4 + hr.pos, cvLen);
                 }
-                gotCv = 1;
             }
             if ((ret == WOLFNANOTLS_SUCCESS) && (mType == WN_HS_FINISHED)) {
                 if (gotCv == 0) {

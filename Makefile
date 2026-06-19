@@ -159,12 +159,12 @@ ASM_CC    := $(CC_$(WOLFNANOTLS_ASM))
 ASM_FLAGS := $(FLAGS_$(WOLFNANOTLS_ASM))
 ASM_SRC   := $(SPSRC_$(WOLFNANOTLS_ASM)) $(ASMSRC_$(WOLFNANOTLS_ASM))
 
-.PHONY: host kstest rfctest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest matrixtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test-qemu test test-core check clean
+.PHONY: host kstest rfctest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest flighttest matrixtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test-qemu test test-core check clean
 test: test-core mlkemtest mldsatest hybridtest wctestpqc ## build + run all local self-tests
-test-core: host kstest rfctest tstest rectest ksharetest hstest wctest msgtest chtest shtest negtest matrixtest certtest ## non-PQC suites (wolfSSL without the wc_mlkem/wc_mldsa API)
+test-core: host kstest rfctest tstest rectest ksharetest hstest wctest msgtest chtest shtest negtest flighttest matrixtest certtest ## non-PQC suites (wolfSSL without the wc_mlkem/wc_mldsa API)
 
 SUITES := host kstest rfctest tstest rectest ksharetest hstest wctest wctestpqc \
-  msgtest chtest shtest negtest matrixtest mlkemtest mldsatest hybridtest certtest
+  msgtest chtest shtest negtest flighttest matrixtest mlkemtest mldsatest hybridtest certtest
 
 check: ## run every suite, continue past failures, print one colored PASS/FAIL tally
 	@pass=0; fail=0; failed=""; \
@@ -286,6 +286,13 @@ negtest: ## build + run negative/malformed parser tests (PORTABLE_C)
 	   tests/parser_negative_test.c -o $(BUILD)/parser_negative_test
 	@echo "---- run ----"
 	@./$(BUILD)/parser_negative_test
+
+flighttest: ## build + run the adversarial encrypted-flight ordering tests (PORTABLE_C)
+	@mkdir -p $(BUILD)
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	   tests/flight_order_test.c -o $(BUILD)/flight_order_test
+	@echo "---- run ----"
+	@./$(BUILD)/flight_order_test
 
 matrixtest: ## build + run the data-driven negotiation matrix (PORTABLE_C)
 	@mkdir -p $(BUILD)
