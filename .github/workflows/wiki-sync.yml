@@ -20,6 +20,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: Andrew-Chen-Wang/github-wiki-action@v4
+      - id: check
+        run: |
+          if git ls-remote "https://github.com/${{ github.repository }}.wiki.git" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Wiki not initialized; create its first page once in the GitHub UI, then docs/ will sync."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.check.outputs.exists == 'true'
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
           path: docs/

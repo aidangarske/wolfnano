@@ -30,4 +30,10 @@ jobs:
         with:
           ref: ${{ matrix.ref }}
       - name: make test (wolfssl ${{ matrix.ref }})
-        run: make test
+        run: |
+          if [ -f wolfssl/wolfcrypt/src/wc_mldsa.c ] && [ -f wolfssl/wolfcrypt/src/wc_mlkem.c ]; then
+            make test
+          else
+            echo "::notice::wolfSSL ${{ matrix.ref }} predates the wc_mlkem/wc_mldsa API; running core suite (no PQC)"
+            make test-core
+          fi

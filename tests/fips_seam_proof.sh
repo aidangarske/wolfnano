@@ -6,7 +6,7 @@
 set -u
 FIPS_DIR=$1
 LIB="$FIPS_DIR/src/.libs/libwolfssl.a"
-SHELL_INC="-Iinclude/wolfnano -Isrc/shell_slim"
+SHELL_INC="-Iinclude/wolfnano -Isrc"
 OUT=build/fips_seam_test
 
 if [ "$(uname)" = "Darwin" ]; then

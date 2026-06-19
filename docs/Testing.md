@@ -72,7 +72,7 @@ The wolfSSL server must be built with PSK + X25519:
 for the OpenSSL leg.
 
 The cert leg runs against **both OpenSSL and wolfSSL** with a generated ECDSA
-P-256 cert (`test-pki/server/`); the wolfNano client pins it as the trust
+P-256 cert (`tests/pki/server/`); the wolfNano client pins it as the trust
 anchor: ECDHE handshake, parse the server Certificate, verify the leaf against
 the anchor, verify the ECDSA CertificateVerify over the transcript, verify the
 server Finished, send the client Finished (preceded by the compat CCS). The
@@ -82,4 +82,4 @@ client cert).
 ## Still ahead
 
 Certificate / Raw-Public-Key authentication (Phase 4 brings X.509), a
-data-driven suite matrix, and the structured `test-pki/`.
+data-driven suite matrix, and the structured `tests/pki/`.

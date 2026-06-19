@@ -24,44 +24,44 @@ FLOOR_SRC := \
 
 TEST_SRC := tests/floor_test.c tests/wn_host_seed.c
 
-SHELL_INC := -Iinclude/wolfnano -Isrc/shell_slim
+SHELL_INC := -Iinclude/wolfnano -Isrc
 
 # Full client crypto + shell for the live interop handshake.
 CONN_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   $(WC)/logging.c $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c $(WC)/hmac.c \
   $(WC)/kdf.c $(WC)/aes.c $(WC)/curve25519.c $(WC)/fe_operations.c \
-  src/shell_slim/wn_msg.c src/shell_slim/wn_keyschedule.c \
-  src/shell_slim/wn_transcript.c src/shell_slim/wn_record.c \
-  src/shell_slim/wn_keyshare.c src/shell_slim/wn_serverhello.c \
-  src/shell_slim/wn_connect.c tests/wn_host_seed.c
+  src/wn_msg.c src/wn_keyschedule.c \
+  src/wn_transcript.c src/wn_record.c \
+  src/wn_keyshare.c src/wn_serverhello.c \
+  src/wn_connect.c tests/wn_host_seed.c
 
 # Cert handshake build (adds ECDHE non-PSK ClientHello + cert/CertVerify deps).
 CONN_CERT_SRC := $(FLOOR_SRC) $(WC)/sp_int.c \
-  src/shell_slim/wn_msg.c src/shell_slim/wn_keyschedule.c \
-  src/shell_slim/wn_transcript.c src/shell_slim/wn_record.c \
-  src/shell_slim/wn_keyshare.c src/shell_slim/wn_serverhello.c \
-  src/shell_slim/wn_clienthello.c src/shell_slim/wn_connect.c \
+  src/wn_msg.c src/wn_keyschedule.c \
+  src/wn_transcript.c src/wn_record.c \
+  src/wn_keyshare.c src/wn_serverhello.c \
+  src/wn_clienthello.c src/wn_connect.c \
   tests/wn_host_seed.c
 KS_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   $(WC)/logging.c $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c \
   $(WC)/hmac.c $(WC)/kdf.c \
-  src/shell_slim/wn_keyschedule.c tests/wn_host_seed.c
+  src/wn_keyschedule.c tests/wn_host_seed.c
 
 TS_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   $(WC)/logging.c $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c \
-  src/shell_slim/wn_transcript.c tests/wn_host_seed.c
+  src/wn_transcript.c tests/wn_host_seed.c
 
 REC_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   $(WC)/logging.c $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c $(WC)/aes.c \
-  src/shell_slim/wn_record.c tests/wn_host_seed.c
+  src/wn_record.c tests/wn_host_seed.c
 
 KSH_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   $(WC)/logging.c $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c \
   $(WC)/curve25519.c $(WC)/fe_operations.c \
-  src/shell_slim/wn_keyshare.c tests/wn_host_seed.c
+  src/wn_keyshare.c tests/wn_host_seed.c
 
-SHELL_SRC := src/shell_slim/wn_keyshare.c src/shell_slim/wn_keyschedule.c \
-  src/shell_slim/wn_transcript.c src/shell_slim/wn_record.c
+SHELL_SRC := src/wn_keyshare.c src/wn_keyschedule.c \
+  src/wn_transcript.c src/wn_record.c
 HS_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   $(WC)/logging.c $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c $(WC)/hmac.c \
   $(WC)/kdf.c $(WC)/aes.c $(WC)/curve25519.c $(WC)/fe_operations.c \
@@ -80,7 +80,7 @@ MLDSA_SRC := $(FLOOR_SRC) $(WC)/sp_int.c $(WC)/sha3.c $(WC)/wc_mldsa.c \
 HYBRID_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   $(WC)/logging.c $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c $(WC)/sha3.c \
   $(WC)/curve25519.c $(WC)/fe_operations.c $(WC)/wc_mlkem.c \
-  $(WC)/wc_mlkem_poly.c src/shell_slim/wn_hybrid.c tests/wn_host_seed.c
+  $(WC)/wc_mlkem_poly.c src/wn_hybrid.c tests/wn_host_seed.c
 
 CERT_SRC := $(FLOOR_SRC) $(WC)/sp_int.c tests/wn_host_seed.c
 
@@ -149,8 +149,9 @@ ASM_CC    := $(CC_$(WOLFNANO_ASM))
 ASM_FLAGS := $(FLAGS_$(WOLFNANO_ASM))
 ASM_SRC   := $(SPSRC_$(WOLFNANO_ASM)) $(ASMSRC_$(WOLFNANO_ASM))
 
-.PHONY: host kstest tstest rectest ksharetest hstest wctest msgtest chtest shtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test clean
-test: host kstest tstest rectest ksharetest hstest wctest msgtest chtest shtest mlkemtest mldsatest hybridtest certtest ## build + run all local self-tests
+.PHONY: host kstest tstest rectest ksharetest hstest wctest msgtest chtest shtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test test-core clean
+test: test-core mlkemtest mldsatest hybridtest ## build + run all local self-tests
+test-core: host kstest tstest rectest ksharetest hstest wctest msgtest chtest shtest certtest ## non-PQC suites (wolfSSL without the wc_mlkem/wc_mldsa API)
 
 host: ## build + run the crypto floor self-test locally (PORTABLE_C)
 	@mkdir -p $(BUILD)
@@ -204,14 +205,14 @@ wctest: ## run wolfSSL's wolfcrypt test against the floor (config-trimmed)
 msgtest: ## build + run the wire encode/decode primitive tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
 	cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
-	   src/shell_slim/wn_msg.c tests/msg_test.c -o $(BUILD)/msg_test
+	   src/wn_msg.c tests/msg_test.c -o $(BUILD)/msg_test
 	@echo "---- run ----"
 	@./$(BUILD)/msg_test
 
 chtest: ## build + run the ClientHello encoder test (PORTABLE_C)
 	@mkdir -p $(BUILD)
 	cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
-	   src/shell_slim/wn_msg.c src/shell_slim/wn_clienthello.c \
+	   src/wn_msg.c src/wn_clienthello.c \
 	   tests/clienthello_test.c -o $(BUILD)/clienthello_test
 	@echo "---- run ----"
 	@./$(BUILD)/clienthello_test
@@ -219,7 +220,7 @@ chtest: ## build + run the ClientHello encoder test (PORTABLE_C)
 shtest: ## build + run the ServerHello parser test (PORTABLE_C)
 	@mkdir -p $(BUILD)
 	cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
-	   src/shell_slim/wn_msg.c src/shell_slim/wn_serverhello.c \
+	   src/wn_msg.c src/wn_serverhello.c \
 	   tests/serverhello_test.c -o $(BUILD)/serverhello_test
 	@echo "---- run ----"
 	@./$(BUILD)/serverhello_test
@@ -294,10 +295,10 @@ fipsproof: ## Phase 5: same shell sources link against the FIPS backend; CASTs p
 	@sh tests/fips_seam_proof.sh $(WOLFNANO_FIPS_DIR)
 	@echo "== shell seam surface is backend-identical (zero source changes) =="
 	@cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
-	   -c src/shell_slim/wn_keyschedule.c -o $(BUILD)/ks_src.o
+	   -c src/wn_keyschedule.c -o $(BUILD)/ks_src.o
 	@cc -Os -DWOLFSSL_USE_OPTIONS_H -I$(WOLFNANO_FIPS_DIR) $(SHELL_INC) \
 	   -DWOLFNANO_TARGET_PORTABLE_C \
-	   -c src/shell_slim/wn_keyschedule.c -o $(BUILD)/ks_fips.o
+	   -c src/wn_keyschedule.c -o $(BUILD)/ks_fips.o
 	@nm -u $(BUILD)/ks_src.o  | grep '_wc_' | sort > $(BUILD)/seam_src.txt
 	@# FIPS headers route each wc_* call to its _fips boundary wrapper; strip the
 	@# suffix to compare the logical crypto surface (the .c is byte-identical).

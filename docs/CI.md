@@ -20,7 +20,7 @@ SHA. Nightly it fetches master, and if it differs from the pin, runs the full
 suite against it:
 
 - **green** -> bumps the committed pin to that SHA, updates
-  `ci/wolfssl-master-known-good.txt`, and closes any open break issue.
+  `.github/wolfssl-master-known-good.txt`, and closes any open break issue.
 - **red** -> leaves the pin alone and opens (or updates) an issue labeled
   `wolfssl-master-break`, assigned to `@aidangarske`, with the failing SHA, the
   upstream short-log since the pin, and a link to the run.

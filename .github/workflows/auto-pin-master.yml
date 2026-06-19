@@ -50,8 +50,8 @@ jobs:
           set -eux
           git -C wolfssl checkout --detach "$MASTER"
           git add wolfssl
-          printf '%s  %s\n' "$MASTER" "$(date -u +%FT%TZ)" > ci/wolfssl-master-known-good.txt
-          git add ci/wolfssl-master-known-good.txt
+          printf '%s  %s\n' "$MASTER" "$(date -u +%FT%TZ)" > .github/wolfssl-master-known-good.txt
+          git add .github/wolfssl-master-known-good.txt
           git config user.name  "wolfnano-ci"
           git config user.email "aidan@wolfssl.com"
           git commit -m "ci: bump wolfssl pin to master ${MASTER}"

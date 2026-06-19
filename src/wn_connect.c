@@ -225,7 +225,7 @@ int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv, void* ioCtx,
     byte plain[512];
     word32 truncOff, binderOff, chLen, recLen, thLen, pubLen, ssLen;
     word32 plainLen, sSeq = 0;
-    byte rtype, ctype;
+    byte rtype = 0, ctype = 0;
     int ret = WOLFNANO_SUCCESS;
     int gotEE = 0, done = 0;
 
@@ -694,7 +694,7 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
     word32 certLens[WN_MAX_CHAIN];
     word32 chLen, recLen, thLen, pubLen, ssLen, plainLen, spkiLen;
     word32 accLen = 0, sSeq = 0, off = 0;
-    byte rtype, ctype;
+    byte rtype = 0, ctype = 0;
     int ret = WOLFNANO_SUCCESS;
     int done = 0, gotCert = 0, gotCv = 0;
 
