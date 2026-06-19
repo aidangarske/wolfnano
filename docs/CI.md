@@ -58,6 +58,8 @@ wolfSSL while `main` rides known-good master.
 - `valgrind.yml` - Valgrind memcheck of the offline suites (MSan was dropped:
   it false-positives on wolfcrypt's DRBG seed-health read, no value over ASan).
 - `compilers.yml` - `make test` across GCC 11-14 and Clang 16-18.
+- `fuzz.yml` - coverage-guided libFuzzer over the ServerHello parser (60s on
+  PR/push, 10min nightly), ASan-instrumented.
 - `semgrep.yml`, `codespell.yml`, `static-analysis.yml` (cppcheck).
 - `coverage.yml` - lcov of `make test`.
 - `stack-bounds.yml` - `-fstack-usage` report.

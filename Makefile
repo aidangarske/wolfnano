@@ -288,6 +288,17 @@ matrixtest: ## build + run the data-driven negotiation matrix (PORTABLE_C)
 	@echo "---- run ----"
 	@./$(BUILD)/suites_matrix
 
+FUZZ_TIME ?= 60
+fuzz: ## coverage-guided fuzz of the ServerHello parser (clang libFuzzer + ASan)
+	@mkdir -p $(BUILD)/fuzz_corpus
+	clang $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	   -fsanitize=fuzzer,address -g \
+	   src/wn_msg.c src/wn_serverhello.c tests/fuzz_serverhello.c \
+	   -o $(BUILD)/fuzz_serverhello
+	@echo "---- run ($(FUZZ_TIME)s) ----"
+	@./$(BUILD)/fuzz_serverhello -max_total_time=$(FUZZ_TIME) -timeout=10 \
+	   $(BUILD)/fuzz_corpus
+
 mlkemtest: ## build + run the ML-KEM-768 KEM test (WOLFNANOTLS_MLKEM)
 	@mkdir -p $(BUILD)
 	$(CC) $(CFLAGS_COMMON) -DWOLFNANOTLS_MLKEM -DWOLFNANOTLS_TARGET_PORTABLE_C \
