@@ -101,5 +101,10 @@
 #undef MBEDTLS_BASE64_C
 #define MBEDTLS_AES_FEWER_TABLES
 #define MBEDTLS_SHA256_SMALLER
+/* smallest ECP: no fixed-point comb tables, smallest windows (size over speed,
+ * matching wolfNanoTLS's size-optimized SP/field math for a fair size comparison) */
+#define MBEDTLS_ECP_FIXED_POINT_OPTIM 0
+#define MBEDTLS_ECP_WINDOW_SIZE 2
+#define MBEDTLS_MPI_WINDOW_SIZE 2
 
 #endif /* WN_FP_MB_PSK_CONFIG_H */
