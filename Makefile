@@ -94,9 +94,9 @@ HYBRID_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
 
 CERT_SRC := $(FLOOR_SRC) $(WC)/sp_int.c tests/wn_host_seed.c
 
-# WOLFNANO_CRYPTO=fips backend (Phase 5 seam proof). Point at a built wolfSSL
-# FIPS bundle (FIPS Ready or a licensed validated module).
-WOLFNANO_FIPS_DIR ?= $(HOME)/Downloads/wolfssl-5.8.2-gplv3-fips-ready
+# WOLFNANO_CRYPTO=fips backend (Phase 5 seam proof). Override with the path to
+# your own built wolfSSL FIPS bundle (FIPS Ready or a licensed validated module).
+WOLFNANO_FIPS_DIR ?= $(HOME)/wolfssl-fips
 FIPS_LIB := $(WOLFNANO_FIPS_DIR)/src/.libs/libwolfssl.a
 
 # ---- WOLFNANO_ASM: per-arch speedup bundle (mirrors wolfSSL --enable-*asm) ----
