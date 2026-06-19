@@ -124,7 +124,7 @@ Runs on every push and PR:
   stable, and master wolfSSL submodule
 - **Standards**: house style, no bare-scope braces, C89 `-Werror`, the
   zero-allocation grep
-- **Static analysis**: CodeQL, Semgrep, cppcheck, codespell
+- **Static analysis**: Semgrep, cppcheck, codespell
 - **Sanitizers**: ASAN / UBSAN
 - **Nightly**: coverage, stack bounds, Coverity, footprint + speed vs MbedTLS,
   and a green-gated auto-bump of the wolfSSL pin to a known-good master

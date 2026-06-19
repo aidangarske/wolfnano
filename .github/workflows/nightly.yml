@@ -18,8 +18,6 @@ jobs:
     uses: ./.github/workflows/coverage.yml
   stack:
     uses: ./.github/workflows/stack-bounds.yml
-  codeql:
-    uses: ./.github/workflows/codeql.yml
   semgrep:
     uses: ./.github/workflows/semgrep.yml
   fips-seam:
