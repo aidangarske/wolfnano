@@ -68,6 +68,7 @@ Whole TLS 1.3 client linked from source for Cortex-M33 (AES-128-GCM, SHA-256),
 |---|--:|
 | PSK + ECDHE, X25519 | **17.6 KB** |
 | PSK + ECDHE, P-256 | **25.2 KB** |
+| PSK + X25519MLKEM768 (post-quantum) | **32.9 KB** |
 | cert / X.509, P-256 | **60.8 KB** |
 
 At ~17 KB the PSK client fits Cortex-M0+/M3/M4 parts from ~32 KB flash, well

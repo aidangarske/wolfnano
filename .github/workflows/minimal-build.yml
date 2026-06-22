@@ -15,11 +15,12 @@ jobs:
     timeout-minutes: 20
     env:
       # Verified Cortex-M33 .text (ArmGNU 14.2) from the configs/ templates:
-      # X25519 17.6K, P-256 25.2K, cert 60.8K. Budgets allow ~15% headroom for
-      # CI's older arm-gcc; they fail loudly if the footprint regresses, keeping
-      # the headline numbers honest.
+      # X25519 17.6K, P-256 25.2K, PQC 32.9K, cert 60.8K. Budgets allow ~15%
+      # headroom for CI's older arm-gcc; they fail loudly if the footprint
+      # regresses, keeping the headline numbers honest.
       PSK_X25519_MAX: 20500
       PSK_P256_MAX: 29500
+      PQC_MAX: 40000
       CERT_MAX: 70000
     steps:
       - uses: actions/checkout@v4
@@ -36,10 +37,12 @@ jobs:
           sz() { arm-none-eabi-size "$1" | awk 'NR==2{print $1}'; }
           psk=$(sz "$RUNNER_TEMP/wn_fpc/wn_psk.elf")
           p256=$(sz "$RUNNER_TEMP/wn_fpc/wn_psk_p256.elf")
+          pqc=$(sz "$RUNNER_TEMP/wn_fpc/wn_psk_pqc.elf")
           cert=$(sz "$RUNNER_TEMP/wn_fpc/wn_cert.elf")
-          echo "wolfNanoTLS .text  PSK-X25519=$psk (max $PSK_X25519_MAX)  PSK-P256=$p256 (max $PSK_P256_MAX)  cert=$cert (max $CERT_MAX)"
+          echo "wolfNanoTLS .text  PSK-X25519=$psk (max $PSK_X25519_MAX)  PSK-P256=$p256 (max $PSK_P256_MAX)  PQC=$pqc (max $PQC_MAX)  cert=$cert (max $CERT_MAX)"
           test "$psk"  -lt "$PSK_X25519_MAX"
           test "$p256" -lt "$PSK_P256_MAX"
+          test "$pqc"  -lt "$PQC_MAX"
           test "$cert" -lt "$CERT_MAX"
       - name: symbol audit (minimal X25519 PSK excludes everything it disables)
         run: |
@@ -47,6 +50,12 @@ jobs:
           sh scripts/symbol_audit.sh arm-none-eabi-nm "$RUNNER_TEMP/wn_fpc/wn_psk.elf" \
             'wc_ecc' 'sp_256' 'sp_384' 'ed25519' 'wc_Rsa' 'Sha384' 'Sha512' \
             'Sha3_' 'hacha' 'Poly1305' 'AesCbc' 'Des3' 'wc_Md5' 'MlKem'
+      - name: symbol audit (PQC PSK has ML-KEM but excludes ECDSA/Ed25519/RSA/SHA-384)
+        run: |
+          set -eu
+          sh scripts/symbol_audit.sh arm-none-eabi-nm "$RUNNER_TEMP/wn_fpc/wn_psk_pqc.elf" \
+            'wc_ecc' 'sp_256' 'sp_384' 'ed25519' 'wc_Rsa' 'Sha384' 'Sha512' \
+            'hacha' 'Poly1305' 'AesCbc' 'Des3' 'wc_Md5'
       - name: TLS-layer footprint (informational)
         run: sh bench/footprint.sh
       - name: crypto-scope footprint (informational)

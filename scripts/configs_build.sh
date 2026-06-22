@@ -22,6 +22,11 @@ PSK="$WC/wc_port.c $WC/memory.c $WC/error.c $WC/hash.c $WC/logging.c \
   $WC/random.c $WC/sha256.c $WC/sha512.c $WC/hmac.c $WC/kdf.c $WC/aes.c \
   $WC/curve25519.c $WC/fe_operations.c"
 
+PQC="$PSK $WC/sha3.c $WC/wc_mlkem.c $WC/wc_mlkem_poly.c $WC/sp_int.c"
+SHELL_PQC="src/wn_msg.c src/wn_keyschedule.c src/wn_transcript.c \
+  src/wn_record.c src/wn_keyshare.c src/wn_serverhello.c src/wn_hybrid.c \
+  src/wn_connect.c src/wn_session.c tests/wn_host_seed.c"
+
 SHELL_PSK="src/wn_msg.c src/wn_keyschedule.c src/wn_transcript.c \
   src/wn_record.c src/wn_keyshare.c src/wn_serverhello.c src/wn_connect.c \
   src/wn_session.c tests/wn_host_seed.c"
@@ -44,6 +49,7 @@ echo "configs-build:"
 build_host minimal   "$PSK $SHELL_PSK"
 build_host psk_p256  "$FLOOR $SHELL_PSK"
 build_host cert      "$FLOOR $WC/rsa.c $SHELL_CERT"
+build_host pqc       "$PQC $SHELL_PQC"
 build_host baremetal "$PSK $SHELL_PSK"
 
 name=stm32h563

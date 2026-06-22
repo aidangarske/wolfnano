@@ -49,11 +49,16 @@ SHA-256), `arm-none-eabi-gcc -Os -flto -ffunction-sections -fdata-sections
 |---|--:|--:|--:|--:|
 | PSK + ECDHE, X25519 | **18000** | 42100 | - | 57% |
 | PSK + ECDHE, P-256 | **25840** | 50848 | - | 49% |
+| PSK + X25519MLKEM768 (PQC) | **33664** | - | - | - |
 | cert / X.509, P-256 | **62297** | 101232 | 150913 | 38% |
 
 The wolfNanoTLS column builds from the public `configs/` starter templates
-(`user_settings_minimal.h`, `user_settings_psk_p256.h`, `user_settings_cert.h`),
-so the numbers reproduce from the same `user_settings.h` a deployment ships.
+(`user_settings_minimal.h`, `user_settings_psk_p256.h`, `user_settings_pqc.h`,
+`user_settings_cert.h`), so the numbers reproduce from the same `user_settings.h`
+a deployment ships. The PQC client is a complete TLS 1.3 PSK handshake with the
+**X25519MLKEM768** hybrid (ML-KEM-768 + X25519); the ~15 KB over the classical
+X25519 client is the ML-KEM lattice math plus SHA-3/SHAKE, the same `wc_mlkem`
+code wolfSSL ships.
 
 mbedTLS is given its smallest config too (`MBEDTLS_ECP_FIXED_POINT_OPTIM 0`,
 `ECP_WINDOW_SIZE 2`) so the comparison is not inflated in wolfNanoTLS's favor.
