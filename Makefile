@@ -167,6 +167,7 @@ SUITES := host kstest keyupdatetest sessiontest mocktest rfctest tstest rectest 
   msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest hybridtest certtest
 
 check: ## run every suite, continue past failures, print one colored PASS/FAIL tally
+	@mkdir -p $(BUILD)
 	@pass=0; fail=0; failed=""; \
 	 if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then G='\033[32m'; R='\033[31m'; Y='\033[33m'; Z='\033[0m'; else G=; R=; Y=; Z=; fi; \
 	 for s in $(SUITES); do \
