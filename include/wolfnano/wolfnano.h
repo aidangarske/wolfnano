@@ -43,5 +43,10 @@
 #define WOLFNANO_E_BAD_MAC      (-7)   /* Finished / record auth failure */
 #define WOLFNANO_E_ILLEGAL_PARAM (-8)  /* bad group / version / param */
 #define WOLFNANO_E_BAD_CERT     (-9)   /* certificate / CertVerify failure */
+#define WOLFNANO_E_CLOSED       (-10)  /* peer sent close_notify */
+
+/* Transport callbacks: return bytes transferred, or < 0 on error. */
+typedef int (*wn_IoSend)(void* ctx, const byte* buf, word32 len);
+typedef int (*wn_IoRecv)(void* ctx, byte* buf, word32 len);
 
 #endif /* WOLFNANO_H */
