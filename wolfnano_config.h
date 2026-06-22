@@ -91,6 +91,16 @@ extern int wn_seed(unsigned char* output, unsigned int sz);
     #define WOLFSSL_SP_NO_MALLOC
 #endif
 
+/* ---- X25519MLKEM768 hybrid key exchange: pulls in ML-KEM-768 + X25519 ---- */
+#ifdef WOLFNANOTLS_HAVE_MLKEM_HYBRID
+    #ifndef WOLFNANOTLS_MLKEM
+        #define WOLFNANOTLS_MLKEM
+    #endif
+    #ifndef WOLFNANOTLS_HAVE_CURVE25519
+        #define WOLFNANOTLS_HAVE_CURVE25519
+    #endif
+#endif
+
 /* ---- hashes ---- */
 #ifndef WOLFNANOTLS_HAVE_SHA256
     #define NO_SHA256
