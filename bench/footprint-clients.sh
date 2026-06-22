@@ -36,6 +36,10 @@ $CC -I"$(cfg psk_p256)" $WN_BASE $WN_SUP_P256 $WN_SHELL bench/min/wn_psk_client.
 $CC -I"$(cfg cert)" -DWOLFNANO_ALLOW_MALLOC $WN_BASE \
    $WN_SUP $WC/ecc.c $WC/asn.c $WC/rsa.c src/wn_clienthello.c $WN_SHELL \
    bench/min/wn_client.c $LINK -o "$OUT/wn_cert.elf" 2>/dev/null
+# PSK + X25519MLKEM768 hybrid (post-quantum): adds ML-KEM-768 + SHA3 + wn_hybrid
+WN_SUP_PQC="$WN_SUP_PSK $WC/sha3.c $WC/wc_mlkem.c $WC/wc_mlkem_poly.c"
+$CC -I"$(cfg pqc)" $WN_BASE $WN_SUP_PQC src/wn_hybrid.c $WN_SHELL \
+   bench/min/wn_psk_client.c $LINK -o "$OUT/wn_psk_pqc.elf" 2>/dev/null
 
 # ---- MbedTLS (minimal configs in bench/min) ----
 mb_build() { # $1=config $2=client $3=out
@@ -63,3 +67,4 @@ printf '  %-22s %10s %10s %10s\n' "" wolfNano MbedTLS wolfSSL
 printf '  %-22s %10s %10s %10s\n' "PSK X25519 (no X509)" "$(textsz $OUT/wn_psk.elf)" "$(textsz $OUT/mb_psk.elf)" "-"
 printf '  %-22s %10s %10s %10s\n' "PSK P-256 (no X509)" "$(textsz $OUT/wn_psk_p256.elf)" "$(textsz $OUT/mb_psk_p256.elf)" "-"
 printf '  %-22s %10s %10s %10s\n' "cert / X509 (P-256)" "$(textsz $OUT/wn_cert.elf)" "$(textsz $OUT/mb_cert.elf)" "$(textsz $OUT/ws_cert.elf)"
+printf '  %-22s %10s %10s %10s\n' "PSK X25519MLKEM768" "$(textsz $OUT/wn_psk_pqc.elf)" "-" "-"
