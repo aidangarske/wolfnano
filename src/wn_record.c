@@ -180,7 +180,7 @@ int wn_Record_Unprotect(byte* content, word32* contentLen, byte* contentType,
     }
 
     if (ret != WOLFNANO_SUCCESS) {
-        ret = WOLFNANO_E_CRYPTO;
+        ret = WOLFNANO_E_BAD_MAC;            /* AEAD tag / record auth failure */
     }
     else {
         n = innerLen;
@@ -188,7 +188,7 @@ int wn_Record_Unprotect(byte* content, word32* contentLen, byte* contentType,
             n--;
         }
         if (n == 0) {
-            ret = WOLFNANO_E_CRYPTO;
+            ret = WOLFNANO_E_DECODE;         /* no content type (all padding) */
         }
         else {
             *contentType = content[n - 1];
