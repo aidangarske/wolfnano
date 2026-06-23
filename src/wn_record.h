@@ -49,7 +49,7 @@ WOLFNANOTLS_LOCAL int wn_RecvRecord(wn_IoRecv recv, void* ctx, byte* rec,
  * iv is the 12-byte write IV; the nonce is iv XOR seq. */
 WOLFNANOTLS_API int wn_Record_Protect(byte* rec, word32* recLen,
                                    const byte* key, word32 keyLen,
-                                   const byte* iv, word32 seq,
+                                   const byte* iv, word64 seq,
                                    byte contentType,
                                    const byte* content, word32 contentLen);
 
@@ -58,7 +58,7 @@ WOLFNANOTLS_API int wn_Record_Protect(byte* rec, word32* recLen,
 WOLFNANOTLS_API int wn_Record_Unprotect(byte* content, word32* contentLen,
                                      byte* contentType,
                                      const byte* key, word32 keyLen,
-                                     const byte* iv, word32 seq,
+                                     const byte* iv, word64 seq,
                                      const byte* rec, word32 recLen);
 
 #endif /* WN_RECORD_H */
