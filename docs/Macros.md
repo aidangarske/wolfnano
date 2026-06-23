@@ -21,6 +21,7 @@ applies the standing size cuts).
 | `WOLFNANO_HAVE_RSA_VERIFY` | RSA verify (cert chains, RSA-PSS) | `WOLFSSL_RSA_VERIFY_ONLY`, `WC_RSA_PSS` |
 | `WOLFNANO_RSA_FULL` | adds RSA keygen/sign (tooling, not the no-alloc product) | `WOLFSSL_KEY_GEN` |
 | `WOLFNANO_X509` | X.509 cert path (needs heap) | cert path + `WOLFSSL_SMALL_CERT_VERIFY` |
+| `WOLFNANO_X509_HOSTNAME` | leaf hostname (SAN/CN, RFC 6125) matching; default on with `WOLFNANO_X509`. Set `0` for an SPKI-pin-only cert build (~0.5 KB smaller) | gates `wn_CheckServerName` |
 | `WOLFNANO_MLKEM` | ML-KEM-768 + X25519MLKEM768 hybrid | `WOLFSSL_HAVE_MLKEM` |
 | `WOLFNANO_MLDSA` | ML-DSA-65 verify (no-malloc) | `WOLFSSL_HAVE_MLDSA`, verify-only |
 | `WOLFNANO_MLDSA_SIGN` | adds ML-DSA keygen/sign (needs memory) | drops verify-only |

@@ -84,7 +84,8 @@ every template against the shell.
 | `user_settings_minimal.h` | PSK + ECDHE X25519 (smallest) | 17.6 KB |
 | `user_settings_psk_p256.h` | PSK + ECDHE P-256 (broad interop) | 25.2 KB |
 | `user_settings_pqc.h` | PSK + X25519MLKEM768 (post-quantum) | 32.9 KB |
-| `user_settings_cert.h` | X.509 server-cert client, ECDSA P-256 | 60.8 KB |
+| `user_settings_cert.h` | X.509 server-cert client, ECDSA P-256 (hostname + pin) | 60.8 KB |
+| `user_settings_cert_pin.h` | X.509 SPKI-pin only (hostname compiled out, ~0.5 KB smaller) | ~60 KB |
 | `user_settings_stm32h563.h` | STM32H563 (Cortex-M33 + Thumb2 asm) | device |
 | `user_settings_baremetal.h` | generic no-OS MCU (portable C) | device |
 
