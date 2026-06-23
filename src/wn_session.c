@@ -93,8 +93,8 @@ static int wn_session_posths(wn_Session* s, const byte* msg, word32 msgLen)
         }
         else if (mType == WN_HS_KEY_UPDATE) {
             req = wn_Read_U8(&r);
-            if (r.err != 0) {
-                ret = WOLFNANO_E_DECODE;
+            if ((r.err != 0) || (mLen != 1u) || (req > WN_KU_REQUESTED)) {
+                ret = WOLFNANO_E_DECODE;   /* RFC 8446 4.6.3: 1-byte enum {0,1} */
             }
             if (ret == WOLFNANO_SUCCESS) {
                 ret = wn_Tls13_KeyUpdate(s->sAppSecret, s->sKey, s->sIv,
@@ -129,6 +129,9 @@ int wn_Send(wn_Session* s, const byte* data, word32 len)
     }
     if ((ret == WOLFNANO_SUCCESS) && ((s->flags & WN_SESS_CLOSED) != 0)) {
         ret = WOLFNANO_E_CLOSED;
+    }
+    if ((ret == WOLFNANO_SUCCESS) && ((s->flags & WN_SESS_ESTABLISHED) == 0)) {
+        ret = WOLFNANO_E_BAD_STATE;
     }
     if (ret == WOLFNANO_SUCCESS) {
         need = WN_RECORD_HEADER_SZ + len + 1 + WN_RECORD_TAG_SZ;
@@ -166,6 +169,9 @@ int wn_Recv(wn_Session* s, byte* out, word32 outCap, word32* outLen)
     if ((ret == WOLFNANO_SUCCESS) && ((s->flags & WN_SESS_CLOSED) != 0)) {
         ret = WOLFNANO_E_CLOSED;
     }
+    if ((ret == WOLFNANO_SUCCESS) && ((s->flags & WN_SESS_ESTABLISHED) == 0)) {
+        ret = WOLFNANO_E_BAD_STATE;
+    }
     if (ret == WOLFNANO_SUCCESS) {
         *outLen = 0;
         plain = s->scratch + WN_RECORD_HEADER_SZ;
@@ -175,7 +181,7 @@ int wn_Recv(wn_Session* s, byte* out, word32 outCap, word32* outLen)
         ret = wn_RecvRecord(s->ioRecv, s->ioCtx, s->scratch, s->scratchLen,
                             &rtype, &recLen);
         if ((ret == WOLFNANO_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER)) {
-            continue;
+            ret = WOLFNANO_E_UNEXPECTED_MSG;   /* CCS only valid mid-handshake */
         }
         if (ret == WOLFNANO_SUCCESS) {
             ret = wn_Record_Unprotect(plain, &plainLen, &ctype, s->sKey,

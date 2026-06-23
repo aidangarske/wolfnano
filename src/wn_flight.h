@@ -20,8 +20,9 @@
 
 /**
  * TLS 1.3 server-flight message-ordering gate (RFC 8446 4.4): the encrypted
- * flight must be EncryptedExtensions, [CertificateRequest], Certificate,
- * CertificateVerify, Finished, in that order, no duplicates, nothing else.
+ * flight must be EncryptedExtensions, Certificate, CertificateVerify,
+ * Finished, in that order, no duplicates, nothing else. CertificateRequest is
+ * rejected: wolfNano does not offer client authentication (mTLS).
  * Pure logic, header-only so wn_connect.c and the unit test share one copy.
  */
 
@@ -49,9 +50,7 @@ static int wn_FlightOrder(byte mType, int* gotEE, int* gotCert, int* gotCv)
         *gotEE = 1;
     }
     else if (mType == WN_FLIGHT_CERT_REQ) {
-        if ((*gotEE == 0) || *gotCert) {
-            ret = WOLFNANO_E_UNEXPECTED_MSG;
-        }
+        ret = WOLFNANO_E_UNSUPPORTED;   /* client authentication (mTLS) not offered */
     }
     else if (mType == WN_FLIGHT_CERT) {
         if ((*gotEE == 0) || *gotCert) {

@@ -87,8 +87,8 @@ int main(void)
 
     check(run_seq(certFlow, 4) == WOLFNANO_SUCCESS,
           "legal cert flight accepted");
-    check(run_seq(certReqFlow, 5) == WOLFNANO_SUCCESS,
-          "legal cert flight with CertificateRequest accepted");
+    check(run_seq(certReqFlow, 5) == WOLFNANO_E_UNSUPPORTED,
+          "CertificateRequest rejected (client auth not offered)");
 
     check(run_seq(certNoVfy, 2) == WOLFNANO_SUCCESS,
           "partial prefix (EE, Cert) accepted so far");
@@ -97,8 +97,8 @@ int main(void)
           "Finished before CertificateVerify rejected");
     check(run_seq(certBeforeEE, 2) == WOLFNANO_E_UNEXPECTED_MSG,
           "Certificate before EncryptedExtensions rejected");
-    check(run_seq(certReqEarly, 1) == WOLFNANO_E_UNEXPECTED_MSG,
-          "CertificateRequest before EncryptedExtensions rejected");
+    check(run_seq(certReqEarly, 1) == WOLFNANO_E_UNSUPPORTED,
+          "CertificateRequest rejected regardless of position");
     check(run_seq(dupEE, 2) == WOLFNANO_E_UNEXPECTED_MSG,
           "duplicate EncryptedExtensions rejected");
     check(run_seq(dupCert, 3) == WOLFNANO_E_UNEXPECTED_MSG,
