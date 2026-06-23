@@ -168,7 +168,7 @@ ASM_CC    := $(CC_$(WOLFNANO_ASM))
 ASM_FLAGS := $(FLAGS_$(WOLFNANO_ASM))
 ASM_SRC   := $(SPSRC_$(WOLFNANO_ASM)) $(ASMSRC_$(WOLFNANO_ASM))
 
-.PHONY: host kstest keyupdatetest sessiontest mocktest mockhybridtest errtest rfctest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test-qemu test test-core check example configs-build coverage stackcheck clean
+.PHONY: host kstest keyupdatetest sessiontest mocktest mockhybridtest errtest rfctest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test-qemu test test-core check example configs-build m33mu coverage stackcheck clean
 test: test-core mlkemtest mldsatest hybridtest mockhybridtest wctestpqc ## build + run all local self-tests
 test-core: host kstest keyupdatetest sessiontest mocktest errtest rfctest tstest rectest ksharetest hstest wctest msgtest chtest shtest negtest flighttest alerttest matrixtest certtest ## non-PQC suites (wolfSSL without the wc_mlkem/wc_mldsa API)
 
@@ -546,6 +546,9 @@ example: ## build the minimal PSK client example (examples/client.c)
 
 configs-build: ## compile each configs/ starter template against the shell
 	sh scripts/configs_build.sh
+
+m33mu: ## build + run the wolfNano floor on an emulated Cortex-M33 (STM32H563)
+	sh scripts/m33mu_run.sh
 
 STACK_SRC := wn_connect.c wn_session.c wn_record.c wn_keyschedule.c \
   wn_keyshare.c wn_transcript.c wn_msg.c wn_serverhello.c wn_clienthello.c
