@@ -71,6 +71,7 @@ for the `src` floor statically (independent of any runtime malloc trap).
 | `make fipsproof` | `WOLFNANO_CRYPTO=fips` seam proof vs a wolfSSL FIPS bundle (see FIPS.md) |
 | `make bench` | all-algo speed, portable C vs Intel asm (see Benchmarks.md) |
 | `make targets` | cross-compile the floor for every non-host arch (build check) |
+| `make m33mu` | **run** the Thumb2 floor on an emulated Cortex-M33 (STM32H563) under m33mu: KATs, UART, `bkpt #0x7e` pass-gate |
 
 `make wctest` reuses wolfSSL's comprehensive crypto test verbatim from the
 submodule. Compiled with the wolfNano config, its `#ifdef` guards trim it to

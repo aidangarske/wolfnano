@@ -1,0 +1,26 @@
+name: m33mu
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  emulate:
+    name: emulated Cortex-M33 (STM32H563)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: ghcr.io/wolfssl/wolfboot-ci-m33mu:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: build + run wolfNano floor on emulated Cortex-M33
+        run: sh scripts/m33mu_run.sh
