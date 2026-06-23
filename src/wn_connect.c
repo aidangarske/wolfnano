@@ -496,8 +496,14 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     ForceZero(sHs, sizeof(sHs));
     ForceZero(cKey, sizeof(cKey));
     ForceZero(sKey, sizeof(sKey));
+    ForceZero(cIv, sizeof(cIv));
+    ForceZero(sIv, sizeof(sIv));
+    ForceZero(ecdhe, sizeof(ecdhe));
     ForceZero(binder, sizeof(binder));
     ForceZero(recvMac, sizeof(recvMac));
+    ForceZero(mac, sizeof(mac));
+    ForceZero(fin, sizeof(fin));
+    ForceZero(plain, sizeof(plain));
 
     return ret;
 }
@@ -1103,6 +1109,11 @@ int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     ForceZero(sHs, sizeof(sHs));
     ForceZero(cKey, sizeof(cKey));
     ForceZero(sKey, sizeof(sKey));
+    ForceZero(cIv, sizeof(cIv));
+    ForceZero(sIv, sizeof(sIv));
+    ForceZero(ecdhe, sizeof(ecdhe));
+    ForceZero(mac, sizeof(mac));
+    ForceZero(fin, sizeof(fin));
 
     return ret;
 }

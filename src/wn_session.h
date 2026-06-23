@@ -55,6 +55,9 @@ typedef struct wn_Session {
     int       flags;
 } wn_Session;
 
+/* A wn_Session is single-threaded: serialize wn_Send/wn_Recv/wn_Close on one
+ * session (no internal locking, by design - zero allocation, embedded). */
+
 /* Encrypt and send one application_data record. Returns WOLFNANO_SUCCESS. */
 WOLFNANO_API int wn_Send(wn_Session* s, const byte* data, word32 len);
 

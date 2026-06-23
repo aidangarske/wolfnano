@@ -175,7 +175,7 @@ ASM_CC    := $(CC_$(WOLFNANO_ASM))
 ASM_FLAGS := $(FLAGS_$(WOLFNANO_ASM))
 ASM_SRC   := $(SPSRC_$(WOLFNANO_ASM)) $(ASMSRC_$(WOLFNANO_ASM))
 
-.PHONY: host kstest keyupdatetest sessiontest mocktest mockhybridtest errtest rfctest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest certmldsatest hybridtest certtest fipsproof bench benchrun targets test-qemu test test-core check example example-cert example-pqc configs-build m33mu coverage stackcheck clean
+.PHONY: host kstest keyupdatetest sessiontest mocktest mockhybridtest errtest rfctest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest certmldsatest certnegtest hybridtest certtest fipsproof bench benchrun targets test-qemu test test-core check example example-cert example-pqc configs-build m33mu coverage stackcheck clean
 test: test-core mlkemtest mldsatest hybridtest mockhybridtest wctestpqc ## build + run all local self-tests (certmldsatest runs separately; compiling X509 here would drag the interop-only cert path into the coverage build)
 test-core: host kstest keyupdatetest sessiontest mocktest errtest rfctest tstest rectest ksharetest hstest wctest msgtest chtest shtest negtest flighttest alerttest matrixtest certtest ## non-PQC suites (wolfSSL without the wc_mlkem/wc_mldsa API)
 
@@ -419,6 +419,15 @@ certmldsatest: ## build + run the ML-DSA-65 CertificateVerify test (scheme 0x090
 	   $(CERTMLDSA_SRC) tests/cert_mldsa_test.c -o $(BUILD)/cert_mldsa_test
 	@echo "---- run ----"
 	@./$(BUILD)/cert_mldsa_test
+
+certnegtest: ## build + run X.509 negative auth tests (chain + ECDSA CertVerify)
+	@mkdir -p $(BUILD)
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 \
+	   -DWOLFNANO_HAVE_RSA_VERIFY \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
+	   $(CERTMLDSA_SRC) tests/cert_neg_test.c -o $(BUILD)/cert_neg_test
+	@echo "---- run ----"
+	@./$(BUILD)/cert_neg_test
 
 hybridtest: ## build + run the X25519MLKEM768 hybrid key-share test
 	@mkdir -p $(BUILD)
