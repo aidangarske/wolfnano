@@ -43,21 +43,21 @@ typedef struct wn_Reader {
     int err;
 } wn_Reader;
 
-WOLFNANOTLS_API void wn_Writer_Init(wn_Writer* w, byte* buf, word32 cap);
-WOLFNANOTLS_API void wn_Write_U8(wn_Writer* w, byte v);
-WOLFNANOTLS_API void wn_Write_U16(wn_Writer* w, word16 v);
-WOLFNANOTLS_API void wn_Write_U24(wn_Writer* w, word32 v);
-WOLFNANOTLS_API void wn_Write_Bytes(wn_Writer* w, const byte* p, word32 n);
+WOLFNANOTLS_LOCAL void wn_Writer_Init(wn_Writer* w, byte* buf, word32 cap);
+WOLFNANOTLS_LOCAL void wn_Write_U8(wn_Writer* w, byte v);
+WOLFNANOTLS_LOCAL void wn_Write_U16(wn_Writer* w, word16 v);
+WOLFNANOTLS_LOCAL void wn_Write_U24(wn_Writer* w, word32 v);
+WOLFNANOTLS_LOCAL void wn_Write_Bytes(wn_Writer* w, const byte* p, word32 n);
 /* Reserve a 1/2/3-byte length, returning the offset to backfill later. */
-WOLFNANOTLS_API word32 wn_Write_LenStart(wn_Writer* w, int lenBytes);
+WOLFNANOTLS_LOCAL word32 wn_Write_LenStart(wn_Writer* w, int lenBytes);
 /* Backfill the length at offset to span everything written since. */
-WOLFNANOTLS_API void wn_Write_LenEnd(wn_Writer* w, word32 offset, int lenBytes);
+WOLFNANOTLS_LOCAL void wn_Write_LenEnd(wn_Writer* w, word32 offset, int lenBytes);
 
-WOLFNANOTLS_API void wn_Reader_Init(wn_Reader* r, const byte* buf, word32 len);
-WOLFNANOTLS_API byte wn_Read_U8(wn_Reader* r);
-WOLFNANOTLS_API word16 wn_Read_U16(wn_Reader* r);
-WOLFNANOTLS_API word32 wn_Read_U24(wn_Reader* r);
+WOLFNANOTLS_LOCAL void wn_Reader_Init(wn_Reader* r, const byte* buf, word32 len);
+WOLFNANOTLS_LOCAL byte wn_Read_U8(wn_Reader* r);
+WOLFNANOTLS_LOCAL word16 wn_Read_U16(wn_Reader* r);
+WOLFNANOTLS_LOCAL word32 wn_Read_U24(wn_Reader* r);
 /* Return a pointer to n bytes and advance, or NULL (and set err) if short. */
-WOLFNANOTLS_API const byte* wn_Read_Bytes(wn_Reader* r, word32 n);
+WOLFNANOTLS_LOCAL const byte* wn_Read_Bytes(wn_Reader* r, word32 n);
 
 #endif /* WN_MSG_H */
