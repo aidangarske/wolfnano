@@ -26,6 +26,11 @@
 #include "wn_record.h"
 #include "wolfnano_crypto.h"
 
+#ifndef WOLFSSL_MISC_INCLUDED
+    #define WOLFSSL_MISC_INCLUDED
+    #include <wolfcrypt/src/misc.c>   /* inline ForceZero, wolfSSL idiom */
+#endif
+
 static int io_recv_exact(wn_IoRecv recv, void* ctx, byte* buf, word32 n)
 {
     int ret = WOLFNANOTLS_SUCCESS;
@@ -139,6 +144,7 @@ int wn_Record_Protect(byte* rec, word32* recLen, const byte* key, word32 keyLen,
     if (aesInit) {
         wc_AesFree(&aes);
     }
+    ForceZero(nonce, sizeof(nonce));
 
     return ret;
 }
@@ -208,6 +214,7 @@ int wn_Record_Unprotect(byte* content, word32* contentLen, byte* contentType,
     if (aesInit) {
         wc_AesFree(&aes);
     }
+    ForceZero(nonce, sizeof(nonce));
 
     return ret;
 }

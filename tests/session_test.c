@@ -262,6 +262,13 @@ int main(void)
     check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_CLOSED,
           "wn_Recv after close");
 
+    setup(&s, &m);
+    s.flags &= ~WN_SESS_ESTABLISHED;
+    check(wn_Send(&s, out, 1) == WOLFNANOTLS_E_BAD_STATE,
+          "wn_Send on non-established session rejected");
+    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_BAD_STATE,
+          "wn_Recv on non-established session rejected");
+
     /* 10. wn_Send oversized (> scratch) and transport failure. */
     setup(&s, &m);
     s.scratchLen = 64;                               /* too small for 100 bytes */
@@ -272,13 +279,12 @@ int main(void)
     check(wn_Send(&s, (const byte*)"x", 1) == WOLFNANOTLS_E_CRYPTO,
           "wn_Send transport failure");
 
-    /* 11. wn_Recv ignores a (plaintext) ChangeCipherSpec then returns app data. */
+    /* 11. wn_Recv rejects a post-handshake ChangeCipherSpec (RFC 8446 5). */
     setup(&s, &m);
     push_raw(&m, WN_REC_CHANGE_CIPHER, (const byte*)"\x01", 1);
-    push_rec(&m, s.sKey, s.sIv, 0, WN_REC_APPDATA, (const byte*)"ccs", 3);
     got = 0;
     rc = wn_Recv(&s, out, sizeof(out), &got);
-    check((rc == 0) && (got == 3), "wn_Recv skips ChangeCipherSpec");
+    check(rc == WOLFNANOTLS_E_UNEXPECTED_MSG, "wn_Recv rejects post-handshake CCS");
 
     /* 12. malformed post-handshake messages. */
     setup(&s, &m);

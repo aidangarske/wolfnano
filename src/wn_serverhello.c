@@ -44,12 +44,15 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
     wn_Reader r;
     word32 hsLen;
     word32 extEnd;
+    word32 eEnd;
     word16 extLen;
     word16 et;
     word16 el;
     word16 klen;
+    word16 lver = 0;
     byte type;
     byte sidLen;
+    byte comp = 0;
     int ret = WOLFNANOTLS_SUCCESS;
 
     if ((msg == NULL) || (out == NULL)) {
@@ -69,7 +72,7 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
         wn_Reader_Init(&r, msg, msgLen);
         type  = wn_Read_U8(&r);
         hsLen = wn_Read_U24(&r);
-        (void)wn_Read_U16(&r);                 /* legacy_version */
+        lver = wn_Read_U16(&r);                /* legacy_version */
         out->random = wn_Read_Bytes(&r, 32);
 
         /* RFC 8446 4.1.3: a HelloRetryRequest is a ServerHello carrying the
@@ -92,7 +95,7 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
             sidLen = wn_Read_U8(&r);
             (void)wn_Read_Bytes(&r, sidLen);   /* legacy_session_id_echo */
             out->cipher = wn_Read_U16(&r);
-            (void)wn_Read_U8(&r);              /* legacy_compression_method */
+            comp = wn_Read_U8(&r);             /* legacy_compression_method */
 
             extLen = wn_Read_U16(&r);
             extEnd = r.pos + extLen;
@@ -103,17 +106,24 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
             while ((r.pos < extEnd) && (r.err == 0)) {
                 et = wn_Read_U16(&r);
                 el = wn_Read_U16(&r);
-                if (et == WN_EXT_KEY_SHARE) {
+                eEnd = r.pos + el;
+                if (eEnd > extEnd) {           /* extension body overruns block */
+                    r.err = 1;
+                }
+                else if (et == WN_EXT_KEY_SHARE) {
                     out->group = wn_Read_U16(&r);
                     klen = wn_Read_U16(&r);
                     out->keyShare = wn_Read_Bytes(&r, klen);
                     out->keyShareLen = klen;
+                    if (r.pos != eEnd) { r.err = 1; }
                 }
                 else if (et == WN_EXT_SUPPORTED_VER) {
                     out->version = wn_Read_U16(&r);
+                    if (r.pos != eEnd) { r.err = 1; }
                 }
                 else if (et == WN_EXT_PRE_SHARED) {
                     out->pskSelected = (int)wn_Read_U16(&r);
+                    if (r.pos != eEnd) { r.err = 1; }
                 }
                 else {
                     (void)wn_Read_Bytes(&r, el);
@@ -121,7 +131,8 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
             }
 
             if ((r.err != 0) || (type != WN_HS_SERVER_HELLO) ||
-                (hsLen != (msgLen - 4)) || (out->random == NULL)) {
+                (hsLen != (msgLen - 4)) || (out->random == NULL) ||
+                (lver != 0x0303u) || (comp != 0u)) {
                 ret = WOLFNANOTLS_E_INVALID_ARG;
             }
         }

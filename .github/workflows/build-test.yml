@@ -31,5 +31,7 @@ jobs:
         run: make test
       - name: ML-DSA-65 CertificateVerify test (X509 + ML-DSA)
         run: make certmldsatest
+      - name: X.509 negative auth test (chain + ECDSA CertificateVerify)
+        run: make certnegtest
       - name: configs-build (compile every starter template)
         run: make configs-build
