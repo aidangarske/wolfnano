@@ -773,13 +773,109 @@ static int wn_CertVerify(word16 scheme, const byte* spki, word32 spkiLen,
     return ret;
 }
 
-/* Verify a presented cert chain (leaf first) up to the pinned anchor: each
- * cert must be signed by the next, and the topmost by the anchor. Copies the
- * leaf SPKI out for CertificateVerify. Signature-chain only (no constraint or
- * name checks yet). */
+/* Exact SPKI pin: the leaf public key must equal the caller-provided key. */
+static int wn_CheckSpkiPin(DecodedCert* leaf, const byte* pin, word32 pinLen)
+{
+    int ret = WOLFNANO_E_BAD_CERT;
+
+    if ((leaf != NULL) && (pin != NULL) && (pinLen == leaf->pubKeySize) &&
+        (ConstantCompare(leaf->publicKey, pin, (int)pinLen) == 0)) {
+        ret = WOLFNANO_SUCCESS;
+    }
+
+    return ret;
+}
+
+#ifdef WOLFNANO_X509_HOSTNAME
+static char wn_AsciiLower(char c)
+{
+    if ((c >= 'A') && (c <= 'Z')) {
+        c = (char)(c - 'A' + 'a');
+    }
+    return c;
+}
+
+static int wn_DnsCaseEq(const char* a, const char* b, int len)
+{
+    int i;
+    int eq = 1;
+    for (i = 0; i < len; i++) {
+        if (wn_AsciiLower(a[i]) != wn_AsciiLower(b[i])) {
+            eq = 0;
+        }
+    }
+    return eq;
+}
+
+/* RFC 6125 host match: exact (case-insensitive) or a single leftmost-label
+ * wildcard ("*.example.com"). */
+static int wn_DnsNameMatch(const char* pat, int patLen, const char* host,
+                           int hostLen)
+{
+    int k = 0;
+    int ret = WOLFNANO_E_BAD_CERT;
+
+    if ((pat == NULL) || (host == NULL) || (patLen <= 0) || (hostLen <= 0)) {
+        ret = WOLFNANO_E_BAD_CERT;
+    }
+    else if ((patLen > 2) && (pat[0] == '*') && (pat[1] == '.')) {
+        while ((k < hostLen) && (host[k] != '.')) {
+            k++;
+        }
+        if ((k > 0) && (k < hostLen) && ((patLen - 1) == (hostLen - k)) &&
+            wn_DnsCaseEq(pat + 1, host + k, patLen - 1)) {
+            ret = WOLFNANO_SUCCESS;
+        }
+    }
+    else if ((patLen == hostLen) && wn_DnsCaseEq(pat, host, patLen)) {
+        ret = WOLFNANO_SUCCESS;
+    }
+
+    return ret;
+}
+
+/* Validate serverName against the leaf SAN dNSName entries (RFC 6125), falling
+ * back to subject CN only when the cert presents no SAN dNSName. */
+static int wn_CheckServerName(DecodedCert* leaf, const char* host)
+{
+    DNS_entry* e;
+    int hostLen;
+    int sawDns = 0;
+    int ret = WOLFNANO_E_BAD_CERT;
+
+    if ((leaf == NULL) || (host == NULL)) {
+        ret = WOLFNANO_E_BAD_CERT;
+    }
+    else {
+        hostLen = (int)XSTRLEN(host);
+        for (e = leaf->altNames; e != NULL; e = e->next) {
+            if (e->type == ASN_DNS_TYPE) {
+                sawDns = 1;
+                if (wn_DnsNameMatch(e->name, e->len, host, hostLen)
+                        == WOLFNANO_SUCCESS) {
+                    ret = WOLFNANO_SUCCESS;
+                }
+            }
+        }
+        if ((sawDns == 0) && (leaf->subjectCN != NULL) &&
+            (wn_DnsNameMatch(leaf->subjectCN, leaf->subjectCNLen, host,
+                             hostLen) == WOLFNANO_SUCCESS)) {
+            ret = WOLFNANO_SUCCESS;
+        }
+    }
+
+    return ret;
+}
+#endif /* WOLFNANO_X509_HOSTNAME */
+
+/* Verify a presented cert chain (leaf first) up to the pinned anchor: each cert
+ * must be signed by the next, and the topmost by the anchor. Copies the leaf
+ * SPKI out for CertificateVerify and, when requested, enforces an SPKI pin
+ * and/or a server-name (hostname) identity match on the leaf. */
 static int wn_VerifyChain(const byte** certs, const word32* certLens, int n,
                           const byte* anchor, word32 anchorLen, byte* spki,
-                          word32* spkiLen)
+                          word32* spkiLen, const char* serverName,
+                          const byte* pinnedSpki, word32 pinnedSpkiLen)
 {
     DecodedCert issuer;
     DecodedCert leaf;
@@ -829,6 +925,16 @@ static int wn_VerifyChain(const byte** certs, const word32* certLens, int n,
                 XMEMCPY(spki, leaf.publicKey, leaf.pubKeySize);
                 *spkiLen = leaf.pubKeySize;
             }
+            if ((ret == WOLFNANO_SUCCESS) && (pinnedSpki != NULL)) {
+                ret = wn_CheckSpkiPin(&leaf, pinnedSpki, pinnedSpkiLen);
+            }
+            if ((ret == WOLFNANO_SUCCESS) && (serverName != NULL)) {
+#ifdef WOLFNANO_X509_HOSTNAME
+                ret = wn_CheckServerName(&leaf, serverName);
+#else
+                ret = WOLFNANO_E_UNSUPPORTED;
+#endif
+            }
         }
     }
     if (leafInit) {
@@ -838,9 +944,11 @@ static int wn_VerifyChain(const byte** certs, const word32* certLens, int n,
     return ret;
 }
 
-int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
+static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                        wn_IoRecv ioRecv, void* ioCtx, const byte* anchor,
-                       word32 anchorLen, byte* scratch, word32 scratchLen)
+                       word32 anchorLen, byte* scratch, word32 scratchLen,
+                       const char* serverName, const byte* pinnedSpki,
+                       word32 pinnedSpkiLen)
 {
     wn_Transcript tc;
     wn_KeyShare ks;
@@ -1029,7 +1137,8 @@ int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                 }
                 if (ret == WOLFNANO_SUCCESS) {
                     ret = wn_VerifyChain(certs, certLens, nc, anchor, anchorLen,
-                                         leafSpki, &spkiLen);
+                                         leafSpki, &spkiLen, serverName,
+                                         pinnedSpki, pinnedSpkiLen);
                 }
             }
             if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_CERT_VERIFY)) {
@@ -1118,6 +1227,34 @@ int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     return ret;
 }
 
+int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
+                       wn_IoRecv ioRecv, void* ioCtx, const byte* anchor,
+                       word32 anchorLen, byte* scratch, word32 scratchLen)
+{
+    return wn_connect_cert_impl(sess, rng, ioSend, ioRecv, ioCtx, anchor,
+                                anchorLen, scratch, scratchLen, NULL, NULL, 0);
+}
+
+int wn_Connect_CertName_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
+                           wn_IoRecv ioRecv, void* ioCtx, const byte* anchor,
+                           word32 anchorLen, const char* serverName,
+                           const byte* pinnedSpki, word32 pinnedSpkiLen,
+                           byte* scratch, word32 scratchLen)
+{
+    int ret = WOLFNANO_SUCCESS;
+
+    if ((serverName == NULL) && (pinnedSpki == NULL)) {
+        ret = WOLFNANO_E_INVALID_ARG;   /* must bind identity by name or pin */
+    }
+    if (ret == WOLFNANO_SUCCESS) {
+        ret = wn_connect_cert_impl(sess, rng, ioSend, ioRecv, ioCtx, anchor,
+                                   anchorLen, scratch, scratchLen, serverName,
+                                   pinnedSpki, pinnedSpkiLen);
+    }
+
+    return ret;
+}
+
 int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
                     void* ioCtx, const byte* anchor, word32 anchorLen,
                     byte* scratch, word32 scratchLen)
@@ -1127,6 +1264,22 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
 
     ret = wn_Connect_Cert_ex(&sess, rng, ioSend, ioRecv, ioCtx, anchor,
                              anchorLen, scratch, scratchLen);
+    ForceZero(&sess, sizeof(sess));
+
+    return ret;
+}
+
+int wn_Connect_CertName(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
+                        void* ioCtx, const byte* anchor, word32 anchorLen,
+                        const char* serverName, const byte* pinnedSpki,
+                        word32 pinnedSpkiLen, byte* scratch, word32 scratchLen)
+{
+    wn_Session sess;
+    int ret;
+
+    ret = wn_Connect_CertName_ex(&sess, rng, ioSend, ioRecv, ioCtx, anchor,
+                                 anchorLen, serverName, pinnedSpki,
+                                 pinnedSpkiLen, scratch, scratchLen);
     ForceZero(&sess, sizeof(sess));
 
     return ret;

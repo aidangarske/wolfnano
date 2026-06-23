@@ -63,8 +63,16 @@ int main(void)
     word32 tbsLen = 0;
     word32 sigLen;
     word32 leafSpkiLen;
+    byte tmp[512];
+    word32 tl;
     int spkiLen, rc, vr, ekInit = 0;
     word32 i;
+#ifdef WOLFNANO_X509_HOSTNAME
+    DecodedCert dc;
+    char nameBuf[256];
+    const char* nm = NULL;
+    int nmLen = 0;
+#endif
 
     printf("wolfNano X.509 negative auth test (chain + ECDSA CertificateVerify)\n");
 
@@ -107,8 +115,63 @@ int main(void)
     leafSpkiLen = (word32)sizeof(leafSpki);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, leafSpki,
-                        &leafSpkiLen);
+                        &leafSpkiLen, NULL, NULL, 0);
     check(rc == WOLFNANO_SUCCESS, "valid ECC chain verified");
+
+    /* SPKI pin: leafSpki now holds the real leaf key; pin against it. */
+    tl = (word32)sizeof(tmp);
+    rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
+                        (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
+                        NULL, leafSpki, leafSpkiLen);
+    check(rc == WOLFNANO_SUCCESS, "matching SPKI pin accepted");
+    leafSpki[0] ^= 0x01;
+    tl = (word32)sizeof(tmp);
+    rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
+                        (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
+                        NULL, leafSpki, leafSpkiLen);
+    check(rc == WOLFNANO_E_BAD_CERT, "wrong SPKI pin rejected");
+
+#ifdef WOLFNANO_X509_HOSTNAME
+    check(wn_DnsNameMatch("example.com", 11, "example.com", 11)
+          == WOLFNANO_SUCCESS, "exact host match");
+    check(wn_DnsNameMatch("EXAMPLE.com", 11, "example.COM", 11)
+          == WOLFNANO_SUCCESS, "case-insensitive host match");
+    check(wn_DnsNameMatch("*.example.com", 13, "a.example.com", 13)
+          == WOLFNANO_SUCCESS, "wildcard host match");
+    check(wn_DnsNameMatch("*.example.com", 13, "a.b.example.com", 15)
+          != WOLFNANO_SUCCESS, "wildcard rejects multi-label host");
+    check(wn_DnsNameMatch("example.com", 11, "other.com", 9)
+          != WOLFNANO_SUCCESS, "host mismatch rejected");
+
+    wc_InitDecodedCert(&dc, serv_ecc_der_256,
+                       (word32)sizeof_serv_ecc_der_256, NULL);
+    if (wc_ParseCert(&dc, CERT_TYPE, NO_VERIFY, NULL) == 0) {
+        if (dc.altNames != NULL) {
+            nm = dc.altNames->name;
+            nmLen = dc.altNames->len;
+        }
+        else {
+            nm = dc.subjectCN;
+            nmLen = dc.subjectCNLen;
+        }
+    }
+    XMEMCPY(nameBuf, nm, (size_t)nmLen);
+    nameBuf[nmLen] = '\0';
+    wc_FreeDecodedCert(&dc);
+
+    certs[0] = serv_ecc_der_256;
+    certLens[0] = (word32)sizeof_serv_ecc_der_256;
+    tl = (word32)sizeof(tmp);
+    rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
+                        (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
+                        nameBuf, NULL, 0);
+    check(rc == WOLFNANO_SUCCESS, "leaf hostname accepted");
+    tl = (word32)sizeof(tmp);
+    rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
+                        (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
+                        "no.match.invalid", NULL, 0);
+    check(rc == WOLFNANO_E_BAD_CERT, "wrong hostname rejected");
+#endif /* WOLFNANO_X509_HOSTNAME */
 
     XMEMCPY(tamper, serv_ecc_der_256, sizeof(serv_ecc_der_256));
     tamper[sizeof(tamper) - 1] ^= 0x01;
@@ -117,7 +180,7 @@ int main(void)
     leafSpkiLen = (word32)sizeof(leafSpki);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, leafSpki,
-                        &leafSpkiLen);
+                        &leafSpkiLen, NULL, NULL, 0);
     check(rc == WOLFNANO_E_BAD_CERT, "tampered ECC chain rejected");
 
     if (ekInit) {
