@@ -507,8 +507,15 @@ int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv, void* ioCtx,
  * the frame small for embedded. scratch is partitioned [record I/O | hsacc |
  * leafSpki]; records decrypt in place in the I/O region. WN_CERT_SCRATCH_MIN is
  * the minimum scratchLen. */
-#define WN_HS_ACC_SZ       6144
-#define WN_LEAF_SPKI_SZ    1024
+#ifdef WOLFSSL_HAVE_MLDSA
+    /* ML-DSA-65 leaf SPKI is 1974 B (DER); its Certificate + ~3309 B
+     * CertificateVerify flight needs a larger accumulator. */
+    #define WN_HS_ACC_SZ       8192
+    #define WN_LEAF_SPKI_SZ    2048
+#else
+    #define WN_HS_ACC_SZ       6144
+    #define WN_LEAF_SPKI_SZ    1024
+#endif
 #define WN_CERT_IO_MIN     4096
 #define WN_CERT_SCRATCH_MIN (WN_CERT_IO_MIN + WN_HS_ACC_SZ + WN_LEAF_SPKI_SZ)
 
