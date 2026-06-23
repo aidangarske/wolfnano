@@ -773,8 +773,10 @@ static int wn_CertVerify(word16 scheme, const byte* spki, word32 spkiLen,
     return ret;
 }
 
-/* Exact SPKI pin: the leaf public key must equal the caller-provided key. */
-static int wn_CheckSpkiPin(DecodedCert* leaf, const byte* pin, word32 pinLen)
+/* Exact public-key pin: the leaf key must equal the caller-provided bytes, in
+ * the same encoding wolfNano parses (SubjectPublicKeyInfo DER for ECC/RSA, raw
+ * key for Ed25519/ML-DSA). Obtain the pin from the target server's leaf. */
+static int wn_CheckKeyPin(DecodedCert* leaf, const byte* pin, word32 pinLen)
 {
     int ret = WOLFNANO_E_BAD_CERT;
 
@@ -875,7 +877,7 @@ static int wn_CheckServerName(DecodedCert* leaf, const char* host)
 static int wn_VerifyChain(const byte** certs, const word32* certLens, int n,
                           const byte* anchor, word32 anchorLen, byte* spki,
                           word32* spkiLen, const char* serverName,
-                          const byte* pinnedSpki, word32 pinnedSpkiLen)
+                          const byte* pinnedKey, word32 pinnedKeyLen)
 {
     DecodedCert issuer;
     DecodedCert leaf;
@@ -925,8 +927,8 @@ static int wn_VerifyChain(const byte** certs, const word32* certLens, int n,
                 XMEMCPY(spki, leaf.publicKey, leaf.pubKeySize);
                 *spkiLen = leaf.pubKeySize;
             }
-            if ((ret == WOLFNANO_SUCCESS) && (pinnedSpki != NULL)) {
-                ret = wn_CheckSpkiPin(&leaf, pinnedSpki, pinnedSpkiLen);
+            if ((ret == WOLFNANO_SUCCESS) && (pinnedKey != NULL)) {
+                ret = wn_CheckKeyPin(&leaf, pinnedKey, pinnedKeyLen);
             }
             if ((ret == WOLFNANO_SUCCESS) && (serverName != NULL)) {
 #ifdef WOLFNANO_X509_HOSTNAME
@@ -947,8 +949,8 @@ static int wn_VerifyChain(const byte** certs, const word32* certLens, int n,
 static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                        wn_IoRecv ioRecv, void* ioCtx, const byte* anchor,
                        word32 anchorLen, byte* scratch, word32 scratchLen,
-                       const char* serverName, const byte* pinnedSpki,
-                       word32 pinnedSpkiLen)
+                       const char* serverName, const byte* pinnedKey,
+                       word32 pinnedKeyLen)
 {
     wn_Transcript tc;
     wn_KeyShare ks;
@@ -1138,7 +1140,7 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                 if (ret == WOLFNANO_SUCCESS) {
                     ret = wn_VerifyChain(certs, certLens, nc, anchor, anchorLen,
                                          leafSpki, &spkiLen, serverName,
-                                         pinnedSpki, pinnedSpkiLen);
+                                         pinnedKey, pinnedKeyLen);
                 }
             }
             if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_CERT_VERIFY)) {
@@ -1238,18 +1240,18 @@ int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
 int wn_Connect_CertName_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                            wn_IoRecv ioRecv, void* ioCtx, const byte* anchor,
                            word32 anchorLen, const char* serverName,
-                           const byte* pinnedSpki, word32 pinnedSpkiLen,
+                           const byte* pinnedKey, word32 pinnedKeyLen,
                            byte* scratch, word32 scratchLen)
 {
     int ret = WOLFNANO_SUCCESS;
 
-    if ((serverName == NULL) && (pinnedSpki == NULL)) {
+    if ((serverName == NULL) && (pinnedKey == NULL)) {
         ret = WOLFNANO_E_INVALID_ARG;   /* must bind identity by name or pin */
     }
     if (ret == WOLFNANO_SUCCESS) {
         ret = wn_connect_cert_impl(sess, rng, ioSend, ioRecv, ioCtx, anchor,
                                    anchorLen, scratch, scratchLen, serverName,
-                                   pinnedSpki, pinnedSpkiLen);
+                                   pinnedKey, pinnedKeyLen);
     }
 
     return ret;
@@ -1271,15 +1273,15 @@ int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
 
 int wn_Connect_CertName(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
                         void* ioCtx, const byte* anchor, word32 anchorLen,
-                        const char* serverName, const byte* pinnedSpki,
-                        word32 pinnedSpkiLen, byte* scratch, word32 scratchLen)
+                        const char* serverName, const byte* pinnedKey,
+                        word32 pinnedKeyLen, byte* scratch, word32 scratchLen)
 {
     wn_Session sess;
     int ret;
 
     ret = wn_Connect_CertName_ex(&sess, rng, ioSend, ioRecv, ioCtx, anchor,
-                                 anchorLen, serverName, pinnedSpki,
-                                 pinnedSpkiLen, scratch, scratchLen);
+                                 anchorLen, serverName, pinnedKey,
+                                 pinnedKeyLen, scratch, scratchLen);
     ForceZero(&sess, sizeof(sess));
 
     return ret;

@@ -118,18 +118,18 @@ int main(void)
                         &leafSpkiLen, NULL, NULL, 0);
     check(rc == WOLFNANO_SUCCESS, "valid ECC chain verified");
 
-    /* SPKI pin: leafSpki now holds the real leaf key; pin against it. */
+    /* key pin: leafSpki now holds the real leaf key; pin against it. */
     tl = (word32)sizeof(tmp);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
                         NULL, leafSpki, leafSpkiLen);
-    check(rc == WOLFNANO_SUCCESS, "matching SPKI pin accepted");
+    check(rc == WOLFNANO_SUCCESS, "matching public-key pin accepted");
     leafSpki[0] ^= 0x01;
     tl = (word32)sizeof(tmp);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
                         NULL, leafSpki, leafSpkiLen);
-    check(rc == WOLFNANO_E_BAD_CERT, "wrong SPKI pin rejected");
+    check(rc == WOLFNANO_E_BAD_CERT, "wrong key pin rejected");
 
 #ifdef WOLFNANO_X509_HOSTNAME
     check(wn_DnsNameMatch("example.com", 11, "example.com", 11)

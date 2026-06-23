@@ -429,7 +429,7 @@ certnegtest: ## build + run X.509 negative auth tests (chain + hostname + ECDSA 
 	@echo "---- run ----"
 	@./$(BUILD)/cert_neg_test
 
-certnegpintest: ## build + run the SPKI-pin-only cert tier (WOLFNANO_X509_HOSTNAME=0)
+certnegpintest: ## build + run the key-pin-only cert tier (WOLFNANO_X509_HOSTNAME=0)
 	@mkdir -p $(BUILD)
 	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 \
 	   -DWOLFNANO_X509_HOSTNAME=0 -DWOLFNANO_HAVE_RSA_VERIFY \

@@ -18,10 +18,10 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* wolfNano X.509 client, SPKI-pin only: same cert path as user_settings_cert.h
+/* wolfNano X.509 client, key-pin only: same cert path as user_settings_cert.h
  * but with hostname matching compiled out (WOLFNANO_X509_HOSTNAME 0), ~1 KB
  * smaller. For embedded devices that authenticate one fixed server by an exact
- * leaf-key pin via wn_Connect_CertName(serverName=NULL, pinnedSpki=...).
+ * leaf-key pin via wn_Connect_CertName(serverName=NULL, pinnedKey=...).
  * Copy to your project as user_settings.h. */
 
 #ifndef WOLFNANO_USER_SETTINGS_H

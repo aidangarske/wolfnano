@@ -73,14 +73,14 @@ WOLFNANO_API int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng,
 
 /* Cert handshake that binds the server identity. Supply serverName (validated
  * against the leaf SAN dNSName / CN per RFC 6125, requires WOLFNANO_X509_HOSTNAME)
- * and/or pinnedSpki (exact leaf public-key match). At least one is required.
+ * and/or pinnedKey (exact leaf public-key match). At least one is required.
  * Pass NULL/0 for the option not used. */
 WOLFNANO_API int wn_Connect_CertName(WC_RNG* rng, wn_IoSend ioSend,
                                      wn_IoRecv ioRecv, void* ioCtx,
                                      const byte* anchor, word32 anchorLen,
                                      const char* serverName,
-                                     const byte* pinnedSpki,
-                                     word32 pinnedSpkiLen, byte* scratch,
+                                     const byte* pinnedKey,
+                                     word32 pinnedKeyLen, byte* scratch,
                                      word32 scratchLen);
 
 /* As wn_Connect_CertName, but on success fills sess for application data. */
@@ -88,8 +88,8 @@ WOLFNANO_API int wn_Connect_CertName_ex(wn_Session* sess, WC_RNG* rng,
                                         wn_IoSend ioSend, wn_IoRecv ioRecv,
                                         void* ioCtx, const byte* anchor,
                                         word32 anchorLen, const char* serverName,
-                                        const byte* pinnedSpki,
-                                        word32 pinnedSpkiLen, byte* scratch,
+                                        const byte* pinnedKey,
+                                        word32 pinnedKeyLen, byte* scratch,
                                         word32 scratchLen);
 
 #endif /* WN_CONNECT_H */
