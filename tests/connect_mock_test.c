@@ -379,7 +379,8 @@ int main(void)
     check(drive(2) != WOLFNANO_SUCCESS, "bad server key_share length rejected");
     check(drive(3) == WOLFNANO_E_BAD_MAC, "corrupt server Finished -> BAD_MAC");
     check(drive(5) == WOLFNANO_E_DECODE, "malformed flight message -> DECODE");
-    check(drive(6) == WOLFNANO_SUCCESS, "unexpected flight message tolerated");
+    check(drive(6) == WOLFNANO_E_UNEXPECTED_MSG,
+          "unexpected flight message rejected (PSK grammar)");
     check(drive(7) == WOLFNANO_E_UNEXPECTED_MSG, "non-appdata record in flight rejected");
     check(drive(8) == WOLFNANO_E_UNSUPPORTED, "HelloRetryRequest detected and rejected");
 

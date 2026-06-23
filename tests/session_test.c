@@ -272,13 +272,12 @@ int main(void)
     check(wn_Send(&s, (const byte*)"x", 1) == WOLFNANO_E_CRYPTO,
           "wn_Send transport failure");
 
-    /* 11. wn_Recv ignores a (plaintext) ChangeCipherSpec then returns app data. */
+    /* 11. wn_Recv rejects a post-handshake ChangeCipherSpec (RFC 8446 5). */
     setup(&s, &m);
     push_raw(&m, WN_REC_CHANGE_CIPHER, (const byte*)"\x01", 1);
-    push_rec(&m, s.sKey, s.sIv, 0, WN_REC_APPDATA, (const byte*)"ccs", 3);
     got = 0;
     rc = wn_Recv(&s, out, sizeof(out), &got);
-    check((rc == 0) && (got == 3), "wn_Recv skips ChangeCipherSpec");
+    check(rc == WOLFNANO_E_UNEXPECTED_MSG, "wn_Recv rejects post-handshake CCS");
 
     /* 12. malformed post-handshake messages. */
     setup(&s, &m);

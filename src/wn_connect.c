@@ -369,7 +369,10 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         ret = wn_Transcript_Update(&tc, scratch + 5, recLen - 5);
     }
     if (ret == WOLFNANO_SUCCESS) {
-        if ((sh.keyShare == NULL) || (sh.keyShareLen != WN_DEFAULT_SRV_SHARE_SZ)) {
+        if ((sh.keyShare == NULL) ||
+            (sh.keyShareLen != WN_DEFAULT_SRV_SHARE_SZ) ||
+            (sh.cipher != WN_CIPHER_AES_128_GCM_SHA256) ||
+            (sh.version != 0x0304u) || (sh.group != WN_DEFAULT_GROUP)) {
             ret = WOLFNANO_E_ILLEGAL_PARAM;
         }
     }
@@ -420,19 +423,27 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                     ret = WOLFNANO_E_DECODE;
                 }
                 else if (mType == WN_HS_ENCRYPTED_EXT) {
-                    ret = wn_Transcript_Update(&tc, plain + mStart, mLen + 4);
-                    gotEE = 1;
+                    if (gotEE != 0) {           /* RFC 8446: one EE per flight */
+                        ret = WOLFNANO_E_UNEXPECTED_MSG;
+                    }
+                    else {
+                        ret = wn_Transcript_Update(&tc, plain + mStart, mLen + 4);
+                        gotEE = 1;
+                    }
                 }
                 else if (mType == WN_HS_FINISHED) {
-                    ret = wn_Transcript_GetHash(&tc, th, &thLen);
+                    if ((gotEE == 0) || (mLen != 32)) {
+                        ret = WOLFNANO_E_BAD_MAC;
+                    }
+                    if (ret == WOLFNANO_SUCCESS) {
+                        ret = wn_Transcript_GetHash(&tc, th, &thLen);
+                    }
                     if (ret == WOLFNANO_SUCCESS) {
                         ret = wn_Tls13_FinishedMac(mac, sHs, th, 32, WC_SHA256);
                     }
                     if (ret == WOLFNANO_SUCCESS) {
                         XMEMCPY(recvMac, plain + mStart + 4, 32);
-                        if ((mLen != 32) ||
-                            (ConstantCompare(mac, recvMac, 32) != 0) ||
-                            (gotEE == 0)) {
+                        if (ConstantCompare(mac, recvMac, 32) != 0) {
                             ret = WOLFNANO_E_BAD_MAC;
                         }
                     }
@@ -441,8 +452,8 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                         done = 1;
                     }
                 }
-                else {
-                    ret = wn_Transcript_Update(&tc, plain + mStart, mLen + 4);
+                else {                          /* PSK flight = EE then Finished */
+                    ret = WOLFNANO_E_UNEXPECTED_MSG;
                 }
             }
         }
@@ -915,7 +926,10 @@ int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         ret = wn_Transcript_Update(&tc, scratch + 5, recLen - 5);
     }
     if ((ret == WOLFNANO_SUCCESS) &&
-        ((sh.keyShare == NULL) || (sh.keyShareLen != WN_DEFAULT_SRV_SHARE_SZ))) {
+        ((sh.keyShare == NULL) ||
+         (sh.keyShareLen != WN_DEFAULT_SRV_SHARE_SZ) ||
+         (sh.cipher != WN_CIPHER_AES_128_GCM_SHA256) ||
+         (sh.version != 0x0304u) || (sh.group != WN_DEFAULT_GROUP))) {
         ret = WOLFNANO_E_ILLEGAL_PARAM;
     }
     if (ret == WOLFNANO_SUCCESS) {
@@ -982,12 +996,19 @@ int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
             if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_CERTIFICATE)) {
                 int nc = 0;
                 word32 cl;
+                word32 listLen, listEnd;
                 word16 extl;
+                byte ctxLen;
                 wn_Reader_Init(&hr, hsacc + off + 4, mLen);
-                (void)wn_Read_Bytes(&hr, wn_Read_U8(&hr)); /* cert_req_context */
-                (void)wn_Read_U24(&hr);                    /* cert_list length */
-                while ((hr.pos < mLen) && (nc < WN_MAX_CHAIN) &&
-                       (hr.err == 0)) {
+                ctxLen = wn_Read_U8(&hr);
+                (void)wn_Read_Bytes(&hr, ctxLen);          /* cert_req_context */
+                listLen = wn_Read_U24(&hr);                /* cert_list length */
+                listEnd = hr.pos + listLen;
+                if ((hr.err != 0) || (ctxLen != 0) || (listEnd != mLen)) {
+                    ret = WOLFNANO_E_DECODE;   /* server cert: empty ctx, exact list */
+                }
+                while ((ret == WOLFNANO_SUCCESS) && (hr.pos < listEnd) &&
+                       (nc < WN_MAX_CHAIN) && (hr.err == 0)) {
                     cl = wn_Read_U24(&hr);                  /* cert_data length */
                     certs[nc] = hsacc + off + 4 + hr.pos;
                     certLens[nc] = cl;
@@ -997,10 +1018,10 @@ int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                     (void)wn_Read_Bytes(&hr, extl);
                 }
                 spkiLen = WN_LEAF_SPKI_SZ;
-                if (hr.err != 0) {
+                if ((ret == WOLFNANO_SUCCESS) && (hr.err != 0)) {
                     ret = WOLFNANO_E_DECODE;
                 }
-                else {
+                if (ret == WOLFNANO_SUCCESS) {
                     ret = wn_VerifyChain(certs, certLens, nc, anchor, anchorLen,
                                          leafSpki, &spkiLen);
                 }
