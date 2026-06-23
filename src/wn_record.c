@@ -97,6 +97,9 @@ int wn_Record_Protect(byte* rec, word32* recLen, const byte* key, word32 keyLen,
         (iv == NULL) || (content == NULL)) {
         ret = WOLFNANO_E_INVALID_ARG;
     }
+    if ((ret == WOLFNANO_SUCCESS) && (contentLen > WN_MAX_PLAINTEXT)) {
+        ret = WOLFNANO_E_INVALID_ARG;   /* fits the 16-bit record length */
+    }
 
     if (ret == WOLFNANO_SUCCESS) {
         innerLen = contentLen + 1;
