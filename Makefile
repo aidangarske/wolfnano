@@ -168,7 +168,7 @@ ASM_CC    := $(CC_$(WOLFNANO_ASM))
 ASM_FLAGS := $(FLAGS_$(WOLFNANO_ASM))
 ASM_SRC   := $(SPSRC_$(WOLFNANO_ASM)) $(ASMSRC_$(WOLFNANO_ASM))
 
-.PHONY: host kstest keyupdatetest sessiontest mocktest mockhybridtest errtest rfctest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test-qemu test test-core check example configs-build m33mu coverage stackcheck clean
+.PHONY: host kstest keyupdatetest sessiontest mocktest mockhybridtest errtest rfctest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest hybridtest certtest fipsproof bench benchrun targets test-qemu test test-core check example example-cert example-pqc configs-build m33mu coverage stackcheck clean
 test: test-core mlkemtest mldsatest hybridtest mockhybridtest wctestpqc ## build + run all local self-tests
 test-core: host kstest keyupdatetest sessiontest mocktest errtest rfctest tstest rectest ksharetest hstest wctest msgtest chtest shtest negtest flighttest alerttest matrixtest certtest ## non-PQC suites (wolfSSL without the wc_mlkem/wc_mldsa API)
 
@@ -543,6 +543,21 @@ example: ## build the minimal PSK client example (examples/client.c)
 	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_SRC) examples/client.c -o $(BUILD)/example_client
 	@echo "built $(BUILD)/example_client"
+
+example-cert: ## build the X.509 server-cert client example (examples/client_cert.c)
+	@mkdir -p $(BUILD)
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
+	   $(CONN_CERT_SRC) $(WC)/rsa.c examples/client_cert.c \
+	   -o $(BUILD)/example_client_cert
+	@echo "built $(BUILD)/example_client_cert"
+
+example-pqc: ## build the X25519MLKEM768 hybrid PSK client example (examples/client_pqc.c)
+	@mkdir -p $(BUILD)
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_HAVE_MLKEM_HYBRID \
+	   -DWOLFNANO_TARGET_PORTABLE_C \
+	   $(MOCKHYB_SRC) examples/client_pqc.c -o $(BUILD)/example_client_pqc
+	@echo "built $(BUILD)/example_client_pqc"
 
 configs-build: ## compile each configs/ starter template against the shell
 	sh scripts/configs_build.sh
