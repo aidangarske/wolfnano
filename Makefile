@@ -180,7 +180,7 @@ test: test-core mlkemtest mldsatest hybridtest mockhybridtest wctestpqc ## build
 test-core: host kstest keyupdatetest sessiontest mocktest errtest rfctest tstest rectest ksharetest hstest wctest msgtest chtest shtest negtest flighttest alerttest matrixtest certtest ## non-PQC suites (wolfSSL without the wc_mlkem/wc_mldsa API)
 
 SUITES := host kstest keyupdatetest sessiontest mocktest mockhybridtest errtest rfctest tstest rectest ksharetest hstest wctest wctestpqc \
-  msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest certmldsatest hybridtest certtest
+  msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest certmldsatest certnegtest hybridtest certtest
 
 check: ## run every suite, continue past failures, print one colored PASS/FAIL tally
 	@mkdir -p $(BUILD)
