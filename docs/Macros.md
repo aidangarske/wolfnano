@@ -21,6 +21,7 @@ applies the standing size cuts).
 | `WOLFNANOTLS_HAVE_RSA_VERIFY` | RSA verify (cert chains, RSA-PSS) | `WOLFSSL_RSA_VERIFY_ONLY`, `WC_RSA_PSS` |
 | `WOLFNANOTLS_RSA_FULL` | adds RSA keygen/sign (tooling, not the no-alloc product) | `WOLFSSL_KEY_GEN` |
 | `WOLFNANOTLS_X509` | X.509 cert path (needs heap) | cert path + `WOLFSSL_SMALL_CERT_VERIFY` |
+| `WOLFNANOTLS_X509_HOSTNAME` | leaf hostname (SAN/CN, RFC 6125) matching; default on with `WOLFNANOTLS_X509`. Set `0` for a key-pin-only cert build (~0.5 KB smaller) | gates `wn_CheckServerName` |
 | `WOLFNANOTLS_MLKEM` | ML-KEM-768 + X25519MLKEM768 hybrid | `WOLFSSL_HAVE_MLKEM` |
 | `WOLFNANOTLS_MLDSA` | ML-DSA-65 verify (no-malloc) | `WOLFSSL_HAVE_MLDSA`, verify-only |
 | `WOLFNANOTLS_MLDSA_SIGN` | adds ML-DSA keygen/sign (needs memory) | drops verify-only |

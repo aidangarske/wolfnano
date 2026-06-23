@@ -54,6 +54,15 @@
 /* ---- X.509 adder (minimal cert path validation) ---- */
 #ifdef WOLFNANOTLS_X509
     #define WOLFSSL_SMALL_CERT_VERIFY  /* low-memory cert signature check */
+    /* Hostname (SAN/CN) identity matching is on by default; a pin-only cert
+     * build may set WOLFNANOTLS_X509_HOSTNAME 0 to drop ~1 KB and rely on an
+     * exact SPKI pin instead. */
+    #ifndef WOLFNANOTLS_X509_HOSTNAME
+        #define WOLFNANOTLS_X509_HOSTNAME 1
+    #endif
+    #if defined(WOLFNANOTLS_X509_HOSTNAME) && (WOLFNANOTLS_X509_HOSTNAME == 0)
+        #undef WOLFNANOTLS_X509_HOSTNAME
+    #endif
 #endif
 
 /* ---- RSA verify adder (RSA-signed cert chains, RSA-PSS for TLS 1.3) ----

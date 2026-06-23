@@ -49,6 +49,7 @@ echo "configs-build:"
 build_host minimal   "$PSK $SHELL_PSK"
 build_host psk_p256  "$FLOOR $SHELL_PSK"
 build_host cert      "$FLOOR $WC/rsa.c $SHELL_CERT"
+build_host cert_pin  "$FLOOR $WC/rsa.c $SHELL_CERT"
 build_host pqc       "$PQC $SHELL_PQC"
 build_host baremetal "$PSK $SHELL_PSK"
 
