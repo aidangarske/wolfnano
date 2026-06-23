@@ -35,11 +35,11 @@ jobs:
         run: |
           set -eux
           wget -q https://scan.coverity.com/download/cxx/linux64 \
-            --post-data "token=$COVERITY_TOKEN&project=wolfNanoTLS" -O cov.tgz
+            --post-data "token=$COVERITY_TOKEN&project=wolfnano" -O cov.tgz
           mkdir cov && tar xzf cov.tgz --strip-components=1 -C cov
           export PATH="$PWD/cov/bin:$PATH"
           cov-build --dir cov-int make test
           tar czf wolfNanoTLS.tgz cov-int
           curl --form token="$COVERITY_TOKEN" --form email="$COVERITY_EMAIL" \
             --form file=@wolfNanoTLS.tgz --form version="ci" --form description="ci" \
-            "https://scan.coverity.com/builds?project=wolfNanoTLS"
+            "https://scan.coverity.com/builds?project=wolfnano"
