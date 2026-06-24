@@ -33,6 +33,16 @@ static void check(int ok, const char* name)
     }
 }
 
+static int wn_IsZero(const byte* b, word32 n)
+{
+    word32 i;
+    byte acc = 0;
+    for (i = 0; i < n; i++) {
+        acc |= b[i];
+    }
+    return acc == 0;
+}
+
 int main(void)
 {
     WC_RNG rng;
@@ -68,11 +78,22 @@ int main(void)
     /* NULL / invalid-arg paths */
     check(wn_Hybrid_ClientKeyShare(NULL, &rng, cliShare, &cliLen)
           == WOLFNANO_E_INVALID_ARG, "ClientKeyShare NULL rejected");
+    XMEMSET(ssC, 0xAA, WN_HYBRID_SECRET);
     check(wn_Hybrid_ClientShared(&h, srvShare, 1, ssC, &ssCLen)
           == WOLFNANO_E_INVALID_ARG, "ClientShared bad length rejected");
+    check(wn_IsZero(ssC, WN_HYBRID_SECRET),
+          "ClientShared wipes the output secret on failure");
+    check(wn_Hybrid_ClientShared(&h, srvShare, 1, NULL, &ssCLen)
+          == WOLFNANO_E_INVALID_ARG, "ClientShared NULL secret rejected safely");
+    XMEMSET(ssS, 0xAA, WN_HYBRID_SECRET);
     check(wn_Hybrid_ServerRespond(cliShare, 1, &rng, srvShare, &srvLen,
           ssS, &ssSLen) == WOLFNANO_E_INVALID_ARG,
           "ServerRespond bad length rejected");
+    check(wn_IsZero(ssS, WN_HYBRID_SECRET),
+          "ServerRespond wipes the output secret on failure");
+    check(wn_Hybrid_ServerRespond(cliShare, 1, &rng, srvShare, &srvLen,
+          NULL, &ssSLen) == WOLFNANO_E_INVALID_ARG,
+          "ServerRespond NULL secret rejected safely");
     check(wn_Hybrid_Free(NULL) == WOLFNANO_E_INVALID_ARG, "Free NULL rejected");
 
     /* malformed client ML-KEM public key: decode rejects it */

@@ -25,6 +25,11 @@
 
 #include "wn_hybrid.h"
 
+#ifndef WOLFSSL_MISC_INCLUDED
+    #define WOLFSSL_MISC_INCLUDED
+    #include <wolfcrypt/src/misc.c>   /* inline ForceZero */
+#endif
+
 int wn_Hybrid_ClientKeyShare(wn_Hybrid* h, WC_RNG* rng, byte* out,
                              word32* outLen)
 {
@@ -111,6 +116,9 @@ int wn_Hybrid_ClientShared(wn_Hybrid* h, const byte* srvShare, word32 srvLen,
     if (ret == WOLFNANO_SUCCESS) {
         *ssLen = WN_HYBRID_SECRET;
     }
+    else if (ss != NULL) {
+        ForceZero(ss, WN_HYBRID_SECRET);   /* no partial secret on failure */
+    }
 
     if (peerInit) {
         wc_curve25519_free(&peer);
@@ -189,6 +197,9 @@ int wn_Hybrid_ServerRespond(const byte* cliShare, word32 cliLen, WC_RNG* rng,
     if (ret == WOLFNANO_SUCCESS) {
         *srvLen = WN_HYBRID_SERVER_SHARE;
         *ssLen = WN_HYBRID_SECRET;
+    }
+    else if (ss != NULL) {
+        ForceZero(ss, WN_HYBRID_SECRET);   /* no partial secret on failure */
     }
 
     if (peerInit) {

@@ -59,8 +59,42 @@
 
 #define WN_HS_FINISHED       20
 #define WN_HS_ENCRYPTED_EXT  8
+#define WN_EXT_SUPPORTED_GRP 10
 
 /* wn_RecvRecord (record read) now lives in wn_record.c; declared in wn_record.h. */
+
+/* RFC 8446 4.3.1 / 4.2: EncryptedExtensions carries only extensions the client
+ * offered that belong here. wolfNano offers nothing EE-legal but supported_groups,
+ * so reject any other (forbidden or unsolicited) extension type. */
+static int wn_CheckEncExt(const byte* body, word32 bodyLen)
+{
+    wn_Reader r;
+    word32 extEnd;
+    word16 extLen;
+    word16 et;
+    word16 el;
+    int ret = WOLFNANO_SUCCESS;
+
+    wn_Reader_Init(&r, body, bodyLen);
+    extLen = wn_Read_U16(&r);
+    extEnd = r.pos + extLen;
+    if ((r.err != 0) || (extEnd != bodyLen)) {
+        ret = WOLFNANO_E_DECODE;
+    }
+    while ((ret == WOLFNANO_SUCCESS) && (r.pos < extEnd) && (r.err == 0)) {
+        et = wn_Read_U16(&r);
+        el = wn_Read_U16(&r);
+        (void)wn_Read_Bytes(&r, el);
+        if (r.err != 0) {
+            ret = WOLFNANO_E_DECODE;
+        }
+        else if (et != WN_EXT_SUPPORTED_GRP) {
+            ret = WOLFNANO_E_UNEXPECTED_MSG;
+        }
+    }
+
+    return ret;
+}
 
 /* Send the TLS 1.3 middlebox-compatibility ChangeCipherSpec (RFC 8446 D.4). */
 static int send_ccs(wn_IoSend send, void* ctx);
@@ -285,7 +319,7 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     byte fin[36];
     byte plain[512];
     word32 truncOff, binderOff, chLen, recLen, thLen, pubLen, ssLen;
-    word32 plainLen; word64 sSeq = 0;
+    word32 plainLen, accOff = 0, accLen = 0; word64 sSeq = 0;
     byte rtype = 0, ctype = 0;
     int ret = WOLFNANO_SUCCESS;
     int gotEE = 0, done = 0;
@@ -407,37 +441,47 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         if ((ret == WOLFNANO_SUCCESS) &&
             ((recLen < (WN_RECORD_HEADER_SZ + WN_RECORD_TAG_SZ)) ||
              ((recLen - WN_RECORD_HEADER_SZ - WN_RECORD_TAG_SZ) >
-                 sizeof(plain)))) {
-            ret = WOLFNANO_E_DECODE;        /* inner record must fit plain[] */
+                 (sizeof(plain) - accLen)))) {
+            ret = WOLFNANO_E_DECODE;        /* reassembled flight must fit plain[] */
         }
         if (ret == WOLFNANO_SUCCESS) {
-            ret = wn_Record_Unprotect(plain, &plainLen, &ctype, sKey, 16, sIv,
-                                      sSeq, scratch, recLen);
+            ret = wn_Record_Unprotect(plain + accLen, &plainLen, &ctype, sKey, 16,
+                                      sIv, sSeq, scratch, recLen);
             sSeq++;
         }
         if ((ret == WOLFNANO_SUCCESS) && (ctype != WN_REC_HANDSHAKE)) {
             ret = WOLFNANO_E_UNEXPECTED_MSG;   /* flight is handshake records only */
         }
-        if ((ret == WOLFNANO_SUCCESS) && (ctype == WN_REC_HANDSHAKE)) {
-            wn_Reader hr;
-            wn_Reader_Init(&hr, plain, plainLen);
-            while ((hr.pos < plainLen) && (ret == WOLFNANO_SUCCESS) &&
-                   (done == 0)) {
+        if (ret == WOLFNANO_SUCCESS) {
+            /* RFC 8446 5.1: a handshake message may span records; accumulate and
+             * parse only complete messages, leaving any partial for the next. */
+            accLen += plainLen;
+            while ((ret == WOLFNANO_SUCCESS) && (done == 0) &&
+                   ((accLen - accOff) >= 4)) {
                 word32 mStart, mLen;
                 byte mType;
-                mStart = hr.pos;
-                mType = wn_Read_U8(&hr);
-                mLen = wn_Read_U24(&hr);
-                (void)wn_Read_Bytes(&hr, mLen);
-                if (hr.err != 0) {
-                    ret = WOLFNANO_E_DECODE;
+                mStart = accOff;
+                mType = plain[accOff];
+                mLen = ((word32)plain[accOff + 1] << 16) |
+                       ((word32)plain[accOff + 2] << 8) | plain[accOff + 3];
+                if ((accOff + 4 + mLen) > sizeof(plain)) {
+                    ret = WOLFNANO_E_DECODE; /* cannot fit the reassembly buffer */
+                    break;
                 }
-                else if (mType == WN_HS_ENCRYPTED_EXT) {
+                if ((accOff + 4 + mLen) > accLen) {
+                    break;                  /* message not complete yet */
+                }
+                accOff += 4 + mLen;
+                if (mType == WN_HS_ENCRYPTED_EXT) {
                     if (gotEE != 0) {           /* RFC 8446: one EE per flight */
                         ret = WOLFNANO_E_UNEXPECTED_MSG;
                     }
                     else {
-                        ret = wn_Transcript_Update(&tc, plain + mStart, mLen + 4);
+                        ret = wn_CheckEncExt(plain + mStart + 4, mLen);
+                        if (ret == WOLFNANO_SUCCESS) {
+                            ret = wn_Transcript_Update(&tc, plain + mStart,
+                                                       mLen + 4);
+                        }
                         gotEE = 1;
                     }
                 }
@@ -790,7 +834,8 @@ static int wn_CheckKeyPin(DecodedCert* leaf, const byte* pin, word32 pinLen)
 {
     int ret = WOLFNANO_E_BAD_CERT;
 
-    if ((leaf != NULL) && (pin != NULL) && (pinLen == leaf->pubKeySize) &&
+    if ((leaf != NULL) && (pin != NULL) && (pinLen > 0) &&
+        (pinLen == leaf->pubKeySize) &&
         (ConstantCompare(leaf->publicKey, pin, (int)pinLen) == 0)) {
         ret = WOLFNANO_SUCCESS;
     }
@@ -1129,6 +1174,9 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
             }
             /* enforce the legal flight order (RFC 8446 4.4); see wn_flight.h */
             ret = wn_FlightOrder(mType, &gotEE, &gotCert, &gotCv);
+            if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_ENCRYPTED_EXT)) {
+                ret = wn_CheckEncExt(hsacc + off + 4, mLen);
+            }
             if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_CERT_VERIFY)) {
                 ret = wn_Transcript_GetHash(&tc, thCert, &thLen);
             }

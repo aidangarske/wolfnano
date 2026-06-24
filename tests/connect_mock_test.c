@@ -304,8 +304,42 @@ static void run_server(int fd, int mode)
     if (mode == 10) {
         /* two EncryptedExtensions in the flight (RFC 8446 allows one) */
         wn_Writer_Init(&w, plainFlight, sizeof(plainFlight));
-        wn_Write_U8(&w, 8); wn_Write_U24(&w, 0);
-        wn_Write_U8(&w, 8); wn_Write_U24(&w, 0);
+        wn_Write_U8(&w, 8); wn_Write_U24(&w, 2); wn_Write_U16(&w, 0);
+        wn_Write_U8(&w, 8); wn_Write_U24(&w, 2); wn_Write_U16(&w, 0);
+        encLen = 0;
+        wn_Record_Protect(encRec, &encLen, sKey, 16, sIv, 0, WN_REC_HANDSHAKE,
+                          plainFlight, w.len);
+        (void)send(fd, encRec, encLen, 0);
+        wn_KeyShare_Free(&ks); wc_FreeRng(&rng); return;
+    }
+
+    if ((mode == 13) || (mode == 14) || (mode == 15)) {
+        /* EncryptedExtensions body checks: forbidden ext, missing vector,
+         * and an extension length that overruns the vector. */
+        wn_Writer_Init(&w, plainFlight, sizeof(plainFlight));
+        wn_Write_U8(&w, 8);
+        if (mode == 14) {
+            wn_Write_U24(&w, 0);            /* no extensions vector field */
+        }
+        else {
+            ext = wn_Write_LenStart(&w, 3);
+            wn_Write_U16(&w, 4);            /* extensions vector length */
+            wn_Write_U16(&w, (mode == 13) ? 51 : 10);  /* 51 forbidden in EE */
+            wn_Write_U16(&w, (mode == 15) ? 0xFFFF : 0);
+            wn_Write_LenEnd(&w, ext, 3);
+        }
+        encLen = 0;
+        wn_Record_Protect(encRec, &encLen, sKey, 16, sIv, 0, WN_REC_HANDSHAKE,
+                          plainFlight, w.len);
+        (void)send(fd, encRec, encLen, 0);
+        wn_KeyShare_Free(&ks); wc_FreeRng(&rng); return;
+    }
+
+    if (mode == 18) {
+        /* valid EE then a message whose length cannot fit the reassembly buffer */
+        wn_Writer_Init(&w, plainFlight, sizeof(plainFlight));
+        wn_Write_U8(&w, 8); wn_Write_U24(&w, 2); wn_Write_U16(&w, 0);
+        wn_Write_U8(&w, 20); wn_Write_U24(&w, 0xffffff);
         encLen = 0;
         wn_Record_Protect(encRec, &encLen, sKey, 16, sIv, 0, WN_REC_HANDSHAKE,
                           plainFlight, w.len);
@@ -340,7 +374,14 @@ static void run_server(int fd, int mode)
     wn_Writer_Init(&w, plainFlight, sizeof(plainFlight));
     wn_Write_U8(&w, 8);                          /* EncryptedExtensions */
     ext = wn_Write_LenStart(&w, 3);
-    wn_Write_U16(&w, 0);                         /* extensions length 0 */
+    if (mode == 17) {
+        wn_Write_U16(&w, 8);                     /* one supported_groups ext */
+        wn_Write_U16(&w, 10); wn_Write_U16(&w, 4);
+        wn_Write_U16(&w, 2); wn_Write_U16(&w, 0x001d);
+    }
+    else {
+        wn_Write_U16(&w, 0);                     /* extensions length 0 */
+    }
     wn_Write_LenEnd(&w, ext, 3);
     if (mode == 6) {
         wn_Write_U8(&w, 99);                     /* unexpected (ignored) message */
@@ -358,6 +399,22 @@ static void run_server(int fd, int mode)
     wn_Write_U24(&w, 32);
     wn_Write_Bytes(&w, mac, 32);
     flightLen = w.len;
+
+    if (mode == 16) {
+        /* split the flight mid-Finished across two records (RFC 8446 5.1) */
+        word32 cut = flightLen - 16;
+        encLen = 0;
+        wn_Record_Protect(encRec, &encLen, sKey, 16, sIv, 0, WN_REC_HANDSHAKE,
+                          plainFlight, cut);
+        (void)send(fd, encRec, encLen, 0);
+        encLen = 0;
+        wn_Record_Protect(encRec, &encLen, sKey, 16, sIv, 1, WN_REC_HANDSHAKE,
+                          plainFlight + cut, flightLen - cut);
+        (void)send(fd, encRec, encLen, 0);
+        (void)srv_read_rec(fd, rec, sizeof(rec), &rtype, &recLen);
+        (void)srv_read_rec(fd, rec, sizeof(rec), &rtype, &recLen);
+        wn_KeyShare_Free(&ks); wc_FreeRng(&rng); return;
+    }
 
     encLen = 0;
     wn_Record_Protect(encRec, &encLen, sKey, 16, sIv, 0, WN_REC_HANDSHAKE,
@@ -455,6 +512,18 @@ int main(void)
           "Finished before EncryptedExtensions rejected");
     check(drive(12) == WOLFNANO_E_UNEXPECTED_MSG,
           "non-handshake inner record in flight rejected");
+    check(drive(13) == WOLFNANO_E_UNEXPECTED_MSG,
+          "forbidden EncryptedExtensions extension rejected");
+    check(drive(14) == WOLFNANO_E_DECODE,
+          "EncryptedExtensions with no extensions vector rejected");
+    check(drive(15) == WOLFNANO_E_DECODE,
+          "EncryptedExtensions extension length overrun rejected");
+    check(drive(16) == WOLFNANO_SUCCESS,
+          "fragmented server flight reassembled across records");
+    check(drive(17) == WOLFNANO_SUCCESS,
+          "EncryptedExtensions with supported_groups accepted");
+    check(drive(18) == WOLFNANO_E_DECODE,
+          "reassembly rejects a message larger than the buffer after a prior one");
 
     /* transport send failures: ClientHello header, ClientHello body, Finished */
     check(drive_ex(0, 1, 0) != WOLFNANO_SUCCESS, "ClientHello header send failure");
