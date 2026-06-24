@@ -16,14 +16,16 @@ runs:
     - name: Re-point wolfssl submodule
       if: inputs.ref != 'pinned'
       shell: bash
+      env:
+        REF: ${{ inputs.ref }}
       run: |
         set -euo pipefail
         cd wolfssl
-        git fetch --depth 1 origin "${{ inputs.ref }}"
+        git fetch --depth 1 origin "$REF"
         git checkout --detach FETCH_HEAD
         git sparse-checkout set wolfcrypt/src wolfcrypt/src/port/arm \
           wolfcrypt/src/port/riscv wolfcrypt/test wolfssl/wolfcrypt wolfssl src 2>/dev/null || true
-        echo "wolfssl @ $(git rev-parse --short HEAD) (ref=${{ inputs.ref }})"
+        echo "wolfssl @ $(git rev-parse --short HEAD) (ref=$REF)"
     - name: Report pinned ref
       if: inputs.ref == 'pinned'
       shell: bash
