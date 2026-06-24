@@ -119,12 +119,17 @@ on. PQC, X.509, and the FIPS 140-3 backend are wired and proven.
 wn_Session sess;
 byte scratch[8192], buf[512];
 word32 got;
+int rc;
 
 /* PSK + ECDHE handshake, keeping a session for application data */
-wn_Connect_Psk_ex(&sess, &rng, mySend, myRecv, &fd, psk, pskLen,
-                  "Client_identity", scratch, sizeof(scratch));
-wn_Send(&sess, (const byte*)"hello", 5);
-wn_Recv(&sess, buf, sizeof(buf), &got);
+rc = wn_Connect_Psk_ex(&sess, &rng, mySend, myRecv, &fd, psk, pskLen,
+                       "Client_identity", scratch, sizeof(scratch));
+if (rc != WOLFNANO_SUCCESS) {
+    return rc;                 /* handshake failed: do not use the session */
+}
+if (wn_Send(&sess, (const byte*)"hello", 5) >= 0) {
+    rc = wn_Recv(&sess, buf, sizeof(buf), &got);
+}
 wn_Close(&sess);
 ```
 
