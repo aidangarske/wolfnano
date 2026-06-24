@@ -116,8 +116,8 @@ int wn_Hybrid_ClientShared(wn_Hybrid* h, const byte* srvShare, word32 srvLen,
     if (ret == WOLFNANOTLS_SUCCESS) {
         *ssLen = WN_HYBRID_SECRET;
     }
-    else {
-        ForceZero(ss, WN_HYBRID_SECRET);   /* LCOV_EXCL_LINE - error path */
+    else if (ss != NULL) {
+        ForceZero(ss, WN_HYBRID_SECRET);   /* no partial secret on failure */
     }
 
     if (peerInit) {
@@ -198,8 +198,8 @@ int wn_Hybrid_ServerRespond(const byte* cliShare, word32 cliLen, WC_RNG* rng,
         *srvLen = WN_HYBRID_SERVER_SHARE;
         *ssLen = WN_HYBRID_SECRET;
     }
-    else {
-        ForceZero(ss, WN_HYBRID_SECRET);   /* LCOV_EXCL_LINE - error path */
+    else if (ss != NULL) {
+        ForceZero(ss, WN_HYBRID_SECRET);   /* no partial secret on failure */
     }
 
     if (peerInit) {
