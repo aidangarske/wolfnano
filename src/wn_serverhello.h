@@ -32,12 +32,14 @@
 typedef struct wn_ServerHello {
     const byte* random;        /* 32 bytes into the input */
     const byte* keyShare;      /* server key_share key data */
+    const byte* sessionId;     /* legacy_session_id_echo into the input */
     word32 keyShareLen;
     word16 cipher;
     word16 group;              /* selected key_share group */
     word16 version;            /* selected supported_versions value */
     int pskSelected;           /* selected PSK identity index, or -1 */
     int isHelloRetry;          /* random matched the HRR sentinel */
+    byte sessionIdLen;         /* legacy_session_id_echo length */
 } wn_ServerHello;
 
 WOLFNANO_API int wn_ServerHello_Parse(const byte* msg, word32 msgLen,
