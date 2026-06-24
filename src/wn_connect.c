@@ -790,7 +790,8 @@ static int wn_CheckKeyPin(DecodedCert* leaf, const byte* pin, word32 pinLen)
 {
     int ret = WOLFNANOTLS_E_BAD_CERT;
 
-    if ((leaf != NULL) && (pin != NULL) && (pinLen == leaf->pubKeySize) &&
+    if ((leaf != NULL) && (pin != NULL) && (pinLen > 0) &&
+        (pinLen == leaf->pubKeySize) &&
         (ConstantCompare(leaf->publicKey, pin, (int)pinLen) == 0)) {
         ret = WOLFNANOTLS_SUCCESS;
     }
