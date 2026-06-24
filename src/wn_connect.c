@@ -335,6 +335,9 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     if ((ret == WOLFNANO_SUCCESS) && (XSTRLEN(identity) > 0xFFFFu)) {
         ret = WOLFNANO_E_INVALID_ARG;   /* identity must fit the 16-bit vector */
     }
+    if (ret == WOLFNANO_SUCCESS) {
+        XMEMSET(sess, 0, sizeof(*sess));    /* no half-open session on failure */
+    }
 
     if (ret == WOLFNANO_SUCCESS) {
         ret = wc_Sha256Hash((const byte*)"", 0, emptyHash);
@@ -1055,6 +1058,7 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     }
 
     if (ret == WOLFNANO_SUCCESS) {
+        XMEMSET(sess, 0, sizeof(*sess));    /* no half-open session on failure */
         ioCap = scratchLen - (WN_HS_ACC_SZ + WN_LEAF_SPKI_SZ);
         plain = scratch + WN_RECORD_HEADER_SZ;   /* records decrypt in place */
         hsacc = scratch + ioCap;
