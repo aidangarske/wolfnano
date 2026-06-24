@@ -60,7 +60,9 @@ int wn_RecvRecord(wn_IoRecv recv, void* ctx, byte* rec, word32 cap,
     if (ret == WOLFNANO_SUCCESS) {
         *type = rec[0];
         frag = ((word32)rec[3] << 8) | rec[4];
-        if ((frag == 0) || ((frag + 5) > cap)) {
+        /* RFC 8446 5.2: TLSCiphertext.length <= 2^14 + 256 */
+        if ((frag == 0) || ((frag + 5) > cap) ||
+            (frag > (WN_MAX_PLAINTEXT + 256))) {
             ret = WOLFNANO_E_CRYPTO;
         }
     }
