@@ -7,6 +7,9 @@ on:
         description: "JSON matrix include[] of wolfSSL refs"
         value: ${{ jobs.discover.outputs.matrix }}
 
+permissions:
+  contents: read
+
 jobs:
   discover:
     runs-on: ubuntu-latest
