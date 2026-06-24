@@ -217,7 +217,7 @@ static void build_client_hello(wn_Writer* w, const byte* random32,
 #ifdef WOLFNANO_SEND_ALERTS
 /* Send a fatal, encrypted alert with the client handshake key (best effort). */
 static void wn_SendAlert(wn_IoSend ioSend, void* ioCtx, const byte* key,
-                         const byte* iv, int ret)
+                         const byte* iv, word64 seq, int ret)
 {
     byte body[2];
     byte rec[WN_RECORD_HEADER_SZ + 2 + 1 + WN_RECORD_TAG_SZ];
@@ -225,7 +225,7 @@ static void wn_SendAlert(wn_IoSend ioSend, void* ioCtx, const byte* key,
 
     body[0] = 2;                                /* fatal */
     body[1] = wn_ErrToAlert(ret);
-    if (wn_Record_Protect(rec, &recLen, key, 16, iv, 0, WN_REC_ALERT,
+    if (wn_Record_Protect(rec, &recLen, key, 16, iv, seq, WN_REC_ALERT,
                           body, sizeof(body)) == WOLFNANO_SUCCESS) {
         (void)ioSend(ioCtx, rec, recLen);
     }
@@ -1043,6 +1043,7 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     int done = 0, gotEE = 0, gotCert = 0, gotCv = 0;
 #ifdef WOLFNANO_SEND_ALERTS
     int keysReady = 0;
+    word64 cHsSeq = 0;
 #endif
 
     XMEMSET(&ks, 0, sizeof(ks));        /* group 0 => Free is a no-op if Init never runs */
@@ -1263,6 +1264,9 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         ret = wn_Tls13_FinishedMac(mac, cHs, th, 32, WC_SHA256);
     }
     if (ret == WOLFNANO_SUCCESS) {
+#ifdef WOLFNANO_SEND_ALERTS
+        cHsSeq = 1;                 /* client hs seq 0 is consumed by Finished */
+#endif
         fin[0] = WN_HS_FINISHED;
         fin[1] = 0;
         fin[2] = 0;
@@ -1286,7 +1290,7 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
 
 #ifdef WOLFNANO_SEND_ALERTS
     if ((ret < 0) && keysReady) {
-        wn_SendAlert(ioSend, ioCtx, cKey, cIv, ret);
+        wn_SendAlert(ioSend, ioCtx, cKey, cIv, cHsSeq, ret);
     }
 #endif
 
