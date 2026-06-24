@@ -298,6 +298,9 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         (identity == NULL) || (scratch == NULL) || (scratchLen < 2048)) {
         ret = WOLFNANOTLS_E_INVALID_ARG;
     }
+    if ((ret == WOLFNANOTLS_SUCCESS) && (XSTRLEN(identity) > 0xFFFFu)) {
+        ret = WOLFNANOTLS_E_INVALID_ARG;   /* identity must fit the 16-bit vector */
+    }
 
     if (ret == WOLFNANOTLS_SUCCESS) {
         ret = wc_Sha256Hash((const byte*)"", 0, emptyHash);
@@ -374,7 +377,9 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
             (sh.keyShareLen != WN_DEFAULT_SRV_SHARE_SZ) ||
             (sh.cipher != WN_CIPHER_AES_128_GCM_SHA256) ||
             (sh.version != 0x0304u) || (sh.group != WN_DEFAULT_GROUP) ||
-            (sh.pskSelected != 0)) {   /* one identity offered => must select 0 */
+            (sh.pskSelected != 0) ||   /* one identity offered => must select 0 */
+            (sh.sessionIdLen != 32) || (sh.sessionId == NULL) ||
+            (ConstantCompare(sh.sessionId, sid, 32) != 0)) {
             ret = WOLFNANOTLS_E_ILLEGAL_PARAM;
         }
     }
@@ -1064,7 +1069,9 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         ((sh.keyShare == NULL) ||
          (sh.keyShareLen != WN_DEFAULT_SRV_SHARE_SZ) ||
          (sh.cipher != WN_CIPHER_AES_128_GCM_SHA256) ||
-         (sh.version != 0x0304u) || (sh.group != WN_DEFAULT_GROUP))) {
+         (sh.version != 0x0304u) || (sh.group != WN_DEFAULT_GROUP) ||
+         (sh.sessionIdLen != 32) || (sh.sessionId == NULL) ||
+         (ConstantCompare(sh.sessionId, sid, 32) != 0))) {
         ret = WOLFNANOTLS_E_ILLEGAL_PARAM;
     }
     if (ret == WOLFNANOTLS_SUCCESS) {

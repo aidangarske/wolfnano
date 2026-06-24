@@ -65,6 +65,8 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
     if (ret == WOLFNANOTLS_SUCCESS) {
         out->random = NULL;
         out->keyShare = NULL;
+        out->sessionId = NULL;
+        out->sessionIdLen = 0;
         out->keyShareLen = 0;
         out->cipher = 0;
         out->group = 0;
@@ -96,7 +98,8 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
 
         if (out->isHelloRetry == 0) {
             sidLen = wn_Read_U8(&r);
-            (void)wn_Read_Bytes(&r, sidLen);   /* legacy_session_id_echo */
+            out->sessionId = wn_Read_Bytes(&r, sidLen);  /* session_id_echo */
+            out->sessionIdLen = sidLen;
             out->cipher = wn_Read_U16(&r);
             comp = wn_Read_U8(&r);             /* legacy_compression_method */
 
@@ -135,7 +138,7 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
                     if (r.pos != eEnd) { r.err = 1; }
                 }
                 else {
-                    (void)wn_Read_Bytes(&r, el);
+                    r.err = 1;   /* RFC 8446 4.1.3: unsolicited SH extension */
                 }
             }
 

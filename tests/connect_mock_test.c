@@ -225,7 +225,8 @@ static void run_server(int fd, int mode)
     body = wn_Write_LenStart(&w, 3);
     wn_Write_U16(&w, 0x0303);
     wn_Write_Bytes(&w, random32, 32);
-    wn_Write_U8(&w, 0);                          /* session_id_echo (empty) */
+    wn_Write_U8(&w, 32);                         /* echo client session_id */
+    wn_Write_Bytes(&w, rec + 44, 32);
     wn_Write_U16(&w, 0x1301);
     wn_Write_U8(&w, 0);
     ext = wn_Write_LenStart(&w, 2);
@@ -419,13 +420,25 @@ static int drive(int mode)
     return drive_ex(mode, 0, 0);
 }
 
+static char g_bigid[0x10001];                   /* 65536 chars > 0xFFFF identity */
+
 int main(void)
 {
     byte scratch[8];
+    byte bscratch[2048];
+    wn_Session bsess;
     WC_RNG rng;
 
     signal(SIGPIPE, SIG_IGN);                   /* writes to a closed peer -> EPIPE */
     check(drive(0) == WOLFNANOTLS_SUCCESS, "PSK handshake completes vs mock server");
+
+    wc_InitRng(&rng);
+    XMEMSET(g_bigid, 'a', sizeof(g_bigid) - 1);
+    g_bigid[sizeof(g_bigid) - 1] = '\0';
+    check(wn_Connect_Psk_ex(&bsess, &rng, sock_send, sock_recv, NULL, g_psk,
+          sizeof(g_psk), g_bigid, bscratch, sizeof(bscratch))
+          == WOLFNANOTLS_E_INVALID_ARG, "over-long PSK identity rejected");
+    wc_FreeRng(&rng);
     check(drive_ex(0, 0, 1) == WOLFNANOTLS_SUCCESS, "handshake via wn_Connect_Psk wrapper");
     check(drive(1) != WOLFNANOTLS_SUCCESS, "ServerHello not a handshake record rejected");
     check(drive(2) != WOLFNANOTLS_SUCCESS, "bad server key_share length rejected");

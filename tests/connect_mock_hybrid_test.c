@@ -193,7 +193,8 @@ static void run_server(int fd)
     body = wn_Write_LenStart(&w, 3);
     wn_Write_U16(&w, 0x0303);
     wn_Write_Bytes(&w, random32, 32);
-    wn_Write_U8(&w, 0);
+    wn_Write_U8(&w, 32);                             /* echo client session_id */
+    wn_Write_Bytes(&w, rec + 44, 32);
     wn_Write_U16(&w, 0x1301);
     wn_Write_U8(&w, 0);
     ext = wn_Write_LenStart(&w, 2);

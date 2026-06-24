@@ -81,8 +81,7 @@ int main(void)
     XMEMCPY(buf, sh, sizeof(sh));
     buf[sizeof(sh) - 5] = 0x4a;                 /* supported_versions -> unknown type */
     rc = wn_ServerHello_Parse(buf, (word32)sizeof(buf), &s);
-    check((rc == WOLFNANOTLS_SUCCESS) && (s.version == 0) && (s.group == 0x001d),
-          "unknown extension skipped");
+    check(rc < 0, "unsolicited ServerHello extension rejected");
 
     printf("\n%s (%d failure%s)\n", fails ? "\033[31mFAILED\033[0m" : "\033[32mALL PASS\033[0m",
            fails, fails == 1 ? "" : "s");
