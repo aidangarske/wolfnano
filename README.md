@@ -30,8 +30,7 @@ interop stays identical to wolfSSL.
   with a malloc trap. Nothing on the heap.
 - **Tiny footprint**: a complete Cortex-M33 TLS 1.3 PSK + ECDHE client is
   **17.6 KB** of `.text` (X25519) or **25.2 KB** (P-256); the cert / X.509
-  client is **60.8 KB**, and the slim shell itself is **~8.7 KB**. That is far
-  smaller than any embedded TLS stack of comparable standing; see
+  client is **60.8 KB**, and the slim shell itself is **~8.7 KB**; see
   [Footprint](https://github.com/aidangarske/wolfNano/wiki/Footprint).
 - **Full wolfSSL asm speed**: target assembly is linked unchanged from the
   submodule. On x86_64, AES-128-GCM hits **2.7 GB/s** and ECDSA P-256 sign
@@ -71,15 +70,14 @@ Whole TLS 1.3 client linked from source for Cortex-M33 (AES-128-GCM, SHA-256),
 | PSK + ECDHE, P-256 | **25.2 KB** |
 | PSK + X25519MLKEM768 (post-quantum) | **32.9 KB** |
 | cert / X.509, P-256 | **60.8 KB** |
+| cert / X.509 + ML-DSA-44 (post-quantum) | **79.3 KB** |
 
-At ~17 KB the PSK client fits Cortex-M0+/M3/M4 parts from ~32 KB flash, well
-below where embedded TLS stacks of comparable standing land. The default curve
-is **X25519** (smallest); set `WOLFNANO_HAVE_ECDHE_P256` (or `WOLFNANO_FIPS`) to
-negotiate **P-256** for FIPS / broad interop. Both are interop-verified against
-OpenSSL and wolfSSL.
+At ~17 KB the PSK client fits Cortex-M0+/M3/M4 parts from ~32 KB flash. The
+default curve is **X25519** (smallest); set `WOLFNANO_HAVE_ECDHE_P256` (or
+`WOLFNANO_FIPS`) to negotiate **P-256** for FIPS / broad interop. Both are
+interop-verified against OpenSSL and wolfSSL.
 
-A like-for-like, hard-minimized comparison against mbedTLS (wolfNano is 49-57%
-smaller), the reproduction steps, and the exact build configs live in
+Per-config sizes and reproduction steps are in
 [Footprint](https://github.com/aidangarske/wolfNano/wiki/Footprint).
 
 ## Speed (x86_64, measured)
@@ -96,11 +94,11 @@ wolfNano's `intel` build runs wolfCrypt assembly through the `wc_*` seam
 | ML-KEM-768 keygen | 49572 op/s |
 | ML-KEM-768 encap | 52906 op/s |
 | ML-KEM-768 decap | 38360 op/s |
-| ML-DSA-65 sign | 4030 op/s |
-| ML-DSA-65 verify | 10952 op/s |
+| ML-DSA-44 sign | 6226 op/s |
+| ML-DSA-44 verify | 17580 op/s |
 
-Plus EdDSA and the full portable-C baseline, the per-algorithm
-speedups, and a head-to-head vs mbedTLS are in
+Plus EdDSA and the full portable-C baseline with the per-algorithm
+asm speedups are in
 [Benchmarks](https://github.com/aidangarske/wolfNano/wiki/Benchmarks).
 
 ## Status
