@@ -32,8 +32,14 @@ ratios are the signal and track wolfSSL's own published figures.
 | ML-KEM-768 keygen | 17096 ops/s | 49572 ops/s | ~2.9x |
 | ML-KEM-768 encap | 14627 ops/s | 52906 ops/s | ~3.6x |
 | ML-KEM-768 decap | 12893 ops/s | 38360 ops/s | ~3.0x |
-| ML-DSA-65 sign | 1546 ops/s | 4030 ops/s | ~2.6x |
-| ML-DSA-65 verify | 4468 ops/s | 10952 ops/s | ~2.5x |
+| ML-DSA-44 sign (default) | 3012 ops/s | 6226 ops/s | ~2.1x |
+| ML-DSA-44 verify (default) | 9019 ops/s | 17580 ops/s | ~1.9x |
+| ML-DSA-65 sign (opt-in) | 1546 ops/s | 4030 ops/s | ~2.6x |
+| ML-DSA-65 verify (opt-in) | 4468 ops/s | 10952 ops/s | ~2.5x |
+
+ML-DSA defaults to level 2 (ML-DSA-44), security-balanced with the 128-bit
+suite; set `WOLFNANOTLS_MLDSA_LEVEL=3` (65) or `5` (87) when a higher level is
+required.
 
 The big wins are AES-NI (symmetric) and the SP x86_64 asm (public key). These
 are wolfSSL's own assembly, linked unchanged under wolfNanoTLS's hand-picked build,
@@ -54,28 +60,8 @@ from source here; aarch64/riscv64 need a complete toolchain. **Speed numbers for
 those require the target silicon** (the Cortex-M33 / STM32H563 is the priority
 and uses the DWT cycle counter).
 
-## vs MbedTLS (same host, same 1 KB block)
-
-wolfNanoTLS's `intel` build (= wolfCrypt asm through the seam) vs MbedTLS 3.6.0
-stock fast config (AES-NI + `MBEDTLS_HAVE_ASM`, `-O2 -march=native`), both on the
-i7-7920HQ, 1 KB block:
-
-| Operation | wolfNanoTLS | MbedTLS | faster |
-|---|--:|--:|--:|
-| AES-128-GCM | 1682 MiB/s | 119 MiB/s | ~14x |
-| AES-256-GCM | 1402 MiB/s | 116 MiB/s | ~12x |
-| ChaCha20-Poly1305 | 391 MiB/s | 60 MiB/s | ~6.5x |
-| SHA-384 | 255 MiB/s | 78 MiB/s | ~3.3x |
-| SHA-256 | 173 MiB/s | 58 MiB/s | ~3.0x |
-| ECDSA P-256 verify | 9386 op/s | 130 op/s | ~72x |
-| RSA-2048 public | 30427 op/s | 954 op/s | ~32x |
-| ECDSA P-256 sign | 20799 op/s | 721 op/s | ~29x |
-| ECDH P-256 agree | 9472 op/s | 390 op/s | ~24x |
-| RSA-2048 private | 861 op/s | 95 op/s | ~9x |
-
-Plus a full PQC + EdDSA suite MbedTLS does not have at all. The block size
-matches MbedTLS's benchmark (1 KB) for a fair symmetric comparison; the internal
-table above uses 16 KB (ratio is unaffected since both sides use the same size).
+A head-to-head against mbedTLS and stock wolfSSL (speed and size) is in
+[Comparison](Comparison.md).
 
 ## Method
 
