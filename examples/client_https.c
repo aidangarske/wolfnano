@@ -58,7 +58,8 @@ int main(int argc, char** argv)
     byte anchor[4096];
     byte scratch[20480];
     byte req[512];
-    byte in[16384];     /* one TLS record's plaintext can be up to 2^14 */
+    byte in[16385];     /* a full 2^14 record plaintext + room for a NUL */
+    struct addrinfo* ai;
     FILE* f;
     size_t anchorLen;
     int reqLen;
@@ -84,14 +85,22 @@ int main(int argc, char** argv)
         printf("resolve %s failed\n", host);
         return 1;
     }
-    fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if ((fd < 0) || (connect(fd, res->ai_addr, res->ai_addrlen) != 0)) {
-        printf("connect to %s:%s failed\n", host, port);
-        freeaddrinfo(res);
-        if (fd >= 0) { close(fd); }
-        return 1;
+    for (ai = res; ai != NULL; ai = ai->ai_next) {
+        fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+        if (fd < 0) {
+            continue;
+        }
+        if (connect(fd, ai->ai_addr, ai->ai_addrlen) == 0) {
+            break;
+        }
+        close(fd);
+        fd = -1;
     }
     freeaddrinfo(res);
+    if (fd < 0) {
+        printf("connect to %s:%s failed\n", host, port);
+        return 1;
+    }
 
     if (wc_InitRng(&rng) != 0) {
         printf("rng init failed\n");
@@ -123,7 +132,7 @@ int main(int argc, char** argv)
         return 1;
     }
     rc = wn_Send(&sess, req, (word32)reqLen);
-    if (rc >= 0) {
+    if (rc == 0) {
         rc = wn_Recv(&sess, in, sizeof(in) - 1, &got);
     }
     if ((rc == 0) && (got > 0)) {

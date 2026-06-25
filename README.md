@@ -129,7 +129,7 @@ rc = wn_Connect_Psk_ex(&sess, &rng, mySend, myRecv, &fd, psk, pskLen,
 if (rc != WOLFNANO_SUCCESS) {
     return rc;                 /* handshake failed: do not use the session */
 }
-if (wn_Send(&sess, (const byte*)"hello", 5) >= 0) {
+if (wn_Send(&sess, (const byte*)"hello", 5) == 0) {
     rc = wn_Recv(&sess, buf, sizeof(buf), &got);
 }
 wn_Close(&sess);
