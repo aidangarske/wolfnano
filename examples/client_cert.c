@@ -24,11 +24,14 @@
  * The server leaf must verify against the pinned trust anchor (DER). Shows
  * the cert lifecycle: wn_Connect_CertName_ex -> wn_Send -> wn_Recv -> wn_Close.
  *
+ * host is resolved (so it can be a DNS name) and matched against the leaf's
+ * SAN/CN; it must match the served certificate's name.
+ *
  * Usage: client_cert <host> <port> <anchor.der>
- *        (default 127.0.0.1 4433 tests/pki/server/ec-cert.der)
- * Try it against:  openssl s_server -tls1_3 -accept 4433 \
- *                    -cert tests/pki/server/ec-cert.pem \
- *                    -key tests/pki/server/ec-key.pem -rev
+ *        (default localhost 4433 tests/pki/server/ec-cert.der)
+ * Try it against wolfSSL's example server presenting that cert:
+ *   examples/server/server -v 4 -c tests/pki/server/ec-cert.pem \
+ *     -k tests/pki/server/ec-key.pem -d -i -p 4433
  */
 
 #include "wn_connect.h"
@@ -37,8 +40,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <netdb.h>
 
 static int sock_send(void* ctx, const byte* buf, word32 len)
 {
@@ -53,11 +55,13 @@ static int sock_recv(void* ctx, byte* buf, word32 len)
 int main(int argc, char** argv)
 {
     static const byte msg[] = "hello from wolfNano\n";
-    const char* host = (argc > 1) ? argv[1] : "127.0.0.1";
-    int port = (argc > 2) ? atoi(argv[2]) : 4433;
+    const char* host = (argc > 1) ? argv[1] : "localhost";
+    const char* port = (argc > 2) ? argv[2] : "4433";
     const char* anchorPath =
         (argc > 3) ? argv[3] : "tests/pki/server/ec-cert.der";
-    struct sockaddr_in sa;
+    struct addrinfo hints;
+    struct addrinfo* res = NULL;
+    struct addrinfo* ai;
     WC_RNG rng;
     wn_Session sess;
     byte anchor[4096];
@@ -66,7 +70,7 @@ int main(int argc, char** argv)
     FILE* f;
     size_t anchorLen;
     word32 got = 0;
-    int fd, rc;
+    int fd = -1, rc;
 
     f = fopen(anchorPath, "rb");
     if (f == NULL) {
@@ -80,18 +84,27 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (fd < 0) {
-        printf("socket failed\n");
+    XMEMSET(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    if (getaddrinfo(host, port, &hints, &res) != 0) {
+        printf("resolve %s failed\n", host);
         return 1;
     }
-    memset(&sa, 0, sizeof(sa));
-    sa.sin_family = AF_INET;
-    sa.sin_port = htons((unsigned short)port);
-    inet_pton(AF_INET, host, &sa.sin_addr);
-    if (connect(fd, (struct sockaddr*)&sa, sizeof(sa)) != 0) {
-        printf("connect to %s:%d failed\n", host, port);
+    for (ai = res; ai != NULL; ai = ai->ai_next) {
+        fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+        if (fd < 0) {
+            continue;
+        }
+        if (connect(fd, ai->ai_addr, ai->ai_addrlen) == 0) {
+            break;
+        }
         close(fd);
+        fd = -1;
+    }
+    freeaddrinfo(res);
+    if (fd < 0) {
+        printf("connect to %s:%s failed\n", host, port);
         return 1;
     }
 
