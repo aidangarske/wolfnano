@@ -1,0 +1,41 @@
+name: examples
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Build every example against the current API (so they cannot bitrot) and run
+# the PSK example end-to-end against openssl s_server. The HTTPS example runs in
+# live-connect.yml; the cert / PQC connect paths are exercised by interop.yml.
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/wolfssl-checkout
+      - name: build all examples
+        run: make example example-cert example-https example-pqc
+      - name: run PSK example against openssl s_server
+        run: |
+          set -e
+          PORT=14470
+          openssl s_server -psk 000102030405060708090a0b0c0d0e0f \
+            -psk_identity Client_identity -nocert -tls1_3 -rev \
+            -accept "$PORT" -quiet >/tmp/sserver.log 2>&1 &
+          spid=$!
+          for i in $(seq 1 50); do
+            nc -z 127.0.0.1 "$PORT" 2>/dev/null && break
+            sleep 0.1
+          done
+          ./build/example_client 127.0.0.1 "$PORT"
+          rc=$?
+          kill "$spid" 2>/dev/null || true
+          exit $rc
