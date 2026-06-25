@@ -46,8 +46,9 @@
 #define NO_FILESYSTEM
 #define NO_ERROR_STRINGS
 
-/* No cert-time validation until the X.509 adder (which brings a time hook). */
-#ifndef WOLFNANOTLS_X509
+/* No cert-time validation until the X.509 adder (which brings a time hook); a
+ * clockless cert build (WOLFNANOTLS_NO_X509_TIME) drops the ASN time path too. */
+#if !defined(WOLFNANOTLS_X509) || defined(WOLFNANOTLS_NO_X509_TIME)
     #define NO_ASN_TIME
 #endif
 
