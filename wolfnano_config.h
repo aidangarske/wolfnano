@@ -84,6 +84,11 @@
     #ifndef SP_INT_BITS
         #define SP_INT_BITS 4096
     #endif
+    /* SP_INT_BITS only covers the generic sp_int engine; specialized SP backends
+     * gate RSA modulus sizes at compile time, so enable the 4096 path there too. */
+    #if defined(WOLFSSL_SP_MATH) && !defined(WOLFSSL_SP_4096)
+        #define WOLFSSL_SP_4096
+    #endif
 #endif
 
 /* ---- side-channel hardening (constant-time) ---- */

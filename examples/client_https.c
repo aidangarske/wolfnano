@@ -139,7 +139,7 @@ int main(int argc, char** argv)
         in[got] = 0;
         printf("server replied %u bytes, status: %.*s\n", (unsigned)got,
                (int)strcspn((char*)in, "\r\n"), (char*)in);
-        rc = (XMEMCMP(in, "HTTP/1.", 7) == 0) ? 0 : 1;
+        rc = ((got >= 7) && (XMEMCMP(in, "HTTP/1.", 7) == 0)) ? 0 : 1;
     }
     else {
         printf("application data failed: %d\n", rc);

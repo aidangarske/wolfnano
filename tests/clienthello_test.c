@@ -151,6 +151,20 @@ int main(void)
     check(sniFound && sniMatch && (r.err == 0),
           "server_name (SNI) carries the host name");
 
+    /* exactly 255 bytes is the maximum accepted host length */
+    for (i = 0; i < 255; i++) { longhost[i] = 'a'; }
+    longhost[255] = 0;
+    rc = wn_ClientHello_Build_ex(ch, &chLen, sizeof(ch), rnd, sid, 32, pub, 32,
+                                 longhost);
+    check(rc == WOLFNANO_SUCCESS, "255-byte SNI host accepted");
+
+    /* 256 bytes is the first length over the limit */
+    for (i = 0; i < 256; i++) { longhost[i] = 'a'; }
+    longhost[256] = 0;
+    rc = wn_ClientHello_Build_ex(ch, &chLen, sizeof(ch), rnd, sid, 32, pub, 32,
+                                 longhost);
+    check(rc == WOLFNANO_E_INVALID_ARG, "256-byte SNI host rejected");
+
     /* SNI host longer than the 255-byte limit is rejected */
     for (i = 0; i < 300; i++) { longhost[i] = 'a'; }
     longhost[300] = 0;
