@@ -194,10 +194,10 @@ Full documentation lives in the
 - [Macros](https://github.com/aidangarske/wolfNanoTLS/wiki/Macros)
 - [Footprint](https://github.com/aidangarske/wolfNanoTLS/wiki/Footprint)
 - [Benchmarks](https://github.com/aidangarske/wolfNanoTLS/wiki/Benchmarks)
+- [Comparison](https://github.com/aidangarske/wolfNanoTLS/wiki/Comparison)
 - [FIPS](https://github.com/aidangarske/wolfNanoTLS/wiki/FIPS)
 - [Testing](https://github.com/aidangarske/wolfNanoTLS/wiki/Testing)
 - [CI](https://github.com/aidangarske/wolfNanoTLS/wiki/CI)
-- [Positioning](https://github.com/aidangarske/wolfNanoTLS/wiki/Positioning)
 
 ## License
 
