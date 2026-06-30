@@ -33,10 +33,10 @@
 #include "wn_keyshare.h"
 #include "wn_serverhello.h"
 #include "wn_clienthello.h"
-#ifdef WOLFNANOTLS_X509
+#ifdef WOLFNANO_X509
 #include "wn_flight.h"
 #endif
-#ifdef WOLFNANOTLS_SEND_ALERTS
+#ifdef WOLFNANO_SEND_ALERTS
 #include "wn_alert.h"
 #endif
 #include <wolfssl/wolfcrypt/asn_public.h>
@@ -74,27 +74,27 @@ static int wn_CheckEncExt(const byte* body, word32 bodyLen, int sniOffered)
     word16 extLen;
     word16 et;
     word16 el;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     wn_Reader_Init(&r, body, bodyLen);
     extLen = wn_Read_U16(&r);
     extEnd = r.pos + extLen;
     if ((r.err != 0) || (extEnd != bodyLen)) {
-        ret = WOLFNANOTLS_E_DECODE;
+        ret = WOLFNANO_E_DECODE;
     }
-    while ((ret == WOLFNANOTLS_SUCCESS) && (r.pos < extEnd) && (r.err == 0)) {
+    while ((ret == WOLFNANO_SUCCESS) && (r.pos < extEnd) && (r.err == 0)) {
         et = wn_Read_U16(&r);
         el = wn_Read_U16(&r);
         (void)wn_Read_Bytes(&r, el);
         if (r.err != 0) {
-            ret = WOLFNANOTLS_E_DECODE;
+            ret = WOLFNANO_E_DECODE;
         }
         else if (et != WN_EXT_SUPPORTED_GRP) {
             /* RFC 6066: server_name is allowed only when SNI was offered and the
              * ack is empty (el == 0); anything else is unsolicited. */
             int sniAck = (et == WN_EXT_SERVER_NAME) && sniOffered && (el == 0);
             if (sniAck == 0) {
-                ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+                ret = WOLFNANO_E_UNEXPECTED_MSG;
             }
         }
     }
@@ -109,7 +109,7 @@ static int send_plain_record(wn_IoSend send, void* ctx, byte type,
                              const byte* body, word32 bodyLen)
 {
     byte hdr[5];
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int r;
 
     hdr[0] = type;
@@ -120,12 +120,12 @@ static int send_plain_record(wn_IoSend send, void* ctx, byte type,
 
     r = send(ctx, hdr, 5);
     if (r != 5) {
-        ret = WOLFNANOTLS_E_CRYPTO;
+        ret = WOLFNANO_E_CRYPTO;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         r = send(ctx, body, bodyLen);
         if ((word32)r != bodyLen) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
 
@@ -178,7 +178,7 @@ static void build_client_hello(wn_Writer* w, const byte* random32,
 #ifdef WOLFSSL_HAVE_MLDSA
     wn_Write_U16(w, 8);
     wn_Write_U16(w, 6);
-    wn_Write_U16(w, WN_MLDSA_SCHEME);          /* ML-DSA (level via WOLFNANOTLS_MLDSA_LEVEL) */
+    wn_Write_U16(w, WN_MLDSA_SCHEME);          /* ML-DSA (level via WOLFNANO_MLDSA_LEVEL) */
 #else
     wn_Write_U16(w, 6);
     wn_Write_U16(w, 4);
@@ -220,7 +220,7 @@ static void build_client_hello(wn_Writer* w, const byte* random32,
     wn_Write_LenEnd(w, hsLen, 3);
 }
 
-#ifdef WOLFNANOTLS_SEND_ALERTS
+#ifdef WOLFNANO_SEND_ALERTS
 /* Send a fatal, encrypted alert with the client handshake key (best effort). */
 static void wn_SendAlert(wn_IoSend ioSend, void* ioCtx, const byte* key,
                          const byte* iv, word64 seq, int ret)
@@ -232,11 +232,11 @@ static void wn_SendAlert(wn_IoSend ioSend, void* ioCtx, const byte* key,
     body[0] = 2;                                /* fatal */
     body[1] = wn_ErrToAlert(ret);
     if (wn_Record_Protect(rec, &recLen, key, 16, iv, seq, WN_REC_ALERT,
-                          body, sizeof(body)) == WOLFNANOTLS_SUCCESS) {
+                          body, sizeof(body)) == WOLFNANO_SUCCESS) {
         (void)ioSend(ioCtx, rec, recLen);
     }
 }
-#endif /* WOLFNANOTLS_SEND_ALERTS */
+#endif /* WOLFNANO_SEND_ALERTS */
 
 /* RFC 8446 7.1: handshake secret, c/s hs traffic, and the record key/iv pair.
  * Shared by the PSK and cert drivers; early differs per path (PSK vs zeros). */
@@ -291,7 +291,7 @@ static int wn_SessionEstablish(wn_Session* sess, const byte* hs,
     ret |= wn_Tls13_ExpandLabel(sess->sIv, WN_AEAD_IV_SZ, sess->sAppSecret,
                                 "iv", NULL, 0, WC_SHA256);
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         sess->ioSend = ioSend;
         sess->ioRecv = ioRecv;
         sess->ioCtx = ioCtx;
@@ -327,7 +327,7 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     word32 truncOff, binderOff, chLen, recLen, thLen, pubLen, ssLen;
     word32 plainLen, accOff = 0, accLen = 0; word64 sSeq = 0;
     byte rtype = 0, ctype = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int gotEE = 0, done = 0;
 
     XMEMSET(zeros32, 0, sizeof(zeros32));
@@ -336,86 +336,86 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     if ((sess == NULL) || (rng == NULL) || (ioSend == NULL) ||
         (ioRecv == NULL) || (psk == NULL) || (pskLen == 0) ||
         (identity == NULL) || (scratch == NULL) || (scratchLen < 2048)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && (XSTRLEN(identity) > 0xFFFFu)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;   /* identity must fit the 16-bit vector */
+    if ((ret == WOLFNANO_SUCCESS) && (XSTRLEN(identity) > 0xFFFFu)) {
+        ret = WOLFNANO_E_INVALID_ARG;   /* identity must fit the 16-bit vector */
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         XMEMSET(sess, 0, sizeof(*sess));    /* no half-open session on failure */
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wc_Sha256Hash((const byte*)"", 0, emptyHash);
-        if (ret != 0) { ret = WOLFNANOTLS_E_CRYPTO; }
+        if (ret != 0) { ret = WOLFNANO_E_CRYPTO; }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wc_RNG_GenerateBlock(rng, random32, 32);
         ret |= wc_RNG_GenerateBlock(rng, sid, 32);
-        if (ret != 0) { ret = WOLFNANOTLS_E_CRYPTO; }
+        if (ret != 0) { ret = WOLFNANO_E_CRYPTO; }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_KeyShare_Init(&ks, WN_DEFAULT_GROUP);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_KeyShare_Generate(&ks, rng, cliPub, &pubLen);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Transcript_Init(&tc, WC_SHA256);
     }
 
     /* ----- ClientHello with PSK binder ----- */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         wn_Writer_Init(&w, scratch, scratchLen);
         build_client_hello(&w, random32, sid, cliPub, WN_DEFAULT_GROUP, pubLen,
                            identity, (word32)XSTRLEN(identity),
                            &truncOff, &binderOff);
-        if (w.err != 0) { ret = WOLFNANOTLS_E_CRYPTO; }
+        if (w.err != 0) { ret = WOLFNANO_E_CRYPTO; }
         chLen = w.len;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret  = wn_Tls13_Extract(early, NULL, 0, psk, pskLen, WC_SHA256);
         ret |= wn_Tls13_DeriveSecret(binderKey, early, "ext binder", emptyHash,
                                      32, WC_SHA256);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wc_Sha256Hash(scratch, truncOff, th);   /* partial CH hash */
-        if (ret != 0) { ret = WOLFNANOTLS_E_CRYPTO; }
+        if (ret != 0) { ret = WOLFNANO_E_CRYPTO; }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Tls13_FinishedMac(binder, binderKey, th, 32, WC_SHA256);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         XMEMCPY(scratch + binderOff, binder, 32);     /* backfill binder */
         ret = wn_Transcript_Update(&tc, scratch, chLen);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = send_plain_record(ioSend, ioCtx, WN_REC_HANDSHAKE, scratch, chLen);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = send_ccs(ioSend, ioCtx);     /* compat CCS after ClientHello */
     }
 
     /* ----- ServerHello ----- */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         do {
             ret = wn_RecvRecord(ioRecv, ioCtx, scratch, scratchLen, &rtype,
                               &recLen);
-        } while ((ret == WOLFNANOTLS_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER));
+        } while ((ret == WOLFNANO_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER));
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && (rtype != WN_REC_HANDSHAKE)) {
-        ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+    if ((ret == WOLFNANO_SUCCESS) && (rtype != WN_REC_HANDSHAKE)) {
+        ret = WOLFNANO_E_UNEXPECTED_MSG;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_ServerHello_Parse(scratch + 5, recLen - 5, &sh);
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && (sh.isHelloRetry != 0)) {
-        ret = WOLFNANOTLS_E_UNSUPPORTED;
+    if ((ret == WOLFNANO_SUCCESS) && (sh.isHelloRetry != 0)) {
+        ret = WOLFNANO_E_UNSUPPORTED;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Transcript_Update(&tc, scratch + 5, recLen - 5);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if ((sh.keyShare == NULL) ||
             (sh.keyShareLen != WN_DEFAULT_SRV_SHARE_SZ) ||
             (sh.cipher != WN_CIPHER_AES_128_GCM_SHA256) ||
@@ -423,49 +423,49 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
             (sh.pskSelected != 0) ||   /* one identity offered => must select 0 */
             (sh.sessionIdLen != 32) || (sh.sessionId == NULL) ||
             (ConstantCompare(sh.sessionId, sid, 32) != 0)) {
-            ret = WOLFNANOTLS_E_ILLEGAL_PARAM;
+            ret = WOLFNANO_E_ILLEGAL_PARAM;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_KeyShare_Shared(&ks, sh.keyShare, sh.keyShareLen, ecdhe,
                                  &ssLen);
     }
 
     /* ----- handshake key schedule ----- */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret  = wn_Transcript_GetHash(&tc, th, &thLen);
         ret |= wn_DeriveHsKeys(hs, cHs, sHs, cKey, cIv, sKey, sIv, early, ecdhe,
                                ssLen, emptyHash, th);
     }
 
     /* ----- server encrypted flight: EncryptedExtensions + Finished ----- */
-    while ((ret == WOLFNANOTLS_SUCCESS) && (done == 0)) {
+    while ((ret == WOLFNANO_SUCCESS) && (done == 0)) {
         ret = wn_RecvRecord(ioRecv, ioCtx, scratch, scratchLen, &rtype, &recLen);
-        if ((ret == WOLFNANOTLS_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER)) {
+        if ((ret == WOLFNANO_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER)) {
             continue;
         }
-        if ((ret == WOLFNANOTLS_SUCCESS) && (rtype != WN_REC_APPDATA)) {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+        if ((ret == WOLFNANO_SUCCESS) && (rtype != WN_REC_APPDATA)) {
+            ret = WOLFNANO_E_UNEXPECTED_MSG;
         }
-        if ((ret == WOLFNANOTLS_SUCCESS) &&
+        if ((ret == WOLFNANO_SUCCESS) &&
             ((recLen < (WN_RECORD_HEADER_SZ + WN_RECORD_TAG_SZ)) ||
              ((recLen - WN_RECORD_HEADER_SZ - WN_RECORD_TAG_SZ) >
                  (sizeof(plain) - accLen)))) {
-            ret = WOLFNANOTLS_E_DECODE;        /* reassembled flight must fit plain[] */
+            ret = WOLFNANO_E_DECODE;        /* reassembled flight must fit plain[] */
         }
-        if (ret == WOLFNANOTLS_SUCCESS) {
+        if (ret == WOLFNANO_SUCCESS) {
             ret = wn_Record_Unprotect(plain + accLen, &plainLen, &ctype, sKey, 16,
                                       sIv, sSeq, scratch, recLen);
             sSeq++;
         }
-        if ((ret == WOLFNANOTLS_SUCCESS) && (ctype != WN_REC_HANDSHAKE)) {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;   /* flight is handshake records only */
+        if ((ret == WOLFNANO_SUCCESS) && (ctype != WN_REC_HANDSHAKE)) {
+            ret = WOLFNANO_E_UNEXPECTED_MSG;   /* flight is handshake records only */
         }
-        if (ret == WOLFNANOTLS_SUCCESS) {
+        if (ret == WOLFNANO_SUCCESS) {
             /* RFC 8446 5.1: a handshake message may span records; accumulate and
              * parse only complete messages, leaving any partial for the next. */
             accLen += plainLen;
-            while ((ret == WOLFNANOTLS_SUCCESS) && (done == 0) &&
+            while ((ret == WOLFNANO_SUCCESS) && (done == 0) &&
                    ((accLen - accOff) >= 4)) {
                 word32 mStart, mLen;
                 byte mType;
@@ -474,7 +474,7 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                 mLen = ((word32)plain[accOff + 1] << 16) |
                        ((word32)plain[accOff + 2] << 8) | plain[accOff + 3];
                 if ((accOff + 4 + mLen) > sizeof(plain)) {
-                    ret = WOLFNANOTLS_E_DECODE; /* cannot fit the reassembly buffer */
+                    ret = WOLFNANO_E_DECODE; /* cannot fit the reassembly buffer */
                     break;
                 }
                 if ((accOff + 4 + mLen) > accLen) {
@@ -483,11 +483,11 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                 accOff += 4 + mLen;
                 if (mType == WN_HS_ENCRYPTED_EXT) {
                     if (gotEE != 0) {           /* RFC 8446: one EE per flight */
-                        ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+                        ret = WOLFNANO_E_UNEXPECTED_MSG;
                     }
                     else {
                         ret = wn_CheckEncExt(plain + mStart + 4, mLen, 0);
-                        if (ret == WOLFNANOTLS_SUCCESS) {
+                        if (ret == WOLFNANO_SUCCESS) {
                             ret = wn_Transcript_Update(&tc, plain + mStart,
                                                        mLen + 4);
                         }
@@ -496,40 +496,40 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                 }
                 else if (mType == WN_HS_FINISHED) {
                     if ((gotEE == 0) || (mLen != 32)) {
-                        ret = WOLFNANOTLS_E_BAD_MAC;
+                        ret = WOLFNANO_E_BAD_MAC;
                     }
-                    if (ret == WOLFNANOTLS_SUCCESS) {
+                    if (ret == WOLFNANO_SUCCESS) {
                         ret = wn_Transcript_GetHash(&tc, th, &thLen);
                     }
-                    if (ret == WOLFNANOTLS_SUCCESS) {
+                    if (ret == WOLFNANO_SUCCESS) {
                         ret = wn_Tls13_FinishedMac(mac, sHs, th, 32, WC_SHA256);
                     }
-                    if (ret == WOLFNANOTLS_SUCCESS) {
+                    if (ret == WOLFNANO_SUCCESS) {
                         XMEMCPY(recvMac, plain + mStart + 4, 32);
                         if (ConstantCompare(mac, recvMac, 32) != 0) {
-                            ret = WOLFNANOTLS_E_BAD_MAC;
+                            ret = WOLFNANO_E_BAD_MAC;
                         }
                     }
-                    if (ret == WOLFNANOTLS_SUCCESS) {
+                    if (ret == WOLFNANO_SUCCESS) {
                         ret = wn_Transcript_Update(&tc, plain + mStart, mLen + 4);
                         done = 1;
                     }
                 }
                 else {                          /* PSK flight = EE then Finished */
-                    ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+                    ret = WOLFNANO_E_UNEXPECTED_MSG;
                 }
             }
         }
     }
 
     /* ----- client Finished ----- */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Transcript_GetHash(&tc, th, &thLen);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Tls13_FinishedMac(mac, cHs, th, 32, WC_SHA256);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         fin[0] = WN_HS_FINISHED;
         fin[1] = 0;
         fin[2] = 0;
@@ -538,15 +538,15 @@ int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         ret = wn_Record_Protect(scratch, &recLen, cKey, 16, cIv, 0,
                                 WN_REC_HANDSHAKE, fin, sizeof(fin));
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (ioSend(ioCtx, scratch, recLen) != (int)recLen) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
 
     /* application traffic secrets (RFC 8446 7.1), transcript through server
      * Finished (th); retained in sess for wn_Send / wn_Recv. */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_SessionEstablish(sess, hs, emptyHash, zeros32, th, ioSend,
                                   ioRecv, ioCtx, scratch, scratchLen);
     }
@@ -585,7 +585,7 @@ int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv, void* ioCtx,
     return ret;
 }
 
-#ifdef WOLFNANOTLS_X509
+#ifdef WOLFNANO_X509
 
 #define WN_HS_CERTIFICATE 11
 #define WN_HS_CERT_VERIFY 15
@@ -596,7 +596,7 @@ int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv, void* ioCtx,
  * the frame small for embedded. scratch is partitioned [record I/O | hsacc |
  * leafSpki]; records decrypt in place in the I/O region. WN_CERT_SCRATCH_MIN is
  * the minimum scratchLen. */
-#if defined(WOLFSSL_HAVE_MLDSA) && (WOLFNANOTLS_MLDSA_LEVEL == 5)
+#if defined(WOLFSSL_HAVE_MLDSA) && (WOLFNANO_MLDSA_LEVEL == 5)
     /* ML-DSA-87 leaf SPKI is ~2620 B (DER); its flight needs the most room. */
     #define WN_HS_ACC_SZ       10240
     #define WN_LEAF_SPKI_SZ    3072
@@ -609,7 +609,7 @@ int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv, void* ioCtx,
     #define WN_HS_ACC_SZ       6144
     #define WN_LEAF_SPKI_SZ    1024
 #endif
-#if defined(WOLFSSL_HAVE_MLDSA) && (WOLFNANOTLS_MLDSA_LEVEL == 5)
+#if defined(WOLFSSL_HAVE_MLDSA) && (WOLFNANO_MLDSA_LEVEL == 5)
     /* a single ML-DSA-87 CertificateVerify record (~4660 B) must fit in place */
     #define WN_CERT_IO_MIN     8192
 #else
@@ -637,38 +637,38 @@ static int wn_CvEcdsa(const byte* spki, word32 spkiLen, int hashType,
     ecc_key key;
     byte hash[WC_MAX_DIGEST_SIZE];
     word32 idx = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int res = 0, keyInit = 0, hashLen;
 
     hashLen = wc_HashGetDigestSize((enum wc_HashType)hashType);
     if ((hashLen <= 0) || (wc_Hash((enum wc_HashType)hashType, tbs, tbsLen,
             hash, (word32)hashLen) != 0)) {
-        ret = WOLFNANOTLS_E_CRYPTO;
+        ret = WOLFNANO_E_CRYPTO;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_ecc_init(&key) != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         else {
             keyInit = 1;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_EccPublicKeyDecode(spki, &idx, &key, spkiLen) != 0) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         /* RFC 8446 4.2.3: an ECDSA SignatureScheme binds the curve, so the
          * leaf key must be on the curve the scheme names. */
         if ((key.dp == NULL) || (key.dp->size != curveSize)) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if ((wc_ecc_verify_hash(sig, sigLen, hash, (word32)hashLen, &res,
                 &key) != 0) || (res != 1)) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
     }
     if (keyInit) {
@@ -684,30 +684,30 @@ static int wn_CvEd25519(const byte* spki, word32 spkiLen, const byte* tbs,
 {
     ed25519_key key;
     word32 idx = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int res = 0, keyInit = 0;
 
     if (wc_ed25519_init(&key) != 0) {
-        ret = WOLFNANOTLS_E_CRYPTO;
+        ret = WOLFNANO_E_CRYPTO;
     }
     else {
         keyInit = 1;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         /* DecodedCert yields the raw 32-byte Ed25519 key, not an SPKI. */
         if (spkiLen == ED25519_PUB_KEY_SIZE) {
             if (wc_ed25519_import_public(spki, spkiLen, &key) != 0) {
-                ret = WOLFNANOTLS_E_BAD_CERT;
+                ret = WOLFNANO_E_BAD_CERT;
             }
         }
         else if (wc_Ed25519PublicKeyDecode(spki, &idx, &key, spkiLen) != 0) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if ((wc_ed25519_verify_msg(sig, sigLen, tbs, tbsLen, &res, &key) != 0)
                 || (res != 1)) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
     }
     if (keyInit) {
@@ -727,32 +727,32 @@ static int wn_CvRsaPss(const byte* spki, word32 spkiLen, int hashType, int mgf,
     byte hash[WC_MAX_DIGEST_SIZE];
     byte out[512];
     word32 idx = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int keyInit = 0, hashLen;
 
     hashLen = wc_HashGetDigestSize((enum wc_HashType)hashType);
     if ((hashLen <= 0) || (wc_Hash((enum wc_HashType)hashType, tbs, tbsLen,
             hash, (word32)hashLen) != 0)) {
-        ret = WOLFNANOTLS_E_CRYPTO;
+        ret = WOLFNANO_E_CRYPTO;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_InitRsaKey(&key, NULL) != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         else {
             keyInit = 1;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_RsaPublicKeyDecode(spki, &idx, &key, spkiLen) != 0) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_RsaPSS_VerifyCheck((byte*)sig, sigLen, out, (word32)sizeof(out),
                 hash, (word32)hashLen, (enum wc_HashType)hashType, mgf, &key)
                 < 0) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
     }
     if (keyInit) {
@@ -764,9 +764,9 @@ static int wn_CvRsaPss(const byte* spki, word32 spkiLen, int hashType, int mgf,
 #endif /* !NO_RSA */
 
 #ifdef WOLFSSL_HAVE_MLDSA
-#if WOLFNANOTLS_MLDSA_LEVEL == 2
+#if WOLFNANO_MLDSA_LEVEL == 2
     #define WN_MLDSA_PARAM WC_ML_DSA_44
-#elif WOLFNANOTLS_MLDSA_LEVEL == 3
+#elif WOLFNANO_MLDSA_LEVEL == 3
     #define WN_MLDSA_PARAM WC_ML_DSA_65
 #else
     #define WN_MLDSA_PARAM WC_ML_DSA_87
@@ -776,29 +776,29 @@ static int wn_CvMlDsa(const byte* spki, word32 spkiLen, const byte* tbs,
 {
     wc_MlDsaKey key;
     word32 idx = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int res = 0, keyInit = 0;
 
     if (wc_MlDsaKey_Init(&key, NULL, INVALID_DEVID) != 0) {
-        ret = WOLFNANOTLS_E_CRYPTO;
+        ret = WOLFNANO_E_CRYPTO;
     }
     else {
         keyInit = 1;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_MlDsaKey_SetParams(&key, WN_MLDSA_PARAM) != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_MlDsaKey_PublicKeyDecode(&key, spki, spkiLen, &idx) != 0) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if ((wc_MlDsaKey_VerifyCtx(&key, sig, sigLen, NULL, 0, tbs, tbsLen,
                 &res) != 0) || (res != 1)) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
     }
     if (keyInit) {
@@ -816,7 +816,7 @@ static int wn_CertVerify(word16 scheme, const byte* spki, word32 spkiLen,
 {
     byte tbs[64 + 33 + 1 + WC_MAX_DIGEST_SIZE];
     word32 tbsLen = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     wn_BuildCvTbs(tbs, &tbsLen, th, thLen);
 
@@ -861,7 +861,7 @@ static int wn_CertVerify(word16 scheme, const byte* spki, word32 spkiLen,
     }
 #endif
     else {
-        ret = WOLFNANOTLS_E_UNSUPPORTED;
+        ret = WOLFNANO_E_UNSUPPORTED;
     }
 
     return ret;
@@ -872,18 +872,18 @@ static int wn_CertVerify(word16 scheme, const byte* spki, word32 spkiLen,
  * key for Ed25519/ML-DSA). Obtain the pin from the target server's leaf. */
 static int wn_CheckKeyPin(DecodedCert* leaf, const byte* pin, word32 pinLen)
 {
-    int ret = WOLFNANOTLS_E_BAD_CERT;
+    int ret = WOLFNANO_E_BAD_CERT;
 
     if ((leaf != NULL) && (pin != NULL) && (pinLen > 0) &&
         (pinLen == leaf->pubKeySize) &&
         (ConstantCompare(leaf->publicKey, pin, (int)pinLen) == 0)) {
-        ret = WOLFNANOTLS_SUCCESS;
+        ret = WOLFNANO_SUCCESS;
     }
 
     return ret;
 }
 
-#ifdef WOLFNANOTLS_X509_HOSTNAME
+#ifdef WOLFNANO_X509_HOSTNAME
 static char wn_AsciiLower(char c)
 {
     if ((c >= 'A') && (c <= 'Z')) {
@@ -910,10 +910,10 @@ static int wn_DnsNameMatch(const char* pat, int patLen, const char* host,
                            int hostLen)
 {
     int k = 0;
-    int ret = WOLFNANOTLS_E_BAD_CERT;
+    int ret = WOLFNANO_E_BAD_CERT;
 
     if ((pat == NULL) || (host == NULL) || (patLen <= 0) || (hostLen <= 0)) {
-        ret = WOLFNANOTLS_E_BAD_CERT;
+        ret = WOLFNANO_E_BAD_CERT;
     }
     else if ((patLen > 2) && (pat[0] == '*') && (pat[1] == '.')) {
         while ((k < hostLen) && (host[k] != '.')) {
@@ -921,11 +921,11 @@ static int wn_DnsNameMatch(const char* pat, int patLen, const char* host,
         }
         if ((k > 0) && (k < hostLen) && ((patLen - 1) == (hostLen - k)) &&
             wn_DnsCaseEq(pat + 1, host + k, patLen - 1)) {
-            ret = WOLFNANOTLS_SUCCESS;
+            ret = WOLFNANO_SUCCESS;
         }
     }
     else if ((patLen == hostLen) && wn_DnsCaseEq(pat, host, patLen)) {
-        ret = WOLFNANOTLS_SUCCESS;
+        ret = WOLFNANO_SUCCESS;
     }
 
     return ret;
@@ -938,10 +938,10 @@ static int wn_CheckServerName(DecodedCert* leaf, const char* host)
     DNS_entry* e;
     int hostLen;
     int sawDns = 0;
-    int ret = WOLFNANOTLS_E_BAD_CERT;
+    int ret = WOLFNANO_E_BAD_CERT;
 
     if ((leaf == NULL) || (host == NULL)) {
-        ret = WOLFNANOTLS_E_BAD_CERT;
+        ret = WOLFNANO_E_BAD_CERT;
     }
     else {
         hostLen = (int)XSTRLEN(host);
@@ -949,21 +949,21 @@ static int wn_CheckServerName(DecodedCert* leaf, const char* host)
             if (e->type == ASN_DNS_TYPE) {
                 sawDns = 1;
                 if (wn_DnsNameMatch(e->name, e->len, host, hostLen)
-                        == WOLFNANOTLS_SUCCESS) {
-                    ret = WOLFNANOTLS_SUCCESS;
+                        == WOLFNANO_SUCCESS) {
+                    ret = WOLFNANO_SUCCESS;
                 }
             }
         }
         if ((sawDns == 0) && (leaf->subjectCN != NULL) &&
             (wn_DnsNameMatch(leaf->subjectCN, leaf->subjectCNLen, host,
-                             hostLen) == WOLFNANOTLS_SUCCESS)) {
-            ret = WOLFNANOTLS_SUCCESS;
+                             hostLen) == WOLFNANO_SUCCESS)) {
+            ret = WOLFNANO_SUCCESS;
         }
     }
 
     return ret;
 }
-#endif /* WOLFNANOTLS_X509_HOSTNAME */
+#endif /* WOLFNANO_X509_HOSTNAME */
 
 #ifndef NO_ASN_TIME
 /* Reject a cert whose validity window does not contain `now` (RFC 5280 4.1.2.5).
@@ -973,27 +973,27 @@ static int wn_CertTimeValid(const DecodedCert* cert, time_t now)
     const byte* d;
     byte fmt;
     int dlen;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if ((cert->beforeDate == NULL) || (cert->afterDate == NULL)) {
-        ret = WOLFNANOTLS_E_BAD_CERT;          /* a server cert must carry dates */
+        ret = WOLFNANO_E_BAD_CERT;          /* a server cert must carry dates */
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_GetDateInfo(cert->beforeDate, cert->beforeDateLen, &d, &fmt,
                 &dlen) != 0) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
         else if (wc_ValidateDateWithTime(d, fmt, ASN_BEFORE, now, dlen) != 1) {
-            ret = WOLFNANOTLS_E_BAD_CERT;       /* not yet valid */
+            ret = WOLFNANO_E_BAD_CERT;       /* not yet valid */
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_GetDateInfo(cert->afterDate, cert->afterDateLen, &d, &fmt,
                 &dlen) != 0) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
         else if (wc_ValidateDateWithTime(d, fmt, ASN_AFTER, now, dlen) != 1) {
-            ret = WOLFNANOTLS_E_BAD_CERT;       /* expired */
+            ret = WOLFNANO_E_BAD_CERT;       /* expired */
         }
     }
 
@@ -1020,14 +1020,14 @@ static int wn_VerifyChain(const byte** certs, const word32* certLens, int n,
     const byte* issuerDer;
     word32 issuerLen;
     int i;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int leafInit = 0;
 
     if (n < 1) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    for (i = 0; (i < n) && (ret == WOLFNANOTLS_SUCCESS); i++) {
+    for (i = 0; (i < n) && (ret == WOLFNANO_SUCCESS); i++) {
         if ((i + 1) < n) {
             issuerDer = certs[i + 1];
             issuerLen = certLens[i + 1];
@@ -1038,21 +1038,21 @@ static int wn_VerifyChain(const byte** certs, const word32* certLens, int n,
         }
         wc_InitDecodedCert(&issuer, issuerDer, issuerLen, NULL);
         if (wc_ParseCert(&issuer, CERT_TYPE, NO_VERIFY, NULL) != 0) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
         else {
             if (CheckCertSignaturePubKey(certs[i], certLens[i], NULL,
                     issuer.publicKey, issuer.pubKeySize, issuer.keyOID) != 0) {
-                ret = WOLFNANOTLS_E_BAD_CERT;
+                ret = WOLFNANO_E_BAD_CERT;
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && ((i + 1) < n) &&
+            if ((ret == WOLFNANO_SUCCESS) && ((i + 1) < n) &&
                 (issuer.isCA == 0)) {
-                ret = WOLFNANOTLS_E_BAD_CERT;   /* presented intermediate must be a CA */
+                ret = WOLFNANO_E_BAD_CERT;   /* presented intermediate must be a CA */
             }
 #ifndef NO_ASN_TIME
             /* time-check presented intermediates, but never the pinned anchor,
              * even if the server redundantly included it in the chain. */
-            if ((ret == WOLFNANOTLS_SUCCESS) && ((i + 1) < n) &&
+            if ((ret == WOLFNANO_SUCCESS) && ((i + 1) < n) &&
                 ((issuerLen != anchorLen) ||
                  (ConstantCompare(issuerDer, anchor, (int)anchorLen) != 0))) {
                 ret = wn_CertTimeValid(&issuer, now);
@@ -1062,40 +1062,40 @@ static int wn_VerifyChain(const byte** certs, const word32* certLens, int n,
         }
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         wc_InitDecodedCert(&leaf, certs[0], certLens[0], NULL);
         if (wc_ParseCert(&leaf, CERT_TYPE, NO_VERIFY, NULL) != 0) {
-            ret = WOLFNANOTLS_E_BAD_CERT;
+            ret = WOLFNANO_E_BAD_CERT;
         }
         else {
             leafInit = 1;
             if (leaf.pubKeySize > *spkiLen) {
-                ret = WOLFNANOTLS_E_CRYPTO;
+                ret = WOLFNANO_E_CRYPTO;
             }
             else {
                 XMEMCPY(spki, leaf.publicKey, leaf.pubKeySize);
                 *spkiLen = leaf.pubKeySize;
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && (leaf.extKeyUsageSet != 0) &&
+            if ((ret == WOLFNANO_SUCCESS) && (leaf.extKeyUsageSet != 0) &&
                 ((leaf.extKeyUsage & KEYUSE_DIGITAL_SIG) == 0)) {
-                ret = WOLFNANOTLS_E_BAD_CERT;   /* leaf must allow digitalSignature */
+                ret = WOLFNANO_E_BAD_CERT;   /* leaf must allow digitalSignature */
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && (leaf.extExtKeyUsageSet != 0) &&
+            if ((ret == WOLFNANO_SUCCESS) && (leaf.extExtKeyUsageSet != 0) &&
                 ((leaf.extExtKeyUsage & EXTKEYUSE_SERVER_AUTH) == 0)) {
-                ret = WOLFNANOTLS_E_BAD_CERT;   /* leaf EKU must allow serverAuth */
+                ret = WOLFNANO_E_BAD_CERT;   /* leaf EKU must allow serverAuth */
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && (pinnedKey != NULL)) {
+            if ((ret == WOLFNANO_SUCCESS) && (pinnedKey != NULL)) {
                 ret = wn_CheckKeyPin(&leaf, pinnedKey, pinnedKeyLen);
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && (serverName != NULL)) {
-#ifdef WOLFNANOTLS_X509_HOSTNAME
+            if ((ret == WOLFNANO_SUCCESS) && (serverName != NULL)) {
+#ifdef WOLFNANO_X509_HOSTNAME
                 ret = wn_CheckServerName(&leaf, serverName);
 #else
-                ret = WOLFNANOTLS_E_UNSUPPORTED;
+                ret = WOLFNANO_E_UNSUPPORTED;
 #endif
             }
 #ifndef NO_ASN_TIME
-            if (ret == WOLFNANOTLS_SUCCESS) {
+            if (ret == WOLFNANO_SUCCESS) {
                 ret = wn_CertTimeValid(&leaf, now);
             }
 #endif
@@ -1134,9 +1134,9 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     word32 chLen, recLen, thLen, pubLen, ssLen, plainLen, spkiLen = 0;
     word32 accLen = 0, off = 0; word64 sSeq = 0;
     byte rtype = 0, ctype = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int done = 0, gotEE = 0, gotCert = 0, gotCv = 0;
-#ifdef WOLFNANOTLS_SEND_ALERTS
+#ifdef WOLFNANO_SEND_ALERTS
     int keysReady = 0;
     word64 cHsSeq = 0;
 #endif
@@ -1146,10 +1146,10 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     if ((sess == NULL) || (rng == NULL) || (ioSend == NULL) ||
         (ioRecv == NULL) || (anchor == NULL) || (scratch == NULL) ||
         (scratchLen < WN_CERT_SCRATCH_MIN)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         XMEMSET(sess, 0, sizeof(*sess));    /* no half-open session on failure */
         ioCap = scratchLen - (WN_HS_ACC_SZ + WN_LEAF_SPKI_SZ);
         plain = scratch + WN_RECORD_HEADER_SZ;   /* records decrypt in place */
@@ -1159,55 +1159,55 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         if ((wc_Sha256Hash((const byte*)"", 0, emptyHash) != 0) ||
             (wc_RNG_GenerateBlock(rng, random32, 32) != 0) ||
             (wc_RNG_GenerateBlock(rng, sid, 32) != 0)) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_KeyShare_Init(&ks, WN_DEFAULT_GROUP);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_KeyShare_Generate(&ks, rng, cliPub, &pubLen);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Transcript_Init(&tc, WC_SHA256);
     }
 
     /* ClientHello (ECDHE, no PSK) */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_ClientHello_Build_ex(scratch, &chLen, scratchLen, random32, sid,
                                       32, cliPub, pubLen, serverName);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Transcript_Update(&tc, scratch, chLen);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = send_plain_record(ioSend, ioCtx, WN_REC_HANDSHAKE, scratch,
                                 chLen);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = send_ccs(ioSend, ioCtx);     /* compat CCS after ClientHello */
     }
 
     /* ServerHello */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         do {
             ret = wn_RecvRecord(ioRecv, ioCtx, scratch, ioCap, &rtype,
                               &recLen);
-        } while ((ret == WOLFNANOTLS_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER));
+        } while ((ret == WOLFNANO_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER));
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && (rtype != WN_REC_HANDSHAKE)) {
-        ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+    if ((ret == WOLFNANO_SUCCESS) && (rtype != WN_REC_HANDSHAKE)) {
+        ret = WOLFNANO_E_UNEXPECTED_MSG;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_ServerHello_Parse(scratch + 5, recLen - 5, &sh);
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && (sh.isHelloRetry != 0)) {
-        ret = WOLFNANOTLS_E_UNSUPPORTED;
+    if ((ret == WOLFNANO_SUCCESS) && (sh.isHelloRetry != 0)) {
+        ret = WOLFNANO_E_UNSUPPORTED;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Transcript_Update(&tc, scratch + 5, recLen - 5);
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) &&
+    if ((ret == WOLFNANO_SUCCESS) &&
         ((sh.keyShare == NULL) ||
          (sh.keyShareLen != WN_DEFAULT_SRV_SHARE_SZ) ||
          (sh.cipher != WN_CIPHER_AES_128_GCM_SHA256) ||
@@ -1215,45 +1215,45 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
          (sh.pskSelected != -1) ||  /* cert path offered no PSK (RFC 8446 4.1.3) */
          (sh.sessionIdLen != 32) || (sh.sessionId == NULL) ||
          (ConstantCompare(sh.sessionId, sid, 32) != 0))) {
-        ret = WOLFNANOTLS_E_ILLEGAL_PARAM;
+        ret = WOLFNANO_E_ILLEGAL_PARAM;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_KeyShare_Shared(&ks, sh.keyShare, sh.keyShareLen, ecdhe,
                                  &ssLen);
     }
 
     /* handshake key schedule (PSK = 0) */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret  = wn_Transcript_GetHash(&tc, th, &thLen);
         ret |= wn_Tls13_Extract(early, NULL, 0, zeros, sizeof(zeros),
                                 WC_SHA256);
         ret |= wn_DeriveHsKeys(hs, cHs, sHs, cKey, cIv, sKey, sIv, early, ecdhe,
                                ssLen, emptyHash, th);
-#ifdef WOLFNANOTLS_SEND_ALERTS
-        if (ret == WOLFNANOTLS_SUCCESS) { keysReady = 1; }
+#ifdef WOLFNANO_SEND_ALERTS
+        if (ret == WOLFNANO_SUCCESS) { keysReady = 1; }
 #endif
     }
 
     /* server flight: EncryptedExtensions, Certificate, CertVerify, Finished */
-    while ((ret == WOLFNANOTLS_SUCCESS) && (done == 0)) {
+    while ((ret == WOLFNANO_SUCCESS) && (done == 0)) {
         ret = wn_RecvRecord(ioRecv, ioCtx, scratch, ioCap, &rtype, &recLen);
-        if ((ret == WOLFNANOTLS_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER)) {
+        if ((ret == WOLFNANO_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER)) {
             continue;
         }
-        if ((ret == WOLFNANOTLS_SUCCESS) && (rtype != WN_REC_APPDATA)) {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+        if ((ret == WOLFNANO_SUCCESS) && (rtype != WN_REC_APPDATA)) {
+            ret = WOLFNANO_E_UNEXPECTED_MSG;
         }
-        if (ret == WOLFNANOTLS_SUCCESS) {
+        if (ret == WOLFNANO_SUCCESS) {
             ret = wn_Record_Unprotect(plain, &plainLen, &ctype, sKey, 16, sIv,
                                       sSeq, scratch, recLen);
             sSeq++;
         }
-        if ((ret == WOLFNANOTLS_SUCCESS) && (ctype != WN_REC_HANDSHAKE)) {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;   /* flight is handshake records only */
+        if ((ret == WOLFNANO_SUCCESS) && (ctype != WN_REC_HANDSHAKE)) {
+            ret = WOLFNANO_E_UNEXPECTED_MSG;   /* flight is handshake records only */
         }
-        if ((ret == WOLFNANOTLS_SUCCESS) && (ctype == WN_REC_HANDSHAKE)) {
+        if ((ret == WOLFNANO_SUCCESS) && (ctype == WN_REC_HANDSHAKE)) {
             if ((accLen + plainLen) > WN_HS_ACC_SZ) {
-                ret = WOLFNANOTLS_E_DECODE;
+                ret = WOLFNANO_E_DECODE;
             }
             else {
                 XMEMCPY(hsacc + accLen, plain, plainLen);
@@ -1262,7 +1262,7 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         }
 
         /* parse complete handshake messages out of the accumulator */
-        while ((ret == WOLFNANOTLS_SUCCESS) && (done == 0) &&
+        while ((ret == WOLFNANO_SUCCESS) && (done == 0) &&
                ((accLen - off) >= 4)) {
             byte mType = hsacc[off];
             word32 mLen = ((word32)hsacc[off + 1] << 16) |
@@ -1272,21 +1272,21 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
             }
             /* enforce the legal flight order (RFC 8446 4.4); see wn_flight.h */
             ret = wn_FlightOrder(mType, &gotEE, &gotCert, &gotCv);
-            if ((ret == WOLFNANOTLS_SUCCESS) && (mType == WN_HS_ENCRYPTED_EXT)) {
+            if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_ENCRYPTED_EXT)) {
                 ret = wn_CheckEncExt(hsacc + off + 4, mLen,
                                      (serverName != NULL) &&
                                      (serverName[0] != 0));
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && (mType == WN_HS_CERT_VERIFY)) {
+            if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_CERT_VERIFY)) {
                 ret = wn_Transcript_GetHash(&tc, thCert, &thLen);
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && (mType == WN_HS_FINISHED)) {
+            if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_FINISHED)) {
                 ret = wn_Transcript_GetHash(&tc, th, &thLen);
             }
-            if (ret == WOLFNANOTLS_SUCCESS) {
+            if (ret == WOLFNANO_SUCCESS) {
                 ret = wn_Transcript_Update(&tc, hsacc + off, mLen + 4);
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && (mType == WN_HS_CERTIFICATE)) {
+            if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_CERTIFICATE)) {
                 int nc = 0;
                 word32 cl;
                 word32 listLen, listEnd;
@@ -1298,9 +1298,9 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                 listLen = wn_Read_U24(&hr);                /* cert_list length */
                 listEnd = hr.pos + listLen;
                 if ((hr.err != 0) || (ctxLen != 0) || (listEnd != mLen)) {
-                    ret = WOLFNANOTLS_E_DECODE;   /* server cert: empty ctx, exact list */
+                    ret = WOLFNANO_E_DECODE;   /* server cert: empty ctx, exact list */
                 }
-                while ((ret == WOLFNANOTLS_SUCCESS) && (hr.pos < listEnd) &&
+                while ((ret == WOLFNANO_SUCCESS) && (hr.pos < listEnd) &&
                        (nc < WN_MAX_CHAIN) && (hr.err == 0)) {
                     cl = wn_Read_U24(&hr);                  /* cert_data length */
                     certs[nc] = hsacc + off + 4 + hr.pos;
@@ -1311,10 +1311,10 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                     (void)wn_Read_Bytes(&hr, extl);
                 }
                 spkiLen = WN_LEAF_SPKI_SZ;
-                if ((ret == WOLFNANOTLS_SUCCESS) && (hr.err != 0)) {
-                    ret = WOLFNANOTLS_E_DECODE;
+                if ((ret == WOLFNANO_SUCCESS) && (hr.err != 0)) {
+                    ret = WOLFNANO_E_DECODE;
                 }
-                if (ret == WOLFNANOTLS_SUCCESS) {
+                if (ret == WOLFNANO_SUCCESS) {
 #ifndef NO_ASN_TIME
                     time_t now = XTIME(0);   /* integrator-provided clock seam */
 #endif
@@ -1327,7 +1327,7 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                                          );
                 }
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && (mType == WN_HS_CERT_VERIFY)) {
+            if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_CERT_VERIFY)) {
                 word16 scheme;
                 word16 cvLen;
                 wn_Reader_Init(&hr, hsacc + off + 4, mLen);
@@ -1335,26 +1335,26 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                 cvLen = wn_Read_U16(&hr);
                 if ((hr.err != 0) || (gotCert == 0) ||
                     ((hr.pos + cvLen) != mLen)) {
-                    ret = WOLFNANOTLS_E_DECODE;   /* signature must span the message */
+                    ret = WOLFNANO_E_DECODE;   /* signature must span the message */
                 }
                 else {
                     ret = wn_CertVerify(scheme, leafSpki, spkiLen, thCert, 32,
                               hsacc + off + 4 + hr.pos, cvLen);
                 }
             }
-            if ((ret == WOLFNANOTLS_SUCCESS) && (mType == WN_HS_FINISHED)) {
+            if ((ret == WOLFNANO_SUCCESS) && (mType == WN_HS_FINISHED)) {
                 if (gotCv == 0) {
-                    ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+                    ret = WOLFNANO_E_UNEXPECTED_MSG;
                 }
-                if (ret == WOLFNANOTLS_SUCCESS) {
+                if (ret == WOLFNANO_SUCCESS) {
                     ret = wn_Tls13_FinishedMac(mac, sHs, th, 32, WC_SHA256);
                 }
-                if ((ret == WOLFNANOTLS_SUCCESS) &&
+                if ((ret == WOLFNANO_SUCCESS) &&
                     ((mLen != 32) ||
                      (ConstantCompare(mac, hsacc + off + 4, 32) != 0))) {
-                    ret = WOLFNANOTLS_E_BAD_MAC;
+                    ret = WOLFNANO_E_BAD_MAC;
                 }
-                if (ret == WOLFNANOTLS_SUCCESS) {
+                if (ret == WOLFNANO_SUCCESS) {
                     done = 1;
                 }
             }
@@ -1363,14 +1363,14 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
     }
 
     /* client Finished */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Transcript_GetHash(&tc, th, &thLen);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Tls13_FinishedMac(mac, cHs, th, 32, WC_SHA256);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
-#ifdef WOLFNANOTLS_SEND_ALERTS
+    if (ret == WOLFNANO_SUCCESS) {
+#ifdef WOLFNANO_SEND_ALERTS
         cHsSeq = 1;                 /* client hs seq 0 is consumed by Finished */
 #endif
         fin[0] = WN_HS_FINISHED;
@@ -1381,20 +1381,20 @@ static int wn_connect_cert_impl(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
         ret = wn_Record_Protect(scratch, &recLen, cKey, 16, cIv, 0,
                                 WN_REC_HANDSHAKE, fin, sizeof(fin));
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (ioSend(ioCtx, scratch, recLen) != (int)recLen) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
 
     /* application traffic secrets (RFC 8446 7.1), transcript through server
      * Finished (th); retained in sess for wn_Send / wn_Recv. */
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_SessionEstablish(sess, hs, emptyHash, zeros, th, ioSend,
                                   ioRecv, ioCtx, scratch, scratchLen);
     }
 
-#ifdef WOLFNANOTLS_SEND_ALERTS
+#ifdef WOLFNANO_SEND_ALERTS
     if ((ret < 0) && keysReady) {
         wn_SendAlert(ioSend, ioCtx, cKey, cIv, cHsSeq, ret);
     }
@@ -1433,12 +1433,12 @@ int wn_Connect_CertName_ex(wn_Session* sess, WC_RNG* rng, wn_IoSend ioSend,
                            const byte* pinnedKey, word32 pinnedKeyLen,
                            byte* scratch, word32 scratchLen)
 {
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if ((serverName == NULL) && (pinnedKey == NULL)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;   /* must bind identity by name or pin */
+        ret = WOLFNANO_E_INVALID_ARG;   /* must bind identity by name or pin */
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_connect_cert_impl(sess, rng, ioSend, ioRecv, ioCtx, anchor,
                                    anchorLen, scratch, scratchLen, serverName,
                                    pinnedKey, pinnedKeyLen);
@@ -1477,4 +1477,4 @@ int wn_Connect_CertName(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
     return ret;
 }
 
-#endif /* WOLFNANOTLS_X509 */
+#endif /* WOLFNANO_X509 */

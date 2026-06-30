@@ -33,14 +33,14 @@
 
 static int io_recv_exact(wn_IoRecv recv, void* ctx, byte* buf, word32 n)
 {
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     word32 got = 0;
     int r;
 
-    while ((got < n) && (ret == WOLFNANOTLS_SUCCESS)) {
+    while ((got < n) && (ret == WOLFNANO_SUCCESS)) {
         r = recv(ctx, buf + got, n - got);
         if (r <= 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         else {
             got += (word32)r;
@@ -57,23 +57,23 @@ int wn_RecvRecord(wn_IoRecv recv, void* ctx, byte* rec, word32 cap,
     int ret;
 
     ret = io_recv_exact(recv, ctx, rec, 5);
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         *type = rec[0];
         frag = ((word32)rec[3] << 8) | rec[4];
         /* RFC 8446 5.2: TLSCiphertext.length <= 2^14 + 256 */
         if ((frag == 0) || ((frag + 5) > cap) ||
             (frag > (WN_MAX_PLAINTEXT + 256))) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = io_recv_exact(recv, ctx, rec + 5, frag);
         *recLen = frag + 5;
     }
     /* RFC 8446 5: a ChangeCipherSpec is exactly one byte with the value 0x01. */
-    if ((ret == WOLFNANOTLS_SUCCESS) && (*type == WN_REC_CHANGE_CIPHER) &&
+    if ((ret == WOLFNANO_SUCCESS) && (*type == WN_REC_CHANGE_CIPHER) &&
         ((frag != 1) || (rec[5] != 0x01))) {
-        ret = WOLFNANOTLS_E_DECODE;
+        ret = WOLFNANO_E_DECODE;
     }
 
     return ret;
@@ -97,18 +97,18 @@ int wn_Record_Protect(byte* rec, word32* recLen, const byte* key, word32 keyLen,
     byte nonce[12];
     word32 innerLen = 0;
     word32 ctLen = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int aesInit = 0;
 
     if ((rec == NULL) || (recLen == NULL) || (key == NULL) ||
         (iv == NULL) || (content == NULL)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && (contentLen > WN_MAX_PLAINTEXT)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;   /* fits the 16-bit record length */
+    if ((ret == WOLFNANO_SUCCESS) && (contentLen > WN_MAX_PLAINTEXT)) {
+        ret = WOLFNANO_E_INVALID_ARG;   /* fits the 16-bit record length */
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         innerLen = contentLen + 1;
         ctLen = innerLen + WN_RECORD_TAG_SZ;
 
@@ -125,19 +125,19 @@ int wn_Record_Protect(byte* rec, word32* recLen, const byte* key, word32 keyLen,
 
         /* LCOV_EXCL_START - wc_AesInit cannot fail without an allocator */
         if (wc_AesInit(&aes, NULL, INVALID_DEVID) != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         aesInit = 1;
         if (wc_AesGcmSetKey(&aes, key, keyLen) != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         *recLen = WN_RECORD_HEADER_SZ + ctLen;
         /* LCOV_EXCL_START - AES-GCM encrypt does not fail on valid inputs */
         if (wc_AesGcmEncrypt(&aes,
@@ -146,7 +146,7 @@ int wn_Record_Protect(byte* rec, word32* recLen, const byte* key, word32 keyLen,
                 nonce, sizeof(nonce),
                 rec + WN_RECORD_HEADER_SZ + innerLen, WN_RECORD_TAG_SZ,
                 rec, WN_RECORD_HEADER_SZ) != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
@@ -154,7 +154,7 @@ int wn_Record_Protect(byte* rec, word32* recLen, const byte* key, word32 keyLen,
     if (aesInit) {
         wc_AesFree(&aes);
     }
-    if ((ret != WOLFNANOTLS_SUCCESS) && (rec != NULL) && (innerLen > 0)) {
+    if ((ret != WOLFNANO_SUCCESS) && (rec != NULL) && (innerLen > 0)) {
         ForceZero(rec + WN_RECORD_HEADER_SZ, innerLen);   /* drop staged plaintext */
     }
     ForceZero(nonce, sizeof(nonce));
@@ -170,53 +170,53 @@ int wn_Record_Unprotect(byte* content, word32* contentLen, byte* contentType,
     byte nonce[12];
     word32 innerLen = 0;
     word32 n;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int aesInit = 0;
 
     if ((content == NULL) || (contentLen == NULL) || (contentType == NULL) ||
         (key == NULL) || (iv == NULL) || (rec == NULL)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if ((ret == WOLFNANOTLS_SUCCESS) &&
+    if ((ret == WOLFNANO_SUCCESS) &&
         (recLen < (word32)(WN_RECORD_HEADER_SZ + WN_RECORD_TAG_SZ + 1))) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         innerLen = recLen - WN_RECORD_HEADER_SZ - WN_RECORD_TAG_SZ;
         wn_BuildNonce(nonce, iv, seq);
         /* LCOV_EXCL_START - wc_AesInit cannot fail without an allocator */
         if (wc_AesInit(&aes, NULL, INVALID_DEVID) != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         aesInit = 1;
         if (wc_AesGcmSetKey(&aes, key, keyLen) != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (wc_AesGcmDecrypt(&aes, content,
                 rec + WN_RECORD_HEADER_SZ, innerLen,
                 nonce, sizeof(nonce),
                 rec + WN_RECORD_HEADER_SZ + innerLen, WN_RECORD_TAG_SZ,
                 rec, WN_RECORD_HEADER_SZ) != 0) {
-            ret = WOLFNANOTLS_E_BAD_MAC;        /* AEAD tag / record auth failure */
+            ret = WOLFNANO_E_BAD_MAC;        /* AEAD tag / record auth failure */
         }
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         n = innerLen;
         while ((n > 0) && (content[n - 1] == 0)) {
             n--;
         }
         if (n == 0) {
-            ret = WOLFNANOTLS_E_DECODE;         /* no content type (all padding) */
+            ret = WOLFNANO_E_DECODE;         /* no content type (all padding) */
         }
         else {
             *contentType = content[n - 1];

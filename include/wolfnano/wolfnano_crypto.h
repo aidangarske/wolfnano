@@ -20,12 +20,12 @@
 
 /**
  * Provider seam. The slim shell reaches crypto ONLY through this header, so the
- * same shell links against WOLFNANOTLS_CRYPTO=src or =fips unchanged. Never call a
+ * same shell links against WOLFNANO_CRYPTO=src or =fips unchanged. Never call a
  * wolfSSL TLS/SSL API from the shell.
  */
 
-#ifndef WOLFNANOTLS_CRYPTO_H
-#define WOLFNANOTLS_CRYPTO_H
+#ifndef WOLFNANO_CRYPTO_H
+#define WOLFNANO_CRYPTO_H
 
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/types.h>
@@ -40,4 +40,4 @@
 #include <wolfssl/wolfcrypt/curve25519.h>
 #include <wolfssl/wolfcrypt/random.h>
 
-#endif /* WOLFNANOTLS_CRYPTO_H */
+#endif /* WOLFNANO_CRYPTO_H */

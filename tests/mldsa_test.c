@@ -18,7 +18,7 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* ML-DSA sign/verify round-trip and tamper rejection (level via WOLFNANOTLS_MLDSA_LEVEL). */
+/* ML-DSA sign/verify round-trip and tamper rejection (level via WOLFNANO_MLDSA_LEVEL). */
 
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/wc_mldsa.h>
@@ -35,10 +35,10 @@ static void check(int ok, const char* name)
     }
 }
 
-#if WOLFNANOTLS_MLDSA_LEVEL == 2
+#if WOLFNANO_MLDSA_LEVEL == 2
     #define WN_T_MLDSA_PARAM WC_ML_DSA_44
     #define WN_T_MLDSA_NAME  "ML-DSA-44"
-#elif WOLFNANOTLS_MLDSA_LEVEL == 3
+#elif WOLFNANO_MLDSA_LEVEL == 3
     #define WN_T_MLDSA_PARAM WC_ML_DSA_65
     #define WN_T_MLDSA_NAME  "ML-DSA-65"
 #else

@@ -19,22 +19,22 @@
  */
 
 /* wolfNanoTLS post-quantum X.509 client: TLS 1.3 ECDHE P-256 with ML-DSA-44
- * server-cert verification (verify-only, no RSA). Set WOLFNANOTLS_MLDSA_LEVEL=3/5
+ * server-cert verification (verify-only, no RSA). Set WOLFNANO_MLDSA_LEVEL=3/5
  * for ML-DSA-65/87. Copy to your project as user_settings.h. */
 
-#ifndef WOLFNANOTLS_USER_SETTINGS_H
-#define WOLFNANOTLS_USER_SETTINGS_H
+#ifndef WOLFNANO_USER_SETTINGS_H
+#define WOLFNANO_USER_SETTINGS_H
 
 #define WOLFCRYPT_ONLY
 
-#define WOLFNANOTLS_HAVE_SHA256
-#define WOLFNANOTLS_HAVE_SHA384
-#define WOLFNANOTLS_HAVE_HKDF
-#define WOLFNANOTLS_HAVE_AESGCM
-#define WOLFNANOTLS_HAVE_ECC
-#define WOLFNANOTLS_HAVE_ECDHE_P256
-#define WOLFNANOTLS_X509
-#define WOLFNANOTLS_MLDSA
+#define WOLFNANO_HAVE_SHA256
+#define WOLFNANO_HAVE_SHA384
+#define WOLFNANO_HAVE_HKDF
+#define WOLFNANO_HAVE_AESGCM
+#define WOLFNANO_HAVE_ECC
+#define WOLFNANO_HAVE_ECDHE_P256
+#define WOLFNANO_X509
+#define WOLFNANO_MLDSA
 
 #define GCM_SMALL
 #define WOLFSSL_AES_SMALL_TABLES
@@ -43,4 +43,4 @@
 #include "wolfnano_target.h"
 #include "wolfnano_config.h"
 
-#endif /* WOLFNANOTLS_USER_SETTINGS_H */
+#endif /* WOLFNANO_USER_SETTINGS_H */

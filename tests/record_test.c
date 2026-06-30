@@ -84,14 +84,14 @@ int main(void)
 
     rc = wn_Record_Protect(rec, &recLen, key, sizeof(key), iv, 0, 22,
                            content, sizeof(content));
-    check((rc == WOLFNANOTLS_SUCCESS) &&
+    check((rc == WOLFNANO_SUCCESS) &&
           (recLen == (word32)(5 + sizeof(content) + 1 + 16)) &&
           (rec[0] == 23) && (rec[1] == 0x03) && (rec[2] == 0x03),
           "Protect builds a TLSCiphertext record");
 
     rc = wn_Record_Unprotect(out, &outLen, &type, key, sizeof(key), iv, 0,
                              rec, recLen);
-    check((rc == WOLFNANOTLS_SUCCESS) && (outLen == sizeof(content)) &&
+    check((rc == WOLFNANO_SUCCESS) && (outLen == sizeof(content)) &&
           (type == 22) && (XMEMCMP(out, content, sizeof(content)) == 0),
           "Unprotect recovers content and type");
 
@@ -99,50 +99,50 @@ int main(void)
     rec[7] ^= 0x01;
     rc = wn_Record_Unprotect(out, &outLen, &type, key, sizeof(key), iv, 0,
                              rec, recLen);
-    check(rc != WOLFNANOTLS_SUCCESS, "tampered record is rejected");
+    check(rc != WOLFNANO_SUCCESS, "tampered record is rejected");
     rec[7] ^= 0x01;
 
     /* wrong sequence number changes the nonce and must fail */
     rc = wn_Record_Unprotect(out, &outLen, &type, key, sizeof(key), iv, 1,
                              rec, recLen);
-    check(rc != WOLFNANOTLS_SUCCESS, "wrong sequence number is rejected");
+    check(rc != WOLFNANO_SUCCESS, "wrong sequence number is rejected");
 
     /* 64-bit sequence: a value above 2^32 round-trips (upper nonce bytes used) */
     rc = wn_Record_Protect(rec, &recLen, key, sizeof(key), iv,
                            (word64)0x0000000123456789ULL, 22,
                            content, sizeof(content));
-    if (rc == WOLFNANOTLS_SUCCESS) {
+    if (rc == WOLFNANO_SUCCESS) {
         rc = wn_Record_Unprotect(out, &outLen, &type, key, sizeof(key), iv,
                                  (word64)0x0000000123456789ULL, rec, recLen);
     }
-    check((rc == WOLFNANOTLS_SUCCESS) && (outLen == sizeof(content)),
+    check((rc == WOLFNANO_SUCCESS) && (outLen == sizeof(content)),
           "64-bit sequence number round-trips");
     rc = wn_Record_Unprotect(out, &outLen, &type, key, sizeof(key), iv,
                              (word64)0x0000000023456789ULL, rec, recLen);
-    check(rc != WOLFNANOTLS_SUCCESS, "differing high sequence word is rejected");
+    check(rc != WOLFNANO_SUCCESS, "differing high sequence word is rejected");
 
     /* --- negative / edge paths --- */
     check(wn_Record_Protect(NULL, &recLen, key, sizeof(key), iv, 0, 22,
-          content, sizeof(content)) == WOLFNANOTLS_E_INVALID_ARG,
+          content, sizeof(content)) == WOLFNANO_E_INVALID_ARG,
           "Protect NULL rejected");
     check(wn_Record_Protect(rec, &recLen, key, 7, iv, 0, 22, content,
-          sizeof(content)) != WOLFNANOTLS_SUCCESS, "Protect bad keyLen fails");
+          sizeof(content)) != WOLFNANO_SUCCESS, "Protect bad keyLen fails");
     check(wn_Record_Protect(rec, &recLen, key, sizeof(key), iv, 0, 22, content,
-          WN_MAX_PLAINTEXT + 1) == WOLFNANOTLS_E_INVALID_ARG,
+          WN_MAX_PLAINTEXT + 1) == WOLFNANO_E_INVALID_ARG,
           "Protect rejects content over the record limit");
     check(wn_Record_Unprotect(NULL, &outLen, &type, key, sizeof(key), iv, 0,
-          rec, recLen) == WOLFNANOTLS_E_INVALID_ARG, "Unprotect NULL rejected");
+          rec, recLen) == WOLFNANO_E_INVALID_ARG, "Unprotect NULL rejected");
     check(wn_Record_Unprotect(out, &outLen, &type, key, sizeof(key), iv, 0,
-          rec, 10) == WOLFNANOTLS_E_INVALID_ARG, "Unprotect short record");
+          rec, 10) == WOLFNANO_E_INVALID_ARG, "Unprotect short record");
     check(wn_Record_Unprotect(out, &outLen, &type, key, 7, iv, 0, rec, recLen)
-          != WOLFNANOTLS_SUCCESS, "Unprotect bad keyLen fails");
+          != WOLFNANO_SUCCESS, "Unprotect bad keyLen fails");
 
     /* all-padding (content + type byte all zero) -> no content type */
     XMEMSET(zc, 0, sizeof(zc));
     rl = 0;
     wn_Record_Protect(big2, &rl, key, sizeof(key), iv, 0, 0, zc, sizeof(zc));
     check(wn_Record_Unprotect(out, &outLen, &type, key, sizeof(key), iv, 0,
-          big2, rl) == WOLFNANOTLS_E_DECODE, "all-padding record -> DECODE");
+          big2, rl) == WOLFNANO_E_DECODE, "all-padding record -> DECODE");
 
     /* wn_RecvRecord: zero-length fragment, oversized fragment, EOF */
     hdr[0] = 22; hdr[1] = 0x03; hdr[2] = 0x03; hdr[3] = 0; hdr[4] = 0;
@@ -165,11 +165,11 @@ int main(void)
     big2[5] = 0x00;                              /* wrong payload value */
     b.buf = big2; b.len = 6; b.pos = 0;
     check(wn_RecvRecord(buf_recv, &b, rec, sizeof(rec), &rtype, &rl)
-          == WOLFNANOTLS_E_DECODE, "RecvRecord rejects non-0x01 ChangeCipherSpec");
+          == WOLFNANO_E_DECODE, "RecvRecord rejects non-0x01 ChangeCipherSpec");
     big2[4] = 2; big2[5] = 0x01; big2[6] = 0x01; /* CCS length != 1 */
     b.buf = big2; b.len = 7; b.pos = 0;
     check(wn_RecvRecord(buf_recv, &b, rec, sizeof(rec), &rtype, &rl)
-          == WOLFNANOTLS_E_DECODE, "RecvRecord rejects oversized ChangeCipherSpec");
+          == WOLFNANO_E_DECODE, "RecvRecord rejects oversized ChangeCipherSpec");
 
     printf("\n%s (%d failure%s)\n", fails ? "\033[31mFAILED\033[0m" : "\033[32mALL PASS\033[0m",
            fails, fails == 1 ? "" : "s");

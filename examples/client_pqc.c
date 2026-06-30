@@ -22,7 +22,7 @@
  * Minimal wolfNanoTLS TLS 1.3 client: external-PSK handshake over the
  * X25519MLKEM768 post-quantum hybrid group, then one application-data round
  * trip and a clean close. The hybrid group is selected at compile time by the
- * PQC config (WOLFNANOTLS_HAVE_MLKEM_HYBRID), so this mirrors the PSK example.
+ * PQC config (WOLFNANO_HAVE_MLKEM_HYBRID), so this mirrors the PSK example.
  * Lifecycle: wn_Connect_Psk_ex -> wn_Send -> wn_Recv -> wn_Close.
  *
  * Usage: client_pqc <host> <port>   (default 127.0.0.1 4433)

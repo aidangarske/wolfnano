@@ -95,7 +95,7 @@ int main(void)
 
     wn_trap_armed = 0;
 
-    ok = (rc == WOLFNANOTLS_SUCCESS) && (outLen == 4) && (type == 23) &&
+    ok = (rc == WOLFNANO_SUCCESS) && (outLen == 4) && (type == 23) &&
          (XMEMCMP(out, ping, 4) == 0);
 
     printf("%s handshake crypto path succeeded\n", ok ? "\033[32mPASS\033[0m" : "\033[31mFAIL\033[0m");

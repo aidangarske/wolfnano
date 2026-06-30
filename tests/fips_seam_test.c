@@ -18,7 +18,7 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Provider-seam proof for WOLFNANOTLS_CRYPTO=fips. Exercises the FIPS-boundary
+/* Provider-seam proof for WOLFNANO_CRYPTO=fips. Exercises the FIPS-boundary
  * crypto the handshake uses, entirely through the wc_* seam header, and asserts
  * the in-core integrity / power-on self-tests passed. */
 

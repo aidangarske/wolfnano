@@ -27,13 +27,13 @@
 
 int wn_Transcript_Init(wn_Transcript* t, int digest)
 {
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if (t == NULL) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         t->digest = digest;
         if (digest == WC_SHA256) {
             ret = wc_InitSha256(&t->h.s256);
@@ -44,11 +44,11 @@ int wn_Transcript_Init(wn_Transcript* t, int digest)
         }
 #endif
         else {
-            ret = WOLFNANOTLS_E_UNSUPPORTED;
+            ret = WOLFNANO_E_UNSUPPORTED;
         }
         /* LCOV_EXCL_START - the hash op does not fail on a valid context */
-        if ((ret != 0) && (ret != WOLFNANOTLS_E_UNSUPPORTED)) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+        if ((ret != 0) && (ret != WOLFNANO_E_UNSUPPORTED)) {
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
@@ -58,13 +58,13 @@ int wn_Transcript_Init(wn_Transcript* t, int digest)
 
 int wn_Transcript_Update(wn_Transcript* t, const byte* msg, word32 msgLen)
 {
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if ((t == NULL) || ((msg == NULL) && (msgLen != 0))) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (t->digest == WC_SHA256) {
             ret = wc_Sha256Update(&t->h.s256, msg, msgLen);
         }
@@ -74,11 +74,11 @@ int wn_Transcript_Update(wn_Transcript* t, const byte* msg, word32 msgLen)
         }
 #endif
         else {
-            ret = WOLFNANOTLS_E_UNSUPPORTED;
+            ret = WOLFNANO_E_UNSUPPORTED;
         }
         /* LCOV_EXCL_START - the hash op does not fail on a valid context */
-        if ((ret != 0) && (ret != WOLFNANOTLS_E_UNSUPPORTED)) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+        if ((ret != 0) && (ret != WOLFNANO_E_UNSUPPORTED)) {
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
@@ -88,13 +88,13 @@ int wn_Transcript_Update(wn_Transcript* t, const byte* msg, word32 msgLen)
 
 int wn_Transcript_GetHash(wn_Transcript* t, byte* out, word32* outLen)
 {
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if ((t == NULL) || (out == NULL) || (outLen == NULL)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (t->digest == WC_SHA256) {
             ret = wc_Sha256GetHash(&t->h.s256, out);
             *outLen = WC_SHA256_DIGEST_SIZE;
@@ -106,11 +106,11 @@ int wn_Transcript_GetHash(wn_Transcript* t, byte* out, word32* outLen)
         }
 #endif
         else {
-            ret = WOLFNANOTLS_E_UNSUPPORTED;
+            ret = WOLFNANO_E_UNSUPPORTED;
         }
         /* LCOV_EXCL_START - the hash op does not fail on a valid context */
-        if ((ret != 0) && (ret != WOLFNANOTLS_E_UNSUPPORTED)) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+        if ((ret != 0) && (ret != WOLFNANO_E_UNSUPPORTED)) {
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
@@ -120,13 +120,13 @@ int wn_Transcript_GetHash(wn_Transcript* t, byte* out, word32* outLen)
 
 int wn_Transcript_Free(wn_Transcript* t)
 {
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if (t == NULL) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (t->digest == WC_SHA256) {
             wc_Sha256Free(&t->h.s256);
         }

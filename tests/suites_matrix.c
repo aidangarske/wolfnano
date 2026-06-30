@@ -113,7 +113,7 @@ int main(void)
     for (i = 0; i < (int)(sizeof(cases) / sizeof(cases[0])); i++) {
         n = build_sh(buf, (word32)sizeof(buf), &cases[i]);
         rc = wn_ServerHello_Parse(buf, n, &sh);
-        ok = (rc == WOLFNANOTLS_SUCCESS) &&
+        ok = (rc == WOLFNANO_SUCCESS) &&
              (sh.cipher == cases[i].cipher) &&
              (sh.group == cases[i].group) &&
              (sh.version == 0x0304) &&

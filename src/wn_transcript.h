@@ -41,18 +41,18 @@ typedef struct wn_Transcript {
 } wn_Transcript;
 
 /* Begin a transcript over the given digest (WC_SHA256 or WC_SHA384). */
-WOLFNANOTLS_API int wn_Transcript_Init(wn_Transcript* t, int digest);
+WOLFNANO_API int wn_Transcript_Init(wn_Transcript* t, int digest);
 
 /* Append a handshake message to the transcript. */
-WOLFNANOTLS_API int wn_Transcript_Update(wn_Transcript* t, const byte* msg,
+WOLFNANO_API int wn_Transcript_Update(wn_Transcript* t, const byte* msg,
                                       word32 msgLen);
 
 /* Current Transcript-Hash without ending the transcript. out is Hash.length
  * bytes; outLen receives that length. */
-WOLFNANOTLS_API int wn_Transcript_GetHash(wn_Transcript* t, byte* out,
+WOLFNANO_API int wn_Transcript_GetHash(wn_Transcript* t, byte* out,
                                        word32* outLen);
 
 /* Release the transcript context. */
-WOLFNANOTLS_API int wn_Transcript_Free(wn_Transcript* t);
+WOLFNANO_API int wn_Transcript_Free(wn_Transcript* t);
 
 #endif /* WN_TRANSCRIPT_H */

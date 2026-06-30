@@ -24,7 +24,7 @@
  * EncryptedExtensions, [CertificateRequest], Certificate, CertificateVerify,
  * Finished. This drives whole message sequences through the gate and asserts
  * the legal ones are accepted and every out-of-order / duplicate / unknown
- * sequence is rejected with WOLFNANOTLS_E_UNEXPECTED_MSG, mirroring what a
+ * sequence is rejected with WOLFNANO_E_UNEXPECTED_MSG, mirroring what a
  * malformed or hostile server would send mid-handshake.
  */
 
@@ -42,16 +42,16 @@ static void check(int ok, const char* name)
 }
 
 /* Run a sequence through the gate; return the first non-success code, or
- * WOLFNANOTLS_SUCCESS if the whole sequence is accepted. */
+ * WOLFNANO_SUCCESS if the whole sequence is accepted. */
 static int run_seq(const byte* seq, int n)
 {
     int gotEE = 0;
     int gotCert = 0;
     int gotCv = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int i;
 
-    for (i = 0; (i < n) && (ret == WOLFNANOTLS_SUCCESS); i++) {
+    for (i = 0; (i < n) && (ret == WOLFNANO_SUCCESS); i++) {
         ret = wn_FlightOrder(seq[i], &gotEE, &gotCert, &gotCv);
     }
 
@@ -85,33 +85,33 @@ int main(void)
     static const byte unknownType[] = { WN_FLIGHT_EE, 99 };
     static const byte clientHelloType[] = { 1 };
 
-    check(run_seq(certFlow, 4) == WOLFNANOTLS_SUCCESS,
+    check(run_seq(certFlow, 4) == WOLFNANO_SUCCESS,
           "legal cert flight accepted");
-    check(run_seq(certReqFlow, 5) == WOLFNANOTLS_E_UNSUPPORTED,
+    check(run_seq(certReqFlow, 5) == WOLFNANO_E_UNSUPPORTED,
           "CertificateRequest rejected (client auth not offered)");
 
-    check(run_seq(certNoVfy, 2) == WOLFNANOTLS_SUCCESS,
+    check(run_seq(certNoVfy, 2) == WOLFNANO_SUCCESS,
           "partial prefix (EE, Cert) accepted so far");
 
-    check(run_seq(finishedFirst, 1) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(run_seq(finishedFirst, 1) == WOLFNANO_E_UNEXPECTED_MSG,
           "Finished before CertificateVerify rejected");
-    check(run_seq(certBeforeEE, 2) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(run_seq(certBeforeEE, 2) == WOLFNANO_E_UNEXPECTED_MSG,
           "Certificate before EncryptedExtensions rejected");
-    check(run_seq(certReqEarly, 1) == WOLFNANOTLS_E_UNSUPPORTED,
+    check(run_seq(certReqEarly, 1) == WOLFNANO_E_UNSUPPORTED,
           "CertificateRequest rejected regardless of position");
-    check(run_seq(dupEE, 2) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(run_seq(dupEE, 2) == WOLFNANO_E_UNEXPECTED_MSG,
           "duplicate EncryptedExtensions rejected");
-    check(run_seq(dupCert, 3) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(run_seq(dupCert, 3) == WOLFNANO_E_UNEXPECTED_MSG,
           "duplicate Certificate rejected");
-    check(run_seq(cvNoCert, 2) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(run_seq(cvNoCert, 2) == WOLFNANO_E_UNEXPECTED_MSG,
           "CertificateVerify without Certificate rejected");
-    check(run_seq(finBeforeCv, 3) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(run_seq(finBeforeCv, 3) == WOLFNANO_E_UNEXPECTED_MSG,
           "Finished before CertificateVerify (after Cert) rejected");
-    check(run_seq(dupCv, 4) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(run_seq(dupCv, 4) == WOLFNANO_E_UNEXPECTED_MSG,
           "duplicate CertificateVerify rejected");
-    check(run_seq(unknownType, 2) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(run_seq(unknownType, 2) == WOLFNANO_E_UNEXPECTED_MSG,
           "unknown handshake type rejected");
-    check(run_seq(clientHelloType, 1) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(run_seq(clientHelloType, 1) == WOLFNANO_E_UNEXPECTED_MSG,
           "client-side message type (ClientHello) rejected");
 
     if (fails == 0) {

@@ -18,7 +18,7 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* ML-DSA TLS 1.3 CertificateVerify (level via WOLFNANOTLS_MLDSA_LEVEL): keygen + sign
+/* ML-DSA TLS 1.3 CertificateVerify (level via WOLFNANO_MLDSA_LEVEL): keygen + sign
  * a CertificateVerify TBS, export the public key to SPKI DER, then drive the
  * client's wn_CertVerify path and assert accept (good sig) + reject (tampered).
  */
@@ -77,12 +77,12 @@ int main(void)
 
     verifyRc = wn_CertVerify(WN_MLDSA_SCHEME, spki, (word32)spkiLen, th, sizeof(th),
                              sig, sigLen);
-    check(verifyRc == WOLFNANOTLS_SUCCESS, "CertificateVerify accepted");
+    check(verifyRc == WOLFNANO_SUCCESS, "CertificateVerify accepted");
 
     sig[0] ^= 0x01;
     verifyRc = wn_CertVerify(WN_MLDSA_SCHEME, spki, (word32)spkiLen, th, sizeof(th),
                              sig, sigLen);
-    check(verifyRc != WOLFNANOTLS_SUCCESS, "tampered signature rejected");
+    check(verifyRc != WOLFNANO_SUCCESS, "tampered signature rejected");
 
     wc_MlDsaKey_Free(&key);
     wc_FreeRng(&rng);

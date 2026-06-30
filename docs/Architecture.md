@@ -11,7 +11,7 @@ without forking.
 
 The shell calls crypto only through a `wc_*` facade
 (`include/wolfnano/wolfnano_crypto.h`, added with the shell). The concrete
-provider is chosen at compile time by `WOLFNANOTLS_CRYPTO`:
+provider is chosen at compile time by `WOLFNANO_CRYPTO`:
 
 - `src` (default, GPLv3): a hand-picked list of `wolfcrypt/src/*.c` from the
   submodule, built with `WOLFSSL_NO_MALLOC`. Smallest and deterministic.

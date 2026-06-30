@@ -68,7 +68,7 @@ for the `src` floor statically (independent of any runtime malloc trap).
 | `make alloctrap` | runtime proof: zero heap calls on the handshake path (`--wrap`) |
 | `make interop` | **live TLS 1.3 handshakes vs OpenSSL/wolfSSL: PSK (X25519+P-256) + cert** |
 | `make certtest` | X.509 cert chain-link verify (ECC + RSA) |
-| `make fipsproof` | `WOLFNANOTLS_CRYPTO=fips` seam proof vs a wolfSSL FIPS bundle (see FIPS.md) |
+| `make fipsproof` | `WOLFNANO_CRYPTO=fips` seam proof vs a wolfSSL FIPS bundle (see FIPS.md) |
 | `make bench` | all-algo speed, portable C vs Intel asm (see Benchmarks.md) |
 | `make targets` | cross-compile the floor for every non-host arch (build check) |
 | `make m33mu` | **run** the Thumb2 floor on an emulated Cortex-M33 (STM32H563) under m33mu: KATs, UART, `bkpt #0x7e` pass-gate |
@@ -112,7 +112,7 @@ After the handshake, `wn_Connect_*_ex` keeps a `wn_Session` and the client
 exchanges data with `wn_Send` / `wn_Recv` / `wn_Close`. `make sessiontest`
 drives this offline against crafted, peer-encrypted records (mock transport):
 app-data round trip, NewSessionTicket skip, KeyUpdate rekey (both
-update_not_requested and update_requested), close_notify to `WOLFNANOTLS_E_CLOSED`,
+update_not_requested and update_requested), close_notify to `WOLFNANO_E_CLOSED`,
 and undersized-buffer rejection. `make interop` adds a **live app-data leg**
 against `openssl s_server -rev` (send a line, read the reversed echo, close),
 which also exercises the NewSessionTicket-skip path since OpenSSL sends tickets

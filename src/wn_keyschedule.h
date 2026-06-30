@@ -30,17 +30,17 @@
 
 /* HKDF-Extract (RFC 5869) as used by the TLS 1.3 schedule. prk is Hash.length
  * bytes. A NULL/zero salt is treated as Hash.length zero bytes. */
-WOLFNANOTLS_API int wn_Tls13_Extract(byte* prk, const byte* salt, word32 saltLen,
+WOLFNANO_API int wn_Tls13_Extract(byte* prk, const byte* salt, word32 saltLen,
                                   const byte* ikm, word32 ikmLen, int digest);
 
 /* HKDF-Expand-Label (RFC 8446 section 7.1): label is prefixed with "tls13 ". */
-WOLFNANOTLS_API int wn_Tls13_ExpandLabel(byte* okm, word32 okmLen,
+WOLFNANO_API int wn_Tls13_ExpandLabel(byte* okm, word32 okmLen,
                                       const byte* secret, const char* label,
                                       const byte* info, word32 infoLen,
                                       int digest);
 
 /* Derive-Secret(secret, label, transcriptHash): out is Hash.length bytes. */
-WOLFNANOTLS_API int wn_Tls13_DeriveSecret(byte* out, const byte* secret,
+WOLFNANO_API int wn_Tls13_DeriveSecret(byte* out, const byte* secret,
                                        const char* label,
                                        const byte* transcriptHash,
                                        word32 hashLen, int digest);
@@ -48,14 +48,14 @@ WOLFNANOTLS_API int wn_Tls13_DeriveSecret(byte* out, const byte* secret,
 /* Finished MAC (RFC 8446 4.4.4) and the PSK binder (4.2.11.2), which share the
  * same construction: HMAC(HKDF-Expand-Label(baseKey, "finished", ""),
  * transcriptHash). out is Hash.length bytes. */
-WOLFNANOTLS_API int wn_Tls13_FinishedMac(byte* out, const byte* baseKey,
+WOLFNANO_API int wn_Tls13_FinishedMac(byte* out, const byte* baseKey,
                                       const byte* transcriptHash,
                                       word32 hashLen, int digest);
 
 /* Post-handshake key update (RFC 8446 7.2): secret is replaced in place with
  * HKDF-Expand-Label(secret, "traffic upd", "", Hash.length), then the
  * AES-128-GCM key (16) and iv (12) are re-derived from the new secret. */
-WOLFNANOTLS_API int wn_Tls13_KeyUpdate(byte* secret, byte* key, byte* iv,
+WOLFNANO_API int wn_Tls13_KeyUpdate(byte* secret, byte* key, byte* iv,
                                     int digest);
 
 #endif /* WN_KEYSCHEDULE_H */

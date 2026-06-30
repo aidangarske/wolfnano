@@ -21,21 +21,21 @@
 /* Generic no-OS / baremetal MCU build (portable C, no asm bundle): minimal PSK
  * + X25519 floor. The integration must provide entropy via wn_seed() and the
  * transport via the wn_IoSend / wn_IoRecv callbacks. Pick an asm bundle with a
- * WOLFNANOTLS_TARGET_* device profile when one fits. Copy as user_settings.h. */
+ * WOLFNANO_TARGET_* device profile when one fits. Copy as user_settings.h. */
 
-#ifndef WOLFNANOTLS_USER_SETTINGS_H
-#define WOLFNANOTLS_USER_SETTINGS_H
+#ifndef WOLFNANO_USER_SETTINGS_H
+#define WOLFNANO_USER_SETTINGS_H
 
-#ifndef WOLFNANOTLS_TARGET_PORTABLE_C
-    #define WOLFNANOTLS_TARGET_PORTABLE_C
+#ifndef WOLFNANO_TARGET_PORTABLE_C
+    #define WOLFNANO_TARGET_PORTABLE_C
 #endif
 
 #define WOLFCRYPT_ONLY
 
-#define WOLFNANOTLS_HAVE_SHA256
-#define WOLFNANOTLS_HAVE_HKDF
-#define WOLFNANOTLS_HAVE_AESGCM
-#define WOLFNANOTLS_HAVE_CURVE25519
+#define WOLFNANO_HAVE_SHA256
+#define WOLFNANO_HAVE_HKDF
+#define WOLFNANO_HAVE_AESGCM
+#define WOLFNANO_HAVE_CURVE25519
 
 #define GCM_SMALL
 #define WOLFSSL_AES_SMALL_TABLES
@@ -44,4 +44,4 @@
 #include "wolfnano_target.h"
 #include "wolfnano_config.h"
 
-#endif /* WOLFNANOTLS_USER_SETTINGS_H */
+#endif /* WOLFNANO_USER_SETTINGS_H */

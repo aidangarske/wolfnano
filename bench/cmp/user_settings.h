@@ -21,8 +21,8 @@
 /* Minimal TLS 1.3 config used only to compile wolfSSL's TLS-layer sources for a
  * footprint comparison against the wolfNanoTLS slim shell. Not a wolfNanoTLS build. */
 
-#ifndef WOLFNANOTLS_BENCH_CMP_SETTINGS_H
-#define WOLFNANOTLS_BENCH_CMP_SETTINGS_H
+#ifndef WOLFNANO_BENCH_CMP_SETTINGS_H
+#define WOLFNANO_BENCH_CMP_SETTINGS_H
 
 #define WOLFSSL_TLS13
 #define WOLFSSL_NO_TLS12
@@ -45,4 +45,4 @@
 #define NO_DH
 #define NO_RSA
 
-#endif /* WOLFNANOTLS_BENCH_CMP_SETTINGS_H */
+#endif /* WOLFNANO_BENCH_CMP_SETTINGS_H */

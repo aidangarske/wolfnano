@@ -42,7 +42,7 @@ typedef struct wn_ServerHello {
     byte sessionIdLen;         /* legacy_session_id_echo length */
 } wn_ServerHello;
 
-WOLFNANOTLS_API int wn_ServerHello_Parse(const byte* msg, word32 msgLen,
+WOLFNANO_API int wn_ServerHello_Parse(const byte* msg, word32 msgLen,
                                       wn_ServerHello* out);
 
 #endif /* WN_SERVERHELLO_H */

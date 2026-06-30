@@ -38,39 +38,39 @@
 #define WN_FLIGHT_FINISHED  20
 
 /* Validate handshake message type mType against the messages seen so far,
- * updating the flags. Returns WOLFNANOTLS_SUCCESS or WOLFNANOTLS_E_UNEXPECTED_MSG. */
+ * updating the flags. Returns WOLFNANO_SUCCESS or WOLFNANO_E_UNEXPECTED_MSG. */
 static int wn_FlightOrder(byte mType, int* gotEE, int* gotCert, int* gotCv)
 {
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if (mType == WN_FLIGHT_EE) {
         if (*gotEE) {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+            ret = WOLFNANO_E_UNEXPECTED_MSG;
         }
         *gotEE = 1;
     }
     else if (mType == WN_FLIGHT_CERT_REQ) {
-        ret = WOLFNANOTLS_E_UNSUPPORTED;   /* client authentication (mTLS) not offered */
+        ret = WOLFNANO_E_UNSUPPORTED;   /* client authentication (mTLS) not offered */
     }
     else if (mType == WN_FLIGHT_CERT) {
         if ((*gotEE == 0) || *gotCert) {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+            ret = WOLFNANO_E_UNEXPECTED_MSG;
         }
         *gotCert = 1;
     }
     else if (mType == WN_FLIGHT_CERT_VFY) {
         if ((*gotCert == 0) || *gotCv) {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+            ret = WOLFNANO_E_UNEXPECTED_MSG;
         }
         *gotCv = 1;
     }
     else if (mType == WN_FLIGHT_FINISHED) {
         if (*gotCv == 0) {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+            ret = WOLFNANO_E_UNEXPECTED_MSG;
         }
     }
     else {
-        ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+        ret = WOLFNANO_E_UNEXPECTED_MSG;
     }
 
     return ret;

@@ -22,7 +22,7 @@
  * TLS 1.3 X25519MLKEM768 hybrid key share (group 0x11ec,
  * draft-kwiatkowski-tls-ecdhe-mlkem). Concatenation is ML-KEM component first,
  * then X25519, for the shares and the combined secret. Over the wc_* seam,
- * caller-held context, no allocation. Requires WOLFNANOTLS_MLKEM.
+ * caller-held context, no allocation. Requires WOLFNANO_MLKEM.
  */
 
 #ifndef WN_HYBRID_H
@@ -50,21 +50,21 @@ typedef struct wn_Hybrid {
 
 /* Client: produce the key_share (ML-KEM public || X25519 public) and keep the
  * private state in h. */
-WOLFNANOTLS_API int wn_Hybrid_ClientKeyShare(wn_Hybrid* h, WC_RNG* rng,
+WOLFNANO_API int wn_Hybrid_ClientKeyShare(wn_Hybrid* h, WC_RNG* rng,
                                           byte* out, word32* outLen);
 
 /* Client: from the server share (ML-KEM ciphertext || X25519 public), derive
  * the combined secret (ML-KEM ss || X25519 ss). */
-WOLFNANOTLS_API int wn_Hybrid_ClientShared(wn_Hybrid* h, const byte* srvShare,
+WOLFNANO_API int wn_Hybrid_ClientShared(wn_Hybrid* h, const byte* srvShare,
                                         word32 srvLen, byte* ss, word32* ssLen);
 
 /* Server side (for testing): respond to a client share, producing the server
  * share and the same combined secret. */
-WOLFNANOTLS_API int wn_Hybrid_ServerRespond(const byte* cliShare, word32 cliLen,
+WOLFNANO_API int wn_Hybrid_ServerRespond(const byte* cliShare, word32 cliLen,
                                          WC_RNG* rng, byte* srvShare,
                                          word32* srvLen, byte* ss,
                                          word32* ssLen);
 
-WOLFNANOTLS_API int wn_Hybrid_Free(wn_Hybrid* h);
+WOLFNANO_API int wn_Hybrid_Free(wn_Hybrid* h);
 
 #endif /* WN_HYBRID_H */

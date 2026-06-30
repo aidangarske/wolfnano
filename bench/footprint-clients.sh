@@ -25,7 +25,7 @@ textsz() { "$SIZE" "$1" 2>/dev/null | awk 'NR==2{print $1}'; }
 # ---- wolfNanoTLS: built from the public configs/ starter templates (one source of
 # truth, so the footprint reproduces from the same user_settings.h a user ships) ----
 cfg() { d="$OUT/cfg_$1"; mkdir -p "$d"; cp "configs/user_settings_$1.h" "$d/user_settings.h"; echo "$d"; }
-WN_BASE="$OPT $ARCH -DWOLFSSL_USER_SETTINGS -DWOLFNANOTLS_TARGET_PORTABLE_C -I. -Iwolfssl -Iinclude/wolfnano -Isrc"
+WN_BASE="$OPT $ARCH -DWOLFSSL_USER_SETTINGS -DWOLFNANO_TARGET_PORTABLE_C -I. -Iwolfssl -Iinclude/wolfnano -Isrc"
 WN_SUP="$WC/wc_port.c $WC/memory.c $WC/error.c $WC/hash.c $WC/random.c $WC/wolfmath.c $WC/logging.c $WC/coding.c $WC/sha256.c $WC/sha512.c $WC/hmac.c $WC/kdf.c $WC/aes.c $WC/curve25519.c $WC/fe_operations.c $WC/sp_int.c"
 WN_SUP_PSK="$WC/wc_port.c $WC/memory.c $WC/error.c $WC/hash.c $WC/random.c $WC/wolfmath.c $WC/logging.c $WC/coding.c $WC/sha256.c $WC/hmac.c $WC/kdf.c $WC/aes.c $WC/curve25519.c $WC/fe_operations.c $WC/sp_int.c"
 WN_SHELL="src/wn_msg.c src/wn_keyschedule.c src/wn_transcript.c src/wn_record.c src/wn_keyshare.c src/wn_serverhello.c src/wn_connect.c"
@@ -33,7 +33,7 @@ $CC -I"$(cfg minimal)" $WN_BASE $WN_SUP_PSK $WN_SHELL bench/min/wn_psk_client.c 
 # P-256 PSK (ECDHE secp256r1): ecc + asn + sp_int, X25519 gated out of the keyshare
 WN_SUP_P256="$WC/wc_port.c $WC/memory.c $WC/error.c $WC/hash.c $WC/random.c $WC/wolfmath.c $WC/logging.c $WC/coding.c $WC/sha256.c $WC/hmac.c $WC/kdf.c $WC/aes.c $WC/ecc.c $WC/asn.c $WC/sp_int.c"
 $CC -I"$(cfg psk_p256)" $WN_BASE $WN_SUP_P256 $WN_SHELL bench/min/wn_psk_client.c $LINK -o "$OUT/wn_psk_p256.elf" 2>/dev/null
-$CC -I"$(cfg cert)" -DWOLFNANOTLS_ALLOW_MALLOC $WN_BASE \
+$CC -I"$(cfg cert)" -DWOLFNANO_ALLOW_MALLOC $WN_BASE \
    $WN_SUP $WC/ecc.c $WC/asn.c $WC/rsa.c src/wn_clienthello.c $WN_SHELL \
    bench/min/wn_client.c $LINK -o "$OUT/wn_cert.elf" 2>/dev/null
 # PSK + X25519MLKEM768 hybrid (post-quantum): adds ML-KEM-768 + SHA3 + wn_hybrid
@@ -46,8 +46,8 @@ $CC -I"$(cfg pqc)" $WN_BASE $WN_SUP_PQC src/wn_hybrid.c $WN_SHELL \
 # bug in ArmGNU 14.2 (the other rows are unaffected), so this row is a slight
 # over-estimate vs the -flto rows above.
 WN_SUP_MLDSA="$WN_SUP $WC/ecc.c $WC/asn.c $WC/sha3.c $WC/wc_mldsa.c"
-WN_BASE_NOLTO="-Os -ffunction-sections -fdata-sections $ARCH -DWOLFSSL_USER_SETTINGS -DWOLFNANOTLS_TARGET_PORTABLE_C -I. -Iwolfssl -Iinclude/wolfnano -Isrc"
-$CC -I"$(cfg cert_mldsa)" -DWOLFNANOTLS_ALLOW_MALLOC $WN_BASE_NOLTO \
+WN_BASE_NOLTO="-Os -ffunction-sections -fdata-sections $ARCH -DWOLFSSL_USER_SETTINGS -DWOLFNANO_TARGET_PORTABLE_C -I. -Iwolfssl -Iinclude/wolfnano -Isrc"
+$CC -I"$(cfg cert_mldsa)" -DWOLFNANO_ALLOW_MALLOC $WN_BASE_NOLTO \
    $WN_SUP_MLDSA src/wn_clienthello.c $WN_SHELL \
    bench/min/wn_client.c -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs \
    -o "$OUT/wn_cert_mldsa.elf" 2>/dev/null
@@ -65,7 +65,7 @@ mb_build() { # $1=config $2=client $3=out
 [ -d "$MB" ] && mb_build mbedtls_config_tls.h bench/min/mbed_client.c "$OUT/mb_cert.elf"
 
 # ---- full wolfSSL (minimal config in bench/min/ws) ----
-WS_CF="$OPT $ARCH -DWOLFSSL_USER_SETTINGS -DWOLFNANOTLS_TARGET_PORTABLE_C -Ibench/min/ws -Iwolfssl"
+WS_CF="$OPT $ARCH -DWOLFSSL_USER_SETTINGS -DWOLFNANO_TARGET_PORTABLE_C -Ibench/min/ws -Iwolfssl"
 $CC $WS_CF $WC/wc_port.c $WC/memory.c $WC/error.c $WC/hash.c $WC/random.c $WC/wolfmath.c \
    $WC/logging.c $WC/coding.c $WC/sha256.c $WC/sha512.c $WC/hmac.c $WC/kdf.c $WC/aes.c \
    $WC/ecc.c $WC/asn.c $WC/rsa.c $WC/sp_int.c $WC/curve25519.c $WC/fe_operations.c \

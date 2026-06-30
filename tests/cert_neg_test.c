@@ -160,7 +160,7 @@ int main(void)
     byte zpub[WN_DEFAULT_PUB_SZ];
     word32 chlen = 0;
 #endif
-#ifdef WOLFNANOTLS_X509_HOSTNAME
+#ifdef WOLFNANO_X509_HOSTNAME
     DecodedCert dc;
     char nameBuf[256];
     const char* nm = NULL;
@@ -196,12 +196,12 @@ int main(void)
 
     vr = wn_CertVerify(0x0403, spki, (word32)spkiLen, th, sizeof(th), sig,
                      sigLen);
-    check(vr == WOLFNANOTLS_SUCCESS, "ECDSA CertificateVerify accepted (0x0403)");
+    check(vr == WOLFNANO_SUCCESS, "ECDSA CertificateVerify accepted (0x0403)");
 
     sig[10] ^= 0x01;
     vr = wn_CertVerify(0x0403, spki, (word32)spkiLen, th, sizeof(th), sig,
                      sigLen);
-    check(vr != WOLFNANOTLS_SUCCESS, "tampered ECDSA signature rejected");
+    check(vr != WOLFNANO_SUCCESS, "tampered ECDSA signature rejected");
 
 #if defined(HAVE_ECC384) && defined(WOLFSSL_SHA384)
     rc = wc_ecc_init(&ek384);
@@ -221,11 +221,11 @@ int main(void)
     check(rc == 0, "sign CertificateVerify TBS (ECDSA P-384)");
     vr = wn_CertVerify(0x0503, spki384, (word32)sp384Len, th, sizeof(th), sig,
                        sigLen);
-    check(vr == WOLFNANOTLS_SUCCESS, "ECDSA P-384 CertVerify accepted (0x0503)");
+    check(vr == WOLFNANO_SUCCESS, "ECDSA P-384 CertVerify accepted (0x0503)");
     sig[10] ^= 0x01;
     vr = wn_CertVerify(0x0503, spki384, (word32)sp384Len, th, sizeof(th), sig,
                        sigLen);
-    check(vr != WOLFNANOTLS_SUCCESS, "tampered ECDSA P-384 signature rejected");
+    check(vr != WOLFNANO_SUCCESS, "tampered ECDSA P-384 signature rejected");
     /* a VALID P-256/SHA-384 signature must still be rejected for the P-384
      * scheme purely on curve binding, not on signature validity. */
     sigLen = (word32)sizeof(sig);
@@ -233,7 +233,7 @@ int main(void)
     check(rc == 0, "sign SHA-384 digest with P-256 key");
     vr = wn_CertVerify(0x0503, spki, (word32)spkiLen, th, sizeof(th), sig,
                        sigLen);
-    check(vr == WOLFNANOTLS_E_BAD_CERT,
+    check(vr == WOLFNANO_E_BAD_CERT,
           "P-256 leaf key rejected for P-384 scheme (curve binding)");
 #endif
 
@@ -257,11 +257,11 @@ int main(void)
     rsigLen = (word32)rc;
     vr = wn_CertVerify(0x0805, rsaSpki, rsaSpkiLen, th, sizeof(th), rsig,
                        rsigLen);
-    check(vr == WOLFNANOTLS_SUCCESS, "RSA-PSS SHA-384 CertVerify accepted (0x0805)");
+    check(vr == WOLFNANO_SUCCESS, "RSA-PSS SHA-384 CertVerify accepted (0x0805)");
     rsig[10] ^= 0x01;
     vr = wn_CertVerify(0x0805, rsaSpki, rsaSpkiLen, th, sizeof(th), rsig,
                        rsigLen);
-    check(vr != WOLFNANOTLS_SUCCESS, "tampered RSA-PSS SHA-384 rejected");
+    check(vr != WOLFNANO_SUCCESS, "tampered RSA-PSS SHA-384 rejected");
     #endif
     #ifdef WOLFSSL_SHA512
     rc = wc_Hash(WC_HASH_TYPE_SHA512, tbs, tbsLen, rdg, 64);
@@ -273,11 +273,11 @@ int main(void)
     rsigLen = (word32)rc;
     vr = wn_CertVerify(0x0806, rsaSpki, rsaSpkiLen, th, sizeof(th), rsig,
                        rsigLen);
-    check(vr == WOLFNANOTLS_SUCCESS, "RSA-PSS SHA-512 CertVerify accepted (0x0806)");
+    check(vr == WOLFNANO_SUCCESS, "RSA-PSS SHA-512 CertVerify accepted (0x0806)");
     rsig[10] ^= 0x01;
     vr = wn_CertVerify(0x0806, rsaSpki, rsaSpkiLen, th, sizeof(th), rsig,
                        rsigLen);
-    check(vr != WOLFNANOTLS_SUCCESS, "tampered RSA-PSS SHA-512 rejected");
+    check(vr != WOLFNANO_SUCCESS, "tampered RSA-PSS SHA-512 rejected");
     #endif
 #endif
 
@@ -286,7 +286,7 @@ int main(void)
     XMEMSET(zpub, 0, sizeof(zpub));
     rc = wn_ClientHello_Build_ex(chbuf, &chlen, sizeof(chbuf), th, NULL, 0,
                                  zpub, sizeof(zpub), NULL);
-    check(rc == WOLFNANOTLS_SUCCESS, "build ClientHello for sig-alg wire check");
+    check(rc == WOLFNANO_SUCCESS, "build ClientHello for sig-alg wire check");
     check(sigalg_offered(chbuf, chlen, 0x0503),
           "ClientHello offers ecdsa_secp384r1_sha384 (0x0503)");
     check(sigalg_offered(chbuf, chlen, 0x0805),
@@ -327,50 +327,50 @@ int main(void)
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, leafSpki,
                         &leafSpkiLen, NULL, NULL, 0, nowValid);
-    check(rc == WOLFNANOTLS_SUCCESS, "valid ECC chain verified");
+    check(rc == WOLFNANO_SUCCESS, "valid ECC chain verified");
 
     /* validity-window enforcement (#35): leaf outside [notBefore,notAfter] */
     leafSpkiLen = (word32)sizeof(leafSpki);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, leafSpki,
                         &leafSpkiLen, NULL, NULL, 0, nowPast);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "not-yet-valid cert rejected");
+    check(rc == WOLFNANO_E_BAD_CERT, "not-yet-valid cert rejected");
     leafSpkiLen = (word32)sizeof(leafSpki);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, leafSpki,
                         &leafSpkiLen, NULL, NULL, 0, nowFuture);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "expired cert rejected");
+    check(rc == WOLFNANO_E_BAD_CERT, "expired cert rejected");
 
     /* key pin: leafSpki now holds the real leaf key; pin against it. */
     tl = (word32)sizeof(tmp);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
                         NULL, leafSpki, leafSpkiLen, nowValid);
-    check(rc == WOLFNANOTLS_SUCCESS, "matching public-key pin accepted");
+    check(rc == WOLFNANO_SUCCESS, "matching public-key pin accepted");
     leafSpki[0] ^= 0x01;
     tl = (word32)sizeof(tmp);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
                         NULL, leafSpki, leafSpkiLen, nowValid);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "wrong key pin rejected");
+    check(rc == WOLFNANO_E_BAD_CERT, "wrong key pin rejected");
     leafSpki[0] ^= 0x01;                         /* restore the real pin bytes */
     tl = (word32)sizeof(tmp);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
                         NULL, leafSpki, 0, nowValid);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "zero-length key pin rejected");
+    check(rc == WOLFNANO_E_BAD_CERT, "zero-length key pin rejected");
 
-#ifdef WOLFNANOTLS_X509_HOSTNAME
+#ifdef WOLFNANO_X509_HOSTNAME
     check(wn_DnsNameMatch("example.com", 11, "example.com", 11)
-          == WOLFNANOTLS_SUCCESS, "exact host match");
+          == WOLFNANO_SUCCESS, "exact host match");
     check(wn_DnsNameMatch("EXAMPLE.com", 11, "example.COM", 11)
-          == WOLFNANOTLS_SUCCESS, "case-insensitive host match");
+          == WOLFNANO_SUCCESS, "case-insensitive host match");
     check(wn_DnsNameMatch("*.example.com", 13, "a.example.com", 13)
-          == WOLFNANOTLS_SUCCESS, "wildcard host match");
+          == WOLFNANO_SUCCESS, "wildcard host match");
     check(wn_DnsNameMatch("*.example.com", 13, "a.b.example.com", 15)
-          != WOLFNANOTLS_SUCCESS, "wildcard rejects multi-label host");
+          != WOLFNANO_SUCCESS, "wildcard rejects multi-label host");
     check(wn_DnsNameMatch("example.com", 11, "other.com", 9)
-          != WOLFNANOTLS_SUCCESS, "host mismatch rejected");
+          != WOLFNANO_SUCCESS, "host mismatch rejected");
 
     wc_InitDecodedCert(&dc, serv_ecc_der_256,
                        (word32)sizeof_serv_ecc_der_256, NULL);
@@ -394,13 +394,13 @@ int main(void)
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
                         nameBuf, NULL, 0, nowValid);
-    check(rc == WOLFNANOTLS_SUCCESS, "leaf hostname accepted");
+    check(rc == WOLFNANO_SUCCESS, "leaf hostname accepted");
     tl = (word32)sizeof(tmp);
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, tmp, &tl,
                         "no.match.invalid", NULL, 0, nowValid);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "wrong hostname rejected");
-#endif /* WOLFNANOTLS_X509_HOSTNAME */
+    check(rc == WOLFNANO_E_BAD_CERT, "wrong hostname rejected");
+#endif /* WOLFNANO_X509_HOSTNAME */
 
     XMEMCPY(tamper, serv_ecc_der_256, sizeof(serv_ecc_der_256));
     tamper[sizeof(tamper) - 1] ^= 0x01;
@@ -410,22 +410,22 @@ int main(void)
     rc = wn_VerifyChain(certs, certLens, 1, ca_ecc_cert_der_256,
                         (word32)sizeof_ca_ecc_cert_der_256, leafSpki,
                         &leafSpkiLen, NULL, NULL, 0, nowValid);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "tampered ECC chain rejected");
+    check(rc == WOLFNANO_E_BAD_CERT, "tampered ECC chain rejected");
 
     /* EncryptedExtensions acceptance (wn_CheckEncExt): empty, supported_groups,
      * and server_name (allowed only when SNI was offered). */
-    check(wn_CheckEncExt(ee_empty, sizeof(ee_empty), 0) == WOLFNANOTLS_SUCCESS,
+    check(wn_CheckEncExt(ee_empty, sizeof(ee_empty), 0) == WOLFNANO_SUCCESS,
           "EE empty accepted");
-    check(wn_CheckEncExt(ee_sgroup, sizeof(ee_sgroup), 0) == WOLFNANOTLS_SUCCESS,
+    check(wn_CheckEncExt(ee_sgroup, sizeof(ee_sgroup), 0) == WOLFNANO_SUCCESS,
           "EE supported_groups accepted");
-    check(wn_CheckEncExt(ee_sni, sizeof(ee_sni), 1) == WOLFNANOTLS_SUCCESS,
+    check(wn_CheckEncExt(ee_sni, sizeof(ee_sni), 1) == WOLFNANO_SUCCESS,
           "EE server_name accepted when SNI offered");
-    check(wn_CheckEncExt(ee_sni, sizeof(ee_sni), 0) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(wn_CheckEncExt(ee_sni, sizeof(ee_sni), 0) == WOLFNANO_E_UNEXPECTED_MSG,
           "EE server_name rejected when SNI not offered");
     check(wn_CheckEncExt(ee_sni_ne, sizeof(ee_sni_ne), 1)
-              == WOLFNANOTLS_E_UNEXPECTED_MSG,
+              == WOLFNANO_E_UNEXPECTED_MSG,
           "EE non-empty server_name ack rejected");
-    check(wn_CheckEncExt(ee_bad, sizeof(ee_bad), 1) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(wn_CheckEncExt(ee_bad, sizeof(ee_bad), 1) == WOLFNANO_E_UNEXPECTED_MSG,
           "EE forbidden extension rejected");
 
     if (ekInit) {

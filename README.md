@@ -42,9 +42,9 @@ interop stays identical to wolfSSL.
   surface; see [Benchmarks](https://github.com/aidangarske/wolfNanoTLS/wiki/Benchmarks).
 - **Post-quantum ready**: ML-KEM-768 (+ X25519MLKEM768 hybrid) and ML-DSA are
   compile-out-able adders.
-- **Per-algorithm compile flags** (`WOLFNANOTLS_HAVE_*`): every algorithm and
+- **Per-algorithm compile flags** (`WOLFNANO_HAVE_*`): every algorithm and
   feature is behind one switch; off means no undefined references.
-- **FIPS 140-3**: a `WOLFNANOTLS_CRYPTO=fips` build runs all TLS 1.3 crypto through
+- **FIPS 140-3**: a `WOLFNANO_CRYPTO=fips` build runs all TLS 1.3 crypto through
   the **validated wolfCrypt module** (verified against v5.2.4, Cert #4718:
   in-core integrity self-test + CASTs pass through the seam). The TLS shell is
   outside the boundary, so only the validated module does cryptography; see
@@ -77,8 +77,8 @@ Whole TLS 1.3 client linked from source for Cortex-M33 (AES-128-GCM, SHA-256),
 | cert / X.509 + ML-DSA-44 (post-quantum) | **79.3 KB** |
 
 At ~17 KB the PSK client fits Cortex-M0+/M3/M4 parts from ~32 KB flash. The
-default curve is **X25519** (smallest); set `WOLFNANOTLS_HAVE_ECDHE_P256` (or
-`WOLFNANOTLS_FIPS`) to negotiate **P-256** for FIPS / broad interop. Both are
+default curve is **X25519** (smallest); set `WOLFNANO_HAVE_ECDHE_P256` (or
+`WOLFNANO_FIPS`) to negotiate **P-256** for FIPS / broad interop. Both are
 interop-verified against OpenSSL and wolfSSL.
 
 Per-config sizes and reproduction steps are in
@@ -126,7 +126,7 @@ int rc;
 /* PSK + ECDHE handshake, keeping a session for application data */
 rc = wn_Connect_Psk_ex(&sess, &rng, mySend, myRecv, &fd, psk, pskLen,
                        "Client_identity", scratch, sizeof(scratch));
-if (rc != WOLFNANOTLS_SUCCESS) {
+if (rc != WOLFNANO_SUCCESS) {
     return rc;                 /* handshake failed: do not use the session */
 }
 if (wn_Send(&sess, (const byte*)"hello", 5) == 0) {
@@ -155,12 +155,12 @@ make bench       # all-algo speed table (portable C vs Intel asm)
 |---|---|
 | `make test` | Build and run all unit / KAT suites |
 | `make interop` | Live handshake vs OpenSSL, wolfSSL, mbedTLS |
-| `make bench` | All-algo benchmark, `WOLFNANOTLS_ASM=none` vs `=intel` |
-| `make targets` | Cross-compile the floor for every `WOLFNANOTLS_ASM` arch |
+| `make bench` | All-algo benchmark, `WOLFNANO_ASM=none` vs `=intel` |
+| `make targets` | Cross-compile the floor for every `WOLFNANO_ASM` arch |
 | `make fipsproof` | Build the shell against a wolfCrypt FIPS bundle |
 | `make clean` | Remove build artifacts |
 
-Pick the accelerated backend with `WOLFNANOTLS_ASM=intel|thumb2|aarch64|armv7|riscv64`
+Pick the accelerated backend with `WOLFNANO_ASM=intel|thumb2|aarch64|armv7|riscv64`
 (default `none` is portable C). See
 [Macros](https://github.com/aidangarske/wolfNanoTLS/wiki/Macros).
 
