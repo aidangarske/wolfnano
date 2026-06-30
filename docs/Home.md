@@ -20,7 +20,7 @@ only through a thin `wc_*` provider seam.
   - `src` (default, GPLv3): selected `wolfcrypt/src/*.c` from the submodule.
   - `fips` (commercial): links a customer-supplied wolfSSL FIPS bundle under the
     unchanged shell.
-- **Per-feature compile flags** (`WOLFNANOTLS_HAVE_*`). ML-KEM and ML-DSA are
+- **Per-feature compile flags** (`WOLFNANO_HAVE_*`). ML-KEM and ML-DSA are
   compile-out-able adders.
 - **Clean-room provenance**: copy wolfSSL-family code verbatim, write everything
   else strictly from the RFC, never from third-party sources.
@@ -37,7 +37,7 @@ Early development, but the TLS 1.3 client works end to end.
 - Done (PQC): ML-KEM-768 and ML-DSA-65 adders (both verify paths
   allocation-free) plus the X25519MLKEM768 hybrid key share.
 - Done (cert auth): X.509 chain-link verify (ECC + RSA) and a **cert-based
-  TLS 1.3 handshake (ECDSA CertVerify) live against OpenSSL** (`WOLFNANOTLS_X509`,
+  TLS 1.3 handshake (ECDSA CertVerify) live against OpenSSL** (`WOLFNANO_X509`,
   needs working memory).
 - Next: the FIPS provider-seam build, benchmarks/positioning.
 - Deferred: full multi-cert path validation, hardware/on-device asm benchmarks.

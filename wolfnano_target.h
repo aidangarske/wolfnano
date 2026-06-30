@@ -18,17 +18,17 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WOLFNANOTLS_TARGET_H
-#define WOLFNANOTLS_TARGET_H
+#ifndef WOLFNANO_TARGET_H
+#define WOLFNANO_TARGET_H
 
-/* One target macro (set by the Makefile from WOLFNANOTLS_ASM=<arch>) selects the
+/* One target macro (set by the Makefile from WOLFNANO_ASM=<arch>) selects the
  * whole asm bundle. The default PORTABLE_C path is lightweight generic math
  * (WOLFSSL_SP_MATH_ALL, no asm); every accelerated target opts into the fast
  * specialized SP backend (WOLFSSL_SP_MATH + per-arch SP file) plus the symmetric
  * asm, mirroring wolfSSL --enable-*asm / --enable-sp=yes,asm. Macro/file names
  * locked against wolfssl master 59295869; re-verify on submodule re-pin (R4). */
 
-#if defined(WOLFNANOTLS_TARGET_X86_64)
+#if defined(WOLFNANO_TARGET_X86_64)
     /* Intel: AES-NI + AVX1/2 hash + SP x86_64 asm. CPUID-detected at runtime. */
     #define WOLFSSL_AESNI
     #define HAVE_INTEL_AVX1
@@ -42,7 +42,7 @@
     #define WOLFSSL_SP_X86_64          /* sp_int.c x86_64 inline asm helpers */
     #define WOLFSSL_SP_X86_64_ASM      /* sp_x86_64.c + asm; auto SP_ASM/AVX/64 */
 
-#elif defined(WOLFNANOTLS_TARGET_CORTEXM33)
+#elif defined(WOLFNANO_TARGET_CORTEXM33)
     /* Thumb2 inline asm (selects thumb2-*-asm_c.c) + SP Cortex-M asm. */
     #define WOLFSSL_ARMASM
     #define WOLFSSL_ARMASM_THUMB2
@@ -58,7 +58,7 @@
     #define SP_WORD_SIZE 32
     #define TFM_NO_ASM
 
-#elif defined(WOLFNANOTLS_TARGET_AARCH64)
+#elif defined(WOLFNANO_TARGET_AARCH64)
     /* ARMv8 aarch64: NEON + (optional) crypto-extension AES/SHA + SP arm64 asm. */
     #define WOLFSSL_ARMASM
     #define WOLFSSL_ARMASM_NEON
@@ -68,7 +68,7 @@
     #define WOLFSSL_HAVE_SP_RSA
     #define WOLFSSL_SP_ARM64_ASM        /* sp_arm64.c; auto SP_ASM/64 */
 
-#elif defined(WOLFNANOTLS_TARGET_ARMV8_32)
+#elif defined(WOLFNANO_TARGET_ARMV8_32)
     /* 32-bit ARM (ARMv7-a / ARMv8-32): SP arm32 asm + armv8-32 symmetric asm. */
     #define WOLFSSL_ARMASM
 
@@ -78,7 +78,7 @@
     #define WOLFSSL_SP_ARM32_ASM        /* sp_arm32.c; auto SP_ASM */
     #define SP_WORD_SIZE 32
 
-#elif defined(WOLFNANOTLS_TARGET_RISCV64)
+#elif defined(WOLFNANO_TARGET_RISCV64)
     /* RISC-V 64: scalar symmetric/hash asm only; SP ECC stays portable sp_c64.c. */
     #define WOLFSSL_RISCV_ASM
 
@@ -87,12 +87,12 @@
     #define WOLFSSL_HAVE_SP_RSA
     #define SP_WORD_SIZE 64
 
-#elif defined(WOLFNANOTLS_TARGET_PORTABLE_C)
+#elif defined(WOLFNANO_TARGET_PORTABLE_C)
     /* pure C, no asm: lightweight default + CI baseline (generic SP math). */
     #define WOLFSSL_SP_MATH_ALL
 
 #else
-    #error "Define a WOLFNANOTLS_TARGET_* (set via WOLFNANOTLS_ASM=<arch> in the Makefile)"
+    #error "Define a WOLFNANO_TARGET_* (set via WOLFNANO_ASM=<arch> in the Makefile)"
 #endif
 
 /* Specialized SP backends implement P-256 by default; P-384 is opt-in. The
@@ -101,4 +101,4 @@
     #define WOLFSSL_SP_384
 #endif
 
-#endif /* WOLFNANOTLS_TARGET_H */
+#endif /* WOLFNANO_TARGET_H */

@@ -60,7 +60,7 @@ int main(void)
     printf("wolfNanoTLS ClientHello encoder test\n");
 
     rc = wn_ClientHello_Build(ch, &chLen, sizeof(ch), rnd, sid, 32, pub, 32);
-    check((rc == WOLFNANOTLS_SUCCESS) && (chLen > 0), "build ClientHello");
+    check((rc == WOLFNANO_SUCCESS) && (chLen > 0), "build ClientHello");
 
     wn_Reader_Init(&r, ch, chLen);
     type  = wn_Read_U8(&r);
@@ -119,7 +119,7 @@ int main(void)
     /* build again with SNI and confirm the server_name extension is present */
     rc = wn_ClientHello_Build_ex(ch, &chLen, sizeof(ch), rnd, sid, 32, pub, 32,
                                  host);
-    check(rc == WOLFNANOTLS_SUCCESS, "build ClientHello with SNI");
+    check(rc == WOLFNANO_SUCCESS, "build ClientHello with SNI");
     wn_Reader_Init(&r, ch, chLen);
     (void)wn_Read_U8(&r); (void)wn_Read_U24(&r); (void)wn_Read_U16(&r);
     (void)wn_Read_Bytes(&r, 32);
@@ -156,27 +156,27 @@ int main(void)
     longhost[255] = 0;
     rc = wn_ClientHello_Build_ex(ch, &chLen, sizeof(ch), rnd, sid, 32, pub, 32,
                                  longhost);
-    check(rc == WOLFNANOTLS_SUCCESS, "255-byte SNI host accepted");
+    check(rc == WOLFNANO_SUCCESS, "255-byte SNI host accepted");
 
     /* 256 bytes is the first length over the limit */
     for (i = 0; i < 256; i++) { longhost[i] = 'a'; }
     longhost[256] = 0;
     rc = wn_ClientHello_Build_ex(ch, &chLen, sizeof(ch), rnd, sid, 32, pub, 32,
                                  longhost);
-    check(rc == WOLFNANOTLS_E_INVALID_ARG, "256-byte SNI host rejected");
+    check(rc == WOLFNANO_E_INVALID_ARG, "256-byte SNI host rejected");
 
     /* SNI host longer than the 255-byte limit is rejected */
     for (i = 0; i < 300; i++) { longhost[i] = 'a'; }
     longhost[300] = 0;
     rc = wn_ClientHello_Build_ex(ch, &chLen, sizeof(ch), rnd, sid, 32, pub, 32,
                                  longhost);
-    check(rc == WOLFNANOTLS_E_INVALID_ARG, "over-long SNI host rejected");
+    check(rc == WOLFNANO_E_INVALID_ARG, "over-long SNI host rejected");
 
     /* invalid args + buffer too small */
     rc = wn_ClientHello_Build(NULL, &chLen, sizeof(ch), rnd, sid, 32, pub, 32);
-    check(rc == WOLFNANOTLS_E_INVALID_ARG, "ClientHello NULL out rejected");
+    check(rc == WOLFNANO_E_INVALID_ARG, "ClientHello NULL out rejected");
     rc = wn_ClientHello_Build(ch, &chLen, 16, rnd, sid, 32, pub, 32);
-    check(rc == WOLFNANOTLS_E_INVALID_ARG, "ClientHello tiny buffer rejected");
+    check(rc == WOLFNANO_E_INVALID_ARG, "ClientHello tiny buffer rejected");
 
     printf("\n%s (%d failure%s)\n", fails ? "\033[31mFAILED\033[0m" : "\033[32mALL PASS\033[0m",
            fails, fails == 1 ? "" : "s");

@@ -71,7 +71,7 @@ int main(void)
     rc |= wn_KeyShare_Generate(&srv, &rng, srvPub, &srvPubLen);
     rc |= wn_KeyShare_Shared(&cli, srvPub, srvPubLen, ssA, &ssALen);
     rc |= wn_KeyShare_Shared(&srv, cliPub, cliPubLen, ssB, &ssBLen);
-    check((rc == WOLFNANOTLS_SUCCESS) && (ssALen == 32) &&
+    check((rc == WOLFNANO_SUCCESS) && (ssALen == 32) &&
           (XMEMCMP(ssA, ssB, 32) == 0), "ECDHE shared secret agrees");
 
     /* 2. transcript over the exchanged key shares (stand-in for CH..SH) */
@@ -80,7 +80,7 @@ int main(void)
     rc |= wn_Transcript_Update(&tc, srvPub, srvPubLen);
     rc |= wn_Transcript_GetHash(&tc, th, &thLen);
     rc |= wn_Transcript_Free(&tc);
-    check((rc == WOLFNANOTLS_SUCCESS) && (thLen == 32), "transcript hash computed");
+    check((rc == WOLFNANO_SUCCESS) && (thLen == 32), "transcript hash computed");
 
     /* 3. key schedule to handshake traffic secrets */
     rc  = wc_Sha256Hash((const byte*)"", 0, emptyHash);
@@ -90,7 +90,7 @@ int main(void)
     rc |= wn_Tls13_Extract(hs, derived, 32, ssA, 32, WC_SHA256);
     rc |= wn_Tls13_DeriveSecret(cHs, hs, "c hs traffic", th, 32, WC_SHA256);
     rc |= wn_Tls13_DeriveSecret(sHs, hs, "s hs traffic", th, 32, WC_SHA256);
-    check(rc == WOLFNANOTLS_SUCCESS, "derive handshake traffic secrets");
+    check(rc == WOLFNANO_SUCCESS, "derive handshake traffic secrets");
 
     /* 4. record keys from each traffic secret */
     rc  = wn_Tls13_ExpandLabel(cKey, sizeof(cKey), cHs, "key", NULL, 0,
@@ -99,14 +99,14 @@ int main(void)
     rc |= wn_Tls13_ExpandLabel(sKey, sizeof(sKey), sHs, "key", NULL, 0,
                                WC_SHA256);
     rc |= wn_Tls13_ExpandLabel(sIv, sizeof(sIv), sHs, "iv", NULL, 0, WC_SHA256);
-    check(rc == WOLFNANOTLS_SUCCESS, "derive record key/iv");
+    check(rc == WOLFNANO_SUCCESS, "derive record key/iv");
 
     /* 5. client -> server protected record */
     rc  = wn_Record_Protect(rec, &recLen, cKey, sizeof(cKey), cIv, 0, 23,
                             ping, sizeof(ping));
     rc |= wn_Record_Unprotect(out, &outLen, &type, cKey, sizeof(cKey), cIv, 0,
                               rec, recLen);
-    check((rc == WOLFNANOTLS_SUCCESS) && (outLen == 4) && (type == 23) &&
+    check((rc == WOLFNANO_SUCCESS) && (outLen == 4) && (type == 23) &&
           (XMEMCMP(out, ping, 4) == 0), "client->server record round-trips");
 
     /* 6. server -> client protected record */
@@ -114,7 +114,7 @@ int main(void)
                             pong, sizeof(pong));
     rc |= wn_Record_Unprotect(out, &outLen, &type, sKey, sizeof(sKey), sIv, 0,
                               rec, recLen);
-    check((rc == WOLFNANOTLS_SUCCESS) && (outLen == 4) && (type == 23) &&
+    check((rc == WOLFNANO_SUCCESS) && (outLen == 4) && (type == 23) &&
           (XMEMCMP(out, pong, 4) == 0), "server->client record round-trips");
 
     wn_KeyShare_Free(&cli);

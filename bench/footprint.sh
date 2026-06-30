@@ -8,7 +8,7 @@ OUT=build/footprint
 rm -rf "$OUT"
 mkdir -p "$OUT/nano" "$OUT/wolfssl"
 
-NANO="-Os -ffunction-sections -fdata-sections -DWOLFSSL_USER_SETTINGS -I. -Iwolfssl -Iinclude/wolfnano -Isrc -DWOLFNANOTLS_TARGET_PORTABLE_C"
+NANO="-Os -ffunction-sections -fdata-sections -DWOLFSSL_USER_SETTINGS -I. -Iwolfssl -Iinclude/wolfnano -Isrc -DWOLFNANO_TARGET_PORTABLE_C"
 CMP="-Os -ffunction-sections -fdata-sections -DWOLFSSL_USER_SETTINGS -Ibench/cmp -Iwolfssl"
 
 textsum() { size "$@" 2>/dev/null | awk 'NR>1{t+=$1} END{printf "%d", t}'; }

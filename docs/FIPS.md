@@ -46,8 +46,8 @@ github submodule.
 Instead, the shell calls crypto only through the `wc_*` seam, and the backend is
 chosen at build time:
 
-- `WOLFNANOTLS_CRYPTO=src`: the public submodule crypto, GPLv3. This is the default.
-- `WOLFNANOTLS_CRYPTO=fips`: links a customer-supplied, licensed wolfSSL FIPS bundle
+- `WOLFNANO_CRYPTO=src`: the public submodule crypto, GPLv3. This is the default.
+- `WOLFNANO_CRYPTO=fips`: links a customer-supplied, licensed wolfSSL FIPS bundle
   under the unchanged shell. This build path is commercial, not GPLv3-only.
 
 The goal is that the exact same shell objects link against both backends with
@@ -71,7 +71,7 @@ validation. The true-no-allocator guarantee is asserted for the `src` build.
 ## Proving the seam (`make fipsproof`)
 
 `make fipsproof` builds the seam against a wolfSSL FIPS bundle and runs two
-checks. Point `WOLFNANOTLS_FIPS_DIR` at a built bundle (a FIPS Ready download works
+checks. Point `WOLFNANO_FIPS_DIR` at a built bundle (a FIPS Ready download works
 for the seam proof; the licensed validated module is needed for an actual
 certificate). Verified against the validated wolfCrypt FIPS 140-3 module v5.2.4
 (Cert #4718).

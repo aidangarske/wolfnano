@@ -131,7 +131,7 @@ int main(void)
     XMEMSET(psk, 0, sizeof(psk));
 
     rc = wn_Tls13_Extract(early, NULL, 0, psk, sizeof(psk), WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(early, earlyExp, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(early, earlyExp, 32),
           "Early Secret = HKDF-Extract(0, 0)");
 
     rc = wc_Sha256Hash((const byte*)"", 0, emptyHash);
@@ -140,52 +140,52 @@ int main(void)
 
     rc = wn_Tls13_DeriveSecret(derived, early, "derived", emptyHash, 32,
                                WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(derived, derivedExp, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(derived, derivedExp, 32),
           "Derive-Secret(Early, \"derived\", \"\")");
 
     rc = wn_Tls13_Extract(hsSecret, derived, 32, ecdhe, sizeof(ecdhe),
                           WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(hsSecret, hsSecretExp, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(hsSecret, hsSecretExp, 32),
           "Handshake Secret = HKDF-Extract(derived, ECDHE)");
 
     rc = wn_Tls13_DeriveSecret(cHs, hsSecret, "c hs traffic", chShHash, 32,
                                WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(cHs, cHsTrafficExp, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(cHs, cHsTrafficExp, 32),
           "client_handshake_traffic_secret");
 
     rc = wn_Tls13_DeriveSecret(sHs, hsSecret, "s hs traffic", chShHash, 32,
                                WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(sHs, sHsTrafficExp, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(sHs, sHsTrafficExp, 32),
           "server_handshake_traffic_secret");
 
     rc = wn_Tls13_ExpandLabel(sKey, sizeof(sKey), sHs, "key", NULL, 0,
                               WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(sKey, sWriteKeyExp, 16),
+    check((rc == WOLFNANO_SUCCESS) && eq(sKey, sWriteKeyExp, 16),
           "server write key = HKDF-Expand-Label(.., \"key\", \"\")");
 
     rc = wn_Tls13_ExpandLabel(sIv, sizeof(sIv), sHs, "iv", NULL, 0, WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(sIv, sWriteIvExp, 12),
+    check((rc == WOLFNANO_SUCCESS) && eq(sIv, sWriteIvExp, 12),
           "server write iv = HKDF-Expand-Label(.., \"iv\", \"\")");
 
     rc = wn_Tls13_ExpandLabel(sFin, sizeof(sFin), sHs, "finished", NULL, 0,
                               WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(sFin, sFinishedKeyExp, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(sFin, sFinishedKeyExp, 32),
           "server finished key = HKDF-Expand-Label(.., \"finished\", \"\")");
 
     rc  = wn_Tls13_DeriveSecret(derived2, hsSecret, "derived", emptyHash, 32,
                                 WC_SHA256);
     rc |= wn_Tls13_Extract(master, derived2, 32, psk, sizeof(psk), WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(master, masterExp, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(master, masterExp, 32),
           "Master Secret = HKDF-Extract(derived, 0)");
 
     rc = wn_Tls13_DeriveSecret(cAp, master, "c ap traffic", chSfHash, 32,
                                WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(cAp, cApTrafficExp, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(cAp, cApTrafficExp, 32),
           "client_application_traffic_secret_0");
 
     rc = wn_Tls13_DeriveSecret(sAp, master, "s ap traffic", chSfHash, 32,
                                WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(sAp, sApTrafficExp, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(sAp, sApTrafficExp, 32),
           "server_application_traffic_secret_0");
 
     /* FinishedMac == HMAC(HKDF-Expand-Label(sHs,"finished"), transcript).
@@ -197,7 +197,7 @@ int main(void)
     rc |= wc_HmacUpdate(&h, emptyHash, 32);
     rc |= wc_HmacFinal(&h, fmanual);
     wc_HmacFree(&h);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(fmac, fmanual, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(fmac, fmanual, 32),
           "FinishedMac = HMAC(finished_key, transcript)");
 
     /* SHA-384 path: exercise the WC_SHA384 branch in wn_DigestSize end to end.
@@ -206,26 +206,26 @@ int main(void)
     rc  = wn_Tls13_Extract(big, NULL, 0, sec48, 48, WC_SHA384);
     rc |= wn_Tls13_ExpandLabel(big, 48, sec48, "derived", NULL, 0, WC_SHA384);
     rc |= wn_Tls13_FinishedMac(big, sec48, sec48, 48, WC_SHA384);
-    check(rc == WOLFNANOTLS_SUCCESS, "SHA-384 key-schedule path runs");
+    check(rc == WOLFNANO_SUCCESS, "SHA-384 key-schedule path runs");
 
     /* invalid arguments and unknown digest are rejected */
     check(wn_Tls13_Extract(NULL, NULL, 0, psk, 32, WC_SHA256)
-          == WOLFNANOTLS_E_INVALID_ARG, "Extract NULL rejected");
+          == WOLFNANO_E_INVALID_ARG, "Extract NULL rejected");
     check(wn_Tls13_Extract(big, NULL, 0, psk, 32, 0x7f)
-          == WOLFNANOTLS_E_INVALID_ARG, "Extract unknown digest rejected");
+          == WOLFNANO_E_INVALID_ARG, "Extract unknown digest rejected");
     check(wn_Tls13_Extract(big, NULL, 0, psk, 0, WC_SHA256)
-          == WOLFNANOTLS_SUCCESS, "Extract with zero-length IKM succeeds");
+          == WOLFNANO_SUCCESS, "Extract with zero-length IKM succeeds");
     check(wn_Tls13_ExpandLabel(NULL, 32, sHs, "key", NULL, 0, WC_SHA256)
-          == WOLFNANOTLS_E_INVALID_ARG, "ExpandLabel NULL rejected");
+          == WOLFNANO_E_INVALID_ARG, "ExpandLabel NULL rejected");
     check(wn_Tls13_FinishedMac(NULL, sHs, emptyHash, 32, WC_SHA256)
-          == WOLFNANOTLS_E_INVALID_ARG, "FinishedMac NULL rejected");
+          == WOLFNANO_E_INVALID_ARG, "FinishedMac NULL rejected");
     check(wn_Tls13_KeyUpdate(NULL, sKey, sIv, WC_SHA256)
-          == WOLFNANOTLS_E_INVALID_ARG, "KeyUpdate NULL rejected");
+          == WOLFNANO_E_INVALID_ARG, "KeyUpdate NULL rejected");
     check(wn_Tls13_DeriveSecret(derived2, hsSecret, "derived", emptyHash, 16,
-          WC_SHA256) == WOLFNANOTLS_E_INVALID_ARG,
+          WC_SHA256) == WOLFNANO_E_INVALID_ARG,
           "DeriveSecret hashLen mismatch rejected");
     check(wn_Tls13_FinishedMac(fmac, sHs, emptyHash, 16, WC_SHA256)
-          == WOLFNANOTLS_E_INVALID_ARG, "FinishedMac hashLen mismatch rejected");
+          == WOLFNANO_E_INVALID_ARG, "FinishedMac hashLen mismatch rejected");
 
     printf("\n%s (%d failure%s)\n", fails ? "\033[31mFAILED\033[0m" : "\033[32mALL PASS\033[0m",
            fails, fails == 1 ? "" : "s");

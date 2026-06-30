@@ -52,7 +52,7 @@ wn_Close(&sess);                           /* close_notify + wipe keys    */
 
 `scratch` is a caller buffer the session reuses for record framing (no
 allocation). `wn_Recv` transparently skips post-handshake NewSessionTicket
-records and processes KeyUpdate; it returns `WOLFNANOTLS_E_CLOSED` when the peer
+records and processes KeyUpdate; it returns `WOLFNANO_E_CLOSED` when the peer
 sends close_notify. The handshake-only `wn_Connect_Psk` (no `_ex`) wipes the
 keys and returns when you do not need an application-data session.
 

@@ -40,7 +40,7 @@ build_host() {
     mkdir -p "$d"
     cp "configs/user_settings_$name.h" "$d/user_settings.h"
     # shellcheck disable=SC2086
-    $CC -I"$d" $COMMON -DWOLFNANOTLS_TARGET_PORTABLE_C $srcset examples/client.c \
+    $CC -I"$d" $COMMON -DWOLFNANO_TARGET_PORTABLE_C $srcset examples/client.c \
         -o "$d/client"
     echo "  PASS $name"
 }
@@ -65,7 +65,7 @@ if command -v arm-none-eabi-gcc >/dev/null 2>&1 && \
     echo "  PASS $name (cross-compiled M33 object)"
 else
     # shellcheck disable=SC2086
-    $CC -I"$d" $COMMON -DWOLFNANOTLS_TARGET_PORTABLE_C -fsyntax-only src/wn_connect.c
+    $CC -I"$d" $COMMON -DWOLFNANO_TARGET_PORTABLE_C -fsyntax-only src/wn_connect.c
     echo "  PASS $name (host syntax-only; no complete arm-none-eabi-gcc)"
 fi
 echo "configs-build: all templates OK"

@@ -22,15 +22,15 @@
  * exchange (ML-KEM-768 + X25519), AES-128-GCM, SHA-256. Copy to your project
  * as user_settings.h. */
 
-#ifndef WOLFNANOTLS_USER_SETTINGS_H
-#define WOLFNANOTLS_USER_SETTINGS_H
+#ifndef WOLFNANO_USER_SETTINGS_H
+#define WOLFNANO_USER_SETTINGS_H
 
 #define WOLFCRYPT_ONLY
 
-#define WOLFNANOTLS_HAVE_SHA256
-#define WOLFNANOTLS_HAVE_HKDF
-#define WOLFNANOTLS_HAVE_AESGCM
-#define WOLFNANOTLS_HAVE_MLKEM_HYBRID
+#define WOLFNANO_HAVE_SHA256
+#define WOLFNANO_HAVE_HKDF
+#define WOLFNANO_HAVE_AESGCM
+#define WOLFNANO_HAVE_MLKEM_HYBRID
 
 #define GCM_SMALL
 #define WOLFSSL_AES_SMALL_TABLES
@@ -39,4 +39,4 @@
 #include "wolfnano_target.h"
 #include "wolfnano_config.h"
 
-#endif /* WOLFNANOTLS_USER_SETTINGS_H */
+#endif /* WOLFNANO_USER_SETTINGS_H */

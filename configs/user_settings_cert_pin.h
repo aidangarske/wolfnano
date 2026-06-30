@@ -19,26 +19,26 @@
  */
 
 /* wolfNanoTLS X.509 client, key-pin only: same cert path as user_settings_cert.h
- * but with hostname matching compiled out (WOLFNANOTLS_X509_HOSTNAME 0), ~1 KB
+ * but with hostname matching compiled out (WOLFNANO_X509_HOSTNAME 0), ~1 KB
  * smaller. For embedded devices that authenticate one fixed server by an exact
  * leaf-key pin via wn_Connect_CertName(serverName=NULL, pinnedKey=...).
  * Copy to your project as user_settings.h. */
 
-#ifndef WOLFNANOTLS_USER_SETTINGS_H
-#define WOLFNANOTLS_USER_SETTINGS_H
+#ifndef WOLFNANO_USER_SETTINGS_H
+#define WOLFNANO_USER_SETTINGS_H
 
 #define WOLFCRYPT_ONLY
 
-#define WOLFNANOTLS_HAVE_SHA256
-#define WOLFNANOTLS_HAVE_SHA384
-#define WOLFNANOTLS_HAVE_HKDF
-#define WOLFNANOTLS_HAVE_AESGCM
-#define WOLFNANOTLS_HAVE_ECC
-#define WOLFNANOTLS_HAVE_ECC384
-#define WOLFNANOTLS_HAVE_ECDHE_P256
-#define WOLFNANOTLS_HAVE_RSA_VERIFY
-#define WOLFNANOTLS_X509
-#define WOLFNANOTLS_X509_HOSTNAME 0     /* pin-only: drop SAN/CN matching (~1 KB) */
+#define WOLFNANO_HAVE_SHA256
+#define WOLFNANO_HAVE_SHA384
+#define WOLFNANO_HAVE_HKDF
+#define WOLFNANO_HAVE_AESGCM
+#define WOLFNANO_HAVE_ECC
+#define WOLFNANO_HAVE_ECC384
+#define WOLFNANO_HAVE_ECDHE_P256
+#define WOLFNANO_HAVE_RSA_VERIFY
+#define WOLFNANO_X509
+#define WOLFNANO_X509_HOSTNAME 0     /* pin-only: drop SAN/CN matching (~1 KB) */
 
 #define GCM_SMALL
 #define WOLFSSL_AES_SMALL_TABLES
@@ -47,4 +47,4 @@
 #include "wolfnano_target.h"
 #include "wolfnano_config.h"
 
-#endif /* WOLFNANOTLS_USER_SETTINGS_H */
+#endif /* WOLFNANO_USER_SETTINGS_H */

@@ -30,17 +30,17 @@ const char* wn_ErrorToString(int err)
     const char* s;
 
     switch (err) {
-        case WOLFNANOTLS_SUCCESS:         s = "success";                  break;
-        case WOLFNANOTLS_E_INVALID_ARG:   s = "invalid argument";         break;
-        case WOLFNANOTLS_E_CRYPTO:        s = "crypto operation failed";  break;
-        case WOLFNANOTLS_E_UNSUPPORTED:   s = "unsupported";              break;
-        case WOLFNANOTLS_E_BAD_STATE:     s = "bad handshake state";      break;
-        case WOLFNANOTLS_E_UNEXPECTED_MSG:s = "unexpected message";       break;
-        case WOLFNANOTLS_E_DECODE:        s = "malformed message";        break;
-        case WOLFNANOTLS_E_BAD_MAC:       s = "authentication failure";   break;
-        case WOLFNANOTLS_E_ILLEGAL_PARAM: s = "illegal parameter";        break;
-        case WOLFNANOTLS_E_BAD_CERT:      s = "certificate failure";      break;
-        case WOLFNANOTLS_E_CLOSED:        s = "connection closed";        break;
+        case WOLFNANO_SUCCESS:         s = "success";                  break;
+        case WOLFNANO_E_INVALID_ARG:   s = "invalid argument";         break;
+        case WOLFNANO_E_CRYPTO:        s = "crypto operation failed";  break;
+        case WOLFNANO_E_UNSUPPORTED:   s = "unsupported";              break;
+        case WOLFNANO_E_BAD_STATE:     s = "bad handshake state";      break;
+        case WOLFNANO_E_UNEXPECTED_MSG:s = "unexpected message";       break;
+        case WOLFNANO_E_DECODE:        s = "malformed message";        break;
+        case WOLFNANO_E_BAD_MAC:       s = "authentication failure";   break;
+        case WOLFNANO_E_ILLEGAL_PARAM: s = "illegal parameter";        break;
+        case WOLFNANO_E_BAD_CERT:      s = "certificate failure";      break;
+        case WOLFNANO_E_CLOSED:        s = "connection closed";        break;
         default:                       s = "unknown error";           break;
     }
 

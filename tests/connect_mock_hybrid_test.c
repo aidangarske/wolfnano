@@ -285,7 +285,7 @@ static int drive(void)
 int main(void)
 {
     signal(SIGPIPE, SIG_IGN);
-    check(drive() == WOLFNANOTLS_SUCCESS, "PSK + X25519MLKEM768 handshake completes");
+    check(drive() == WOLFNANO_SUCCESS, "PSK + X25519MLKEM768 handshake completes");
     if (fails == 0) {
         printf("connect_mock_hybrid_test: all checks passed\n");
     }

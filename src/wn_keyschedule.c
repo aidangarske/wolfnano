@@ -50,13 +50,13 @@ static word32 wn_DigestSize(int digest)
 int wn_Tls13_Extract(byte* prk, const byte* salt, word32 saltLen,
                      const byte* ikm, word32 ikmLen, int digest)
 {
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if ((prk == NULL) || (ikm == NULL) || (wn_DigestSize(digest) == 0)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if (ikmLen == 0) {
             /* wolfCrypt writes a digest-sized zero block through ikm for the
              * zero-length case, so give it writable scratch, not the caller's
@@ -71,7 +71,7 @@ int wn_Tls13_Extract(byte* prk, const byte* salt, word32 saltLen,
         }
         /* LCOV_EXCL_START - HKDF-Extract does not fail on a validated digest */
         if (ret != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
@@ -84,23 +84,23 @@ int wn_Tls13_ExpandLabel(byte* okm, word32 okmLen, const byte* secret,
                          int digest)
 {
     static const byte protocol[6] = { 't', 'l', 's', '1', '3', ' ' };
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     word32 hashLen;
 
     hashLen = wn_DigestSize(digest);
     if ((okm == NULL) || (secret == NULL) || (label == NULL) ||
         (hashLen == 0) || ((info == NULL) && (infoLen > 0))) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wc_Tls13_HKDF_Expand_Label(okm, okmLen, secret, hashLen,
                   protocol, (word32)sizeof(protocol),
                   (const byte*)label, (word32)XSTRLEN(label),
                   info, infoLen, digest);
         /* LCOV_EXCL_START - HKDF-Expand-Label does not fail on a valid digest */
         if (ret != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
@@ -112,12 +112,12 @@ int wn_Tls13_DeriveSecret(byte* out, const byte* secret, const char* label,
                           const byte* transcriptHash, word32 hashLen,
                           int digest)
 {
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if (hashLen != wn_DigestSize(digest)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Tls13_ExpandLabel(out, hashLen, secret, label,
                                    transcriptHash, hashLen, digest);
     }
@@ -130,35 +130,35 @@ int wn_Tls13_FinishedMac(byte* out, const byte* baseKey,
 {
     Hmac hmac;
     byte finishedKey[WC_MAX_DIGEST_SIZE];
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int hmacInit = 0;
 
     if ((out == NULL) || (baseKey == NULL) || (transcriptHash == NULL) ||
         (hashLen == 0) || (hashLen != wn_DigestSize(digest)) ||
         (hashLen > sizeof(finishedKey))) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Tls13_ExpandLabel(finishedKey, hashLen, baseKey, "finished",
                                    NULL, 0, digest);
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         /* LCOV_EXCL_START - wc_HmacInit does not fail without an allocator */
         if (wc_HmacInit(&hmac, NULL, INVALID_DEVID) != 0) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         hmacInit = 1;
         /* LCOV_EXCL_START - HMAC set/update/final does not fail on valid input */
         if ((wc_HmacSetKey(&hmac, digest, finishedKey, hashLen) != 0) ||
             (wc_HmacUpdate(&hmac, transcriptHash, hashLen) != 0) ||
             (wc_HmacFinal(&hmac, out) != 0)) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
         /* LCOV_EXCL_STOP */
     }
@@ -175,23 +175,23 @@ int wn_Tls13_KeyUpdate(byte* secret, byte* key, byte* iv, int digest)
 {
     byte newSecret[WC_MAX_DIGEST_SIZE];
     word32 hashLen;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     hashLen = wn_DigestSize(digest);
     if ((secret == NULL) || (key == NULL) || (iv == NULL) || (hashLen == 0) ||
         (hashLen > sizeof(newSecret))) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Tls13_ExpandLabel(newSecret, hashLen, secret, "traffic upd",
                                    NULL, 0, digest);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         XMEMCPY(secret, newSecret, hashLen);
         ret = wn_Tls13_ExpandLabel(key, 16, secret, "key", NULL, 0, digest);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Tls13_ExpandLabel(iv, 12, secret, "iv", NULL, 0, digest);
     }
 

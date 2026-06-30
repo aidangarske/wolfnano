@@ -213,16 +213,16 @@ int main(void)
     push_rec(&m, s.sKey, s.sIv, 0, WN_REC_HANDSHAKE, ku, sizeof(ku));
     got = 0;
     rc = wn_Recv(&s, out, sizeof(out), &got);
-    check(rc == WOLFNANOTLS_E_DECODE, "wn_Recv rejects invalid KeyUpdate request byte");
+    check(rc == WOLFNANO_E_DECODE, "wn_Recv rejects invalid KeyUpdate request byte");
 
-    /* 6. close_notify alert -> WOLFNANOTLS_E_CLOSED, no data. */
+    /* 6. close_notify alert -> WOLFNANO_E_CLOSED, no data. */
     setup(&s, &m);
     alert[0] = 1;                   /* warning */
     alert[1] = 0;                   /* close_notify */
     push_rec(&m, s.sKey, s.sIv, 0, WN_REC_ALERT, alert, sizeof(alert));
     got = 99;
     rc = wn_Recv(&s, out, sizeof(out), &got);
-    check((rc == WOLFNANOTLS_E_CLOSED) && (got == 0), "wn_Recv reports close_notify");
+    check((rc == WOLFNANO_E_CLOSED) && (got == 0), "wn_Recv reports close_notify");
 
     /* 7. output buffer too small is rejected, not overflowed. */
     setup(&s, &m);
@@ -266,32 +266,32 @@ int main(void)
 
     setup(&s, &m);
     s.flags |= WN_SESS_CLOSED;
-    check(wn_Send(&s, out, 1) == WOLFNANOTLS_E_CLOSED, "wn_Send after close");
-    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_CLOSED,
+    check(wn_Send(&s, out, 1) == WOLFNANO_E_CLOSED, "wn_Send after close");
+    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANO_E_CLOSED,
           "wn_Recv after close");
 
     setup(&s, &m);
     s.flags &= ~WN_SESS_ESTABLISHED;
-    check(wn_Send(&s, out, 1) == WOLFNANOTLS_E_BAD_STATE,
+    check(wn_Send(&s, out, 1) == WOLFNANO_E_BAD_STATE,
           "wn_Send on non-established session rejected");
-    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_BAD_STATE,
+    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANO_E_BAD_STATE,
           "wn_Recv on non-established session rejected");
 
     setup(&s, &m);
-    check(wn_Send(&s, out, 0xfffffff0u) == WOLFNANOTLS_E_INVALID_ARG,
+    check(wn_Send(&s, out, 0xfffffff0u) == WOLFNANO_E_INVALID_ARG,
           "wn_Send rejects length that would overflow the size check");
 
     XMEMSET(&s, 0, sizeof(s));                        /* never-established, ioSend NULL */
-    check(wn_Close(&s) == WOLFNANOTLS_SUCCESS, "wn_Close on zero-init session is safe");
+    check(wn_Close(&s) == WOLFNANO_SUCCESS, "wn_Close on zero-init session is safe");
 
     /* 10. wn_Send oversized (> scratch) and transport failure. */
     setup(&s, &m);
     s.scratchLen = 64;                               /* too small for 100 bytes */
-    check(wn_Send(&s, big, 100) == WOLFNANOTLS_E_INVALID_ARG,
+    check(wn_Send(&s, big, 100) == WOLFNANO_E_INVALID_ARG,
           "wn_Send oversized rejected");
     setup(&s, &m);
     m.failSend = 1;
-    check(wn_Send(&s, (const byte*)"x", 1) == WOLFNANOTLS_E_CRYPTO,
+    check(wn_Send(&s, (const byte*)"x", 1) == WOLFNANO_E_CRYPTO,
           "wn_Send transport failure");
 
     /* 11. wn_Recv rejects a post-handshake ChangeCipherSpec (RFC 8446 5). */
@@ -299,25 +299,25 @@ int main(void)
     push_raw(&m, WN_REC_CHANGE_CIPHER, (const byte*)"\x01", 1);
     got = 0;
     rc = wn_Recv(&s, out, sizeof(out), &got);
-    check(rc == WOLFNANOTLS_E_UNEXPECTED_MSG, "wn_Recv rejects post-handshake CCS");
+    check(rc == WOLFNANO_E_UNEXPECTED_MSG, "wn_Recv rejects post-handshake CCS");
 
     /* 12. malformed post-handshake messages. */
     setup(&s, &m);
     ku[0] = 24; ku[1] = 0; ku[2] = 0; ku[3] = 1;   /* KeyUpdate, body missing */
     push_rec(&m, s.sKey, s.sIv, 0, WN_REC_HANDSHAKE, ku, 4);
-    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_DECODE,
+    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANO_E_DECODE,
           "wn_Recv truncated KeyUpdate -> DECODE");
 
     setup(&s, &m);
     nst[0] = 4; nst[1] = 0; nst[2] = 0; nst[3] = 0xff; /* NST len > available */
     push_rec(&m, s.sKey, s.sIv, 0, WN_REC_HANDSHAKE, nst, 4);
-    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_DECODE,
+    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANO_E_DECODE,
           "wn_Recv overlong post-handshake msg -> DECODE");
 
     setup(&s, &m);
     nst[0] = 99; nst[1] = 0; nst[2] = 0; nst[3] = 0;   /* unknown HS type */
     push_rec(&m, s.sKey, s.sIv, 0, WN_REC_HANDSHAKE, nst, 4);
-    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANO_E_UNEXPECTED_MSG,
           "wn_Recv unknown post-handshake type -> UNEXPECTED_MSG");
 
     /* 13. fatal (non-close) alert and unexpected content type. */
@@ -328,14 +328,14 @@ int main(void)
 
     setup(&s, &m);
     push_rec(&m, s.sKey, s.sIv, 0, 99, (const byte*)"z", 1); /* bad content type */
-    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANO_E_UNEXPECTED_MSG,
           "wn_Recv unexpected content type -> UNEXPECTED_MSG");
 
     /* 14. bad-MAC record (tampered tag) via wn_Recv. */
     setup(&s, &m);
     push_rec(&m, s.sKey, s.sIv, 0, WN_REC_APPDATA, (const byte*)"hi", 2);
     m.rx[m.rxLen - 1] ^= 0xff;                       /* corrupt the tag */
-    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_BAD_MAC,
+    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANO_E_BAD_MAC,
           "wn_Recv tampered record -> BAD_MAC");
 
     /* 15. KeyUpdate(update_requested) but our KeyUpdate send fails. */
@@ -343,7 +343,7 @@ int main(void)
     m.failSend = 1;
     ku[0] = 24; ku[1] = 0; ku[2] = 0; ku[3] = 1; ku[4] = 1;
     push_rec(&m, s.sKey, s.sIv, 0, WN_REC_HANDSHAKE, ku, 5);
-    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANOTLS_E_CRYPTO,
+    check(wn_Recv(&s, out, sizeof(out), &got) == WOLFNANO_E_CRYPTO,
           "wn_Recv KeyUpdate reply send failure -> CRYPTO");
 
     if (fails == 0) {

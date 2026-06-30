@@ -23,7 +23,7 @@
  * Each case feeds deliberately broken input and asserts a clean rejection
  * (return < 0) with no out-of-bounds read (caught by the ASan job). The
  * sticky-error reader in wn_msg latches r.err on any over-read, which the
- * parser surfaces as WOLFNANOTLS_E_INVALID_ARG. Complements serverhello_test.c.
+ * parser surfaces as WOLFNANO_E_INVALID_ARG. Complements serverhello_test.c.
  */
 
 #include "wn_serverhello.h"
@@ -61,7 +61,7 @@ int main(void)
     printf("wolfNanoTLS ServerHello negative-input test\n");
 
     rc = wn_ServerHello_Parse(shGood, n, &s);
-    check(rc == WOLFNANOTLS_SUCCESS, "baseline valid ServerHello parses");
+    check(rc == WOLFNANO_SUCCESS, "baseline valid ServerHello parses");
 
     check(wn_ServerHello_Parse(NULL, n, &s) < 0, "reject NULL msg");
     check(wn_ServerHello_Parse(shGood, n, NULL) < 0, "reject NULL out");

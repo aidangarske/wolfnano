@@ -8,7 +8,7 @@ CC       ?= cc
 
 # Pass MALLOC=1 to relax the true-no-allocator bar during bring-up.
 ifeq ($(MALLOC),1)
-  MALLOC_FLAG := -DWOLFNANOTLS_ALLOW_MALLOC
+  MALLOC_FLAG := -DWOLFNANO_ALLOW_MALLOC
 endif
 
 CFLAGS_COMMON := -Os -Wall -Wextra -Wdeclaration-after-statement \
@@ -110,26 +110,26 @@ MOCKHYB_SRC := $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
   src/wn_keyshare.c src/wn_serverhello.c src/wn_hybrid.c src/wn_connect.c \
   src/wn_session.c tests/wn_host_seed.c
 
-# WOLFNANOTLS_CRYPTO=fips backend (Phase 5 seam proof). Override with the path to
+# WOLFNANO_CRYPTO=fips backend (Phase 5 seam proof). Override with the path to
 # your own built wolfSSL FIPS bundle (FIPS Ready or a licensed validated module).
-WOLFNANOTLS_FIPS_DIR ?= $(HOME)/wolfssl-fips
-FIPS_LIB := $(WOLFNANOTLS_FIPS_DIR)/src/.libs/libwolfssl.a
+WOLFNANO_FIPS_DIR ?= $(HOME)/wolfssl-fips
+FIPS_LIB := $(WOLFNANO_FIPS_DIR)/src/.libs/libwolfssl.a
 
-# ---- WOLFNANOTLS_ASM: per-arch speedup bundle (mirrors wolfSSL --enable-*asm) ----
+# ---- WOLFNANO_ASM: per-arch speedup bundle (mirrors wolfSSL --enable-*asm) ----
 # Default 'none' = lightweight portable C (WOLFSSL_SP_MATH_ALL, no asm). Each
 # accelerated arch selects its toolchain, flags, specialized SP file + asm files.
 # The macro bundle lives in wolfnano_target.h (selected via FLAGS_<arch>).
-WOLFNANOTLS_ASM ?= none
+WOLFNANO_ASM ?= none
 ARM   := $(WC)/port/arm
 RISCV := $(WC)/port/riscv
 
 CC_none      := cc
-FLAGS_none   := -DWOLFNANOTLS_TARGET_PORTABLE_C
+FLAGS_none   := -DWOLFNANO_TARGET_PORTABLE_C
 SPSRC_none   := $(WC)/sp_int.c
 ASMSRC_none  :=
 
 CC_intel     := cc
-FLAGS_intel  := -march=native -DWOLFNANOTLS_TARGET_X86_64
+FLAGS_intel  := -march=native -DWOLFNANO_TARGET_X86_64
 SPSRC_intel  := $(WC)/sp_int.c $(WC)/sp_x86_64.c $(WC)/sp_x86_64_asm.S
 # 64-bit AES-NI is in aes_x86_64_asm.S; aes_asm.S is now WOLFSSL_X86_BUILD (32-bit) only
 ASMSRC_intel := $(WC)/aes_x86_64_asm.S $(WC)/aes_gcm_asm.S $(WC)/sha256_asm.S \
@@ -139,25 +139,25 @@ ASMSRC_intel := $(WC)/aes_x86_64_asm.S $(WC)/aes_gcm_asm.S $(WC)/sha256_asm.S \
 # fall back to the bare name (overridable: make floor-thumb2 CC_thumb2=...).
 ARM_GNU_BIN := $(wildcard /Applications/ArmGNUToolchain/*/arm-none-eabi/bin)
 CC_thumb2     := $(firstword $(wildcard $(ARM_GNU_BIN)/arm-none-eabi-gcc) arm-none-eabi-gcc)
-FLAGS_thumb2  := -mcpu=cortex-m33 -mthumb -DWOLFNANOTLS_TARGET_CORTEXM33
+FLAGS_thumb2  := -mcpu=cortex-m33 -mthumb -DWOLFNANO_TARGET_CORTEXM33
 SPSRC_thumb2  := $(WC)/sp_int.c $(WC)/sp_cortexm.c
 ASMSRC_thumb2 := $(ARM)/thumb2-aes-asm_c.c $(ARM)/thumb2-sha256-asm_c.c \
                  $(ARM)/thumb2-sha512-asm_c.c $(ARM)/thumb2-curve25519_c.c
 
 CC_aarch64     := $(shell command -v aarch64-elf-gcc 2>/dev/null || echo aarch64-none-elf-gcc)
-FLAGS_aarch64  := -march=armv8-a+crypto -DWOLFNANOTLS_TARGET_AARCH64
+FLAGS_aarch64  := -march=armv8-a+crypto -DWOLFNANO_TARGET_AARCH64
 SPSRC_aarch64  := $(WC)/sp_int.c $(WC)/sp_arm64.c
 ASMSRC_aarch64 := $(ARM)/armv8-aes-asm_c.c $(ARM)/armv8-sha256-asm_c.c \
                   $(ARM)/armv8-sha512-asm_c.c $(ARM)/armv8-curve25519_c.c
 
 CC_armv7     := $(CC_thumb2)
-FLAGS_armv7  := -march=armv7-a -DWOLFNANOTLS_TARGET_ARMV8_32
+FLAGS_armv7  := -march=armv7-a -DWOLFNANO_TARGET_ARMV8_32
 SPSRC_armv7  := $(WC)/sp_int.c $(WC)/sp_arm32.c
 ASMSRC_armv7 := $(ARM)/armv8-32-aes-asm_c.c $(ARM)/armv8-32-sha256-asm_c.c \
                 $(ARM)/armv8-32-sha512-asm_c.c $(ARM)/armv8-32-curve25519_c.c
 
 CC_riscv64     := riscv64-unknown-elf-gcc
-FLAGS_riscv64  := -march=rv64gc -DWOLFNANOTLS_TARGET_RISCV64
+FLAGS_riscv64  := -march=rv64gc -DWOLFNANO_TARGET_RISCV64
 SPSRC_riscv64  := $(WC)/sp_int.c $(WC)/sp_c64.c
 ASMSRC_riscv64 := $(RISCV)/riscv-64-aes.c $(RISCV)/riscv-64-sha256.c \
                   $(RISCV)/riscv-64-sha512.c
@@ -172,9 +172,9 @@ BENCHASM_aarch64 :=
 BENCHASM_armv7   :=
 BENCHASM_riscv64 :=
 
-ASM_CC    := $(CC_$(WOLFNANOTLS_ASM))
-ASM_FLAGS := $(FLAGS_$(WOLFNANOTLS_ASM))
-ASM_SRC   := $(SPSRC_$(WOLFNANOTLS_ASM)) $(ASMSRC_$(WOLFNANOTLS_ASM))
+ASM_CC    := $(CC_$(WOLFNANO_ASM))
+ASM_FLAGS := $(FLAGS_$(WOLFNANO_ASM))
+ASM_SRC   := $(SPSRC_$(WOLFNANO_ASM)) $(ASMSRC_$(WOLFNANO_ASM))
 
 .PHONY: host kstest keyupdatetest sessiontest mocktest mockhybridtest errtest rfctest tstest rectest ksharetest hstest wctest wctestpqc msgtest chtest shtest negtest flighttest alerttest matrixtest mlkemtest mldsatest certmldsatest certnegtest certnegpintest certgentest hybridtest certtest fipsproof bench benchrun targets test-qemu test test-core check example example-cert cert-notime-build example-https example-pqc configs-build m33mu coverage stackcheck clean
 test: test-core mlkemtest mldsatest hybridtest mockhybridtest wctestpqc ## build + run all local self-tests (certmldsatest runs separately; compiling X509 here would drag the interop-only cert path into the coverage build)
@@ -203,43 +203,43 @@ check: ## run every suite, continue past failures, print one colored PASS/FAIL t
 
 host: ## build + run the crypto floor self-test locally (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(FLOOR_SRC) $(WC)/sp_int.c $(TEST_SRC) -o $(BUILD)/floor_test_host
 	@echo "---- run ----"
 	@./$(BUILD)/floor_test_host
 
 kstest: ## build + run the TLS 1.3 key-schedule KATs (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(KS_SRC) tests/keyschedule_test.c -o $(BUILD)/keyschedule_test
 	@echo "---- run ----"
 	@./$(BUILD)/keyschedule_test
 
 keyupdatetest: ## build + run the post-handshake KeyUpdate KAT (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(KS_SRC) tests/keyupdate_test.c -o $(BUILD)/keyupdate_test
 	@echo "---- run ----"
 	@./$(BUILD)/keyupdate_test
 
 errtest: ## build + run the wn_ErrorToString tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   src/wn_error.c tests/error_test.c -o $(BUILD)/error_test
 	@echo "---- run ----"
 	@./$(BUILD)/error_test
 
 mocktest: ## build + run the in-process mock-server handshake test (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_SRC) tests/connect_mock_test.c -o $(BUILD)/connect_mock_test
 	@echo "---- run ----"
 	@./$(BUILD)/connect_mock_test
 
 mockhybridtest: ## build + run the X25519MLKEM768 hybrid mock-server handshake test
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
-	   -DWOLFNANOTLS_HAVE_MLKEM_HYBRID \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
+	   -DWOLFNANO_HAVE_MLKEM_HYBRID \
 	   $(MOCKHYB_SRC) tests/connect_mock_hybrid_test.c \
 	   -o $(BUILD)/connect_mock_hybrid_test
 	@echo "---- run ----"
@@ -247,7 +247,7 @@ mockhybridtest: ## build + run the X25519MLKEM768 hybrid mock-server handshake t
 
 sessiontest: ## build + run the application-data session unit tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c \
 	   $(WC)/logging.c $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c \
 	   $(WC)/hmac.c $(WC)/kdf.c $(WC)/aes.c \
@@ -258,42 +258,42 @@ sessiontest: ## build + run the application-data session unit tests (PORTABLE_C)
 
 rfctest: ## build + run RFC 8448 section 3 record-key KATs (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(KS_SRC) tests/rfc8448_test.c -o $(BUILD)/rfc8448_test
 	@echo "---- run ----"
 	@./$(BUILD)/rfc8448_test
 
 tstest: ## build + run the transcript-hash tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(TS_SRC) tests/transcript_test.c -o $(BUILD)/transcript_test
 	@echo "---- run ----"
 	@./$(BUILD)/transcript_test
 
 rectest: ## build + run the record-protection tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(REC_SRC) tests/record_test.c -o $(BUILD)/record_test
 	@echo "---- run ----"
 	@./$(BUILD)/record_test
 
 ksharetest: ## build + run the X25519 key-share tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(KSH_SRC) tests/keyshare_test.c -o $(BUILD)/keyshare_test
 	@echo "---- run ----"
 	@./$(BUILD)/keyshare_test
 
 hstest: ## build + run the end-to-end crypto handshake (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(HS_SRC) tests/handshake_crypto_test.c -o $(BUILD)/handshake_crypto_test
 	@echo "---- run ----"
 	@./$(BUILD)/handshake_crypto_test
 
 alloctrap: ## runtime proof: handshake crypto path makes zero heap calls (GNU ld)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   -Wl,--wrap=malloc,--wrap=calloc,--wrap=realloc \
 	   $(HS_SRC) tests/malloc_trap.c tests/malloc_trap_test.c \
 	   -o $(BUILD)/malloc_trap_test
@@ -302,7 +302,7 @@ alloctrap: ## runtime proof: handshake crypto path makes zero heap calls (GNU ld
 
 wctest: ## run wolfSSL's wolfcrypt test against the floor (config-trimmed)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) -DNO_MAIN_DRIVER -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) -DNO_MAIN_DRIVER -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(WCT_SRC) tests/wolfcrypt_test_main.c -o $(BUILD)/wctest
 	@echo "---- run ----"
 	@./$(BUILD)/wctest > $(BUILD)/wctest.out 2>&1; \
@@ -310,8 +310,8 @@ wctest: ## run wolfSSL's wolfcrypt test against the floor (config-trimmed)
 
 wctestpqc: ## run wolfSSL's wolfcrypt KATs incl. ML-KEM/ML-DSA (lifted from wolfSSL)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) -DNO_MAIN_DRIVER -DWOLFNANOTLS_TARGET_PORTABLE_C \
-	   -DWOLFNANOTLS_MLKEM -DWOLFNANOTLS_MLDSA -DWOLFNANOTLS_MLDSA_SIGN -DWOLFNANOTLS_ALLOW_MALLOC \
+	$(CC) $(CFLAGS_COMMON) -DNO_MAIN_DRIVER -DWOLFNANO_TARGET_PORTABLE_C \
+	   -DWOLFNANO_MLKEM -DWOLFNANO_MLDSA -DWOLFNANO_MLDSA_SIGN -DWOLFNANO_ALLOW_MALLOC \
 	   $(WCTPQC_SRC) tests/wolfcrypt_test_main.c -o $(BUILD)/wctestpqc
 	@echo "---- run ----"
 	@./$(BUILD)/wctestpqc > $(BUILD)/wctestpqc.out 2>&1; \
@@ -319,14 +319,14 @@ wctestpqc: ## run wolfSSL's wolfcrypt KATs incl. ML-KEM/ML-DSA (lifted from wolf
 
 msgtest: ## build + run the wire encode/decode primitive tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   src/wn_msg.c tests/msg_test.c -o $(BUILD)/msg_test
 	@echo "---- run ----"
 	@./$(BUILD)/msg_test
 
 chtest: ## build + run the ClientHello encoder test (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   src/wn_msg.c src/wn_clienthello.c \
 	   tests/clienthello_test.c -o $(BUILD)/clienthello_test
 	@echo "---- run ----"
@@ -334,7 +334,7 @@ chtest: ## build + run the ClientHello encoder test (PORTABLE_C)
 
 shtest: ## build + run the ServerHello parser test (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   src/wn_msg.c src/wn_serverhello.c \
 	   tests/serverhello_test.c -o $(BUILD)/serverhello_test
 	@echo "---- run ----"
@@ -342,7 +342,7 @@ shtest: ## build + run the ServerHello parser test (PORTABLE_C)
 
 negtest: ## build + run negative/malformed parser tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   src/wn_msg.c src/wn_serverhello.c \
 	   tests/parser_negative_test.c -o $(BUILD)/parser_negative_test
 	@echo "---- run ----"
@@ -350,21 +350,21 @@ negtest: ## build + run negative/malformed parser tests (PORTABLE_C)
 
 flighttest: ## build + run the adversarial encrypted-flight ordering tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   tests/flight_order_test.c -o $(BUILD)/flight_order_test
 	@echo "---- run ----"
 	@./$(BUILD)/flight_order_test
 
 alerttest: ## build + run the error->alert (RFC 8446 6.2) mapping tests (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   tests/alert_map_test.c -o $(BUILD)/alert_map_test
 	@echo "---- run ----"
 	@./$(BUILD)/alert_map_test
 
 matrixtest: ## build + run the data-driven negotiation matrix (PORTABLE_C)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   src/wn_msg.c src/wn_serverhello.c \
 	   tests/suites_matrix.c -o $(BUILD)/suites_matrix
 	@echo "---- run ----"
@@ -374,14 +374,14 @@ FUZZ_TIME ?= 60
 FUZZ_CC ?= clang
 fuzz: ## coverage-guided fuzz of the wire parsers (clang libFuzzer + ASan)
 	@mkdir -p $(BUILD)/corp_sh $(BUILD)/corp_msg $(BUILD)/corp_rec
-	$(FUZZ_CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(FUZZ_CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   -fsanitize=fuzzer,address -g \
 	   src/wn_msg.c src/wn_serverhello.c tests/fuzz_serverhello.c \
 	   -o $(BUILD)/fuzz_serverhello
-	$(FUZZ_CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(FUZZ_CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   -fsanitize=fuzzer,address -g \
 	   src/wn_msg.c tests/fuzz_msg.c -o $(BUILD)/fuzz_msg
-	$(FUZZ_CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(FUZZ_CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   -fsanitize=fuzzer,address -g \
 	   $(WC)/wc_port.c $(WC)/memory.c $(WC)/error.c $(WC)/hash.c $(WC)/logging.c \
 	   $(WC)/random.c $(WC)/sha256.c $(WC)/sha512.c $(WC)/aes.c src/wn_record.c \
@@ -391,22 +391,22 @@ fuzz: ## coverage-guided fuzz of the wire parsers (clang libFuzzer + ASan)
 	@./$(BUILD)/fuzz_msg        -max_total_time=$(FUZZ_TIME) -timeout=10 $(BUILD)/corp_msg
 	@./$(BUILD)/fuzz_record     -max_total_time=$(FUZZ_TIME) -timeout=10 $(BUILD)/corp_rec
 
-mlkemtest: ## build + run the ML-KEM-768 KEM test (WOLFNANOTLS_MLKEM)
+mlkemtest: ## build + run the ML-KEM-768 KEM test (WOLFNANO_MLKEM)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) -DWOLFNANOTLS_MLKEM -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) -DWOLFNANO_MLKEM -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(MLKEM_SRC) tests/mlkem_test.c -o $(BUILD)/mlkem_test
 	@echo "---- run ----"
 	@./$(BUILD)/mlkem_test
 
 mldsatest: ## build + run ML-DSA-65 round-trip + verify-only no-malloc proof
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) -DWOLFNANOTLS_MLDSA -DWOLFNANOTLS_MLDSA_SIGN \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) -DWOLFNANO_MLDSA -DWOLFNANO_MLDSA_SIGN \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(MLDSA_SRC) tests/mldsa_test.c -o $(BUILD)/mldsa_test
 	@echo "---- run (sign/verify round-trip) ----"
 	@./$(BUILD)/mldsa_test
 	@echo "---- verify-only no-malloc proof ----"
-	@cc $(CFLAGS_COMMON) -DWOLFNANOTLS_MLDSA -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	@cc $(CFLAGS_COMMON) -DWOLFNANO_MLDSA -DWOLFNANO_TARGET_PORTABLE_C \
 	   -c $(WC)/wc_mldsa.c -o $(BUILD)/wc_mldsa_vo.o 2>/dev/null
 	@if nm $(BUILD)/wc_mldsa_vo.o | grep -E ' U _(malloc|calloc|realloc|free)$$'; \
 	 then echo "  FAIL: verify-only references heap"; exit 1; \
@@ -416,77 +416,77 @@ certmldsatest: ## build + run the ML-DSA CertificateVerify test at each level (4
 	@mkdir -p $(BUILD)
 	@for lvl in 2 3 5; do \
 	   echo "---- ML-DSA level $$lvl ----"; \
-	   $(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 \
-	      -DWOLFNANOTLS_HAVE_RSA_VERIFY -DWOLFNANOTLS_MLDSA -DWOLFNANOTLS_MLDSA_SIGN \
-	      -DWOLFNANOTLS_MLDSA_LEVEL=$$lvl \
-	      -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	   $(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 \
+	      -DWOLFNANO_HAVE_RSA_VERIFY -DWOLFNANO_MLDSA -DWOLFNANO_MLDSA_SIGN \
+	      -DWOLFNANO_MLDSA_LEVEL=$$lvl \
+	      -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	      $(CERTMLDSA_SRC) tests/cert_mldsa_test.c -o $(BUILD)/cert_mldsa_test || exit 1; \
 	   ./$(BUILD)/cert_mldsa_test || exit 1; \
 	 done
 
 certnegtest: ## build + run X.509 negative auth tests (chain + hostname + ECDSA CertVerify)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 \
-	   -DWOLFNANOTLS_HAVE_RSA_VERIFY -DWOLFNANOTLS_RSA_FULL \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 \
+	   -DWOLFNANO_HAVE_RSA_VERIFY -DWOLFNANO_RSA_FULL \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CERTMLDSA_SRC) tests/cert_neg_test.c -o $(BUILD)/cert_neg_test
 	@echo "---- run ----"
 	@./$(BUILD)/cert_neg_test
 
 certgentest: ## build + run generated-PKI chain-constraint tests (CA flag, keyUsage, EKU)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 \
-	   -DWOLFNANOTLS_HAVE_RSA_VERIFY -DWOLFNANOTLS_RSA_FULL \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 \
+	   -DWOLFNANO_HAVE_RSA_VERIFY -DWOLFNANO_RSA_FULL \
 	   -DWOLFSSL_CERT_GEN -DWOLFSSL_CERT_EXT -DWOLFSSL_KEY_GEN \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CERTMLDSA_SRC) tests/cert_gen_test.c -o $(BUILD)/cert_gen_test
 	@echo "---- run ----"
 	@./$(BUILD)/cert_gen_test
 
-certnegpintest: ## build + run the key-pin-only cert tier (WOLFNANOTLS_X509_HOSTNAME=0)
+certnegpintest: ## build + run the key-pin-only cert tier (WOLFNANO_X509_HOSTNAME=0)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 \
-	   -DWOLFNANOTLS_X509_HOSTNAME=0 -DWOLFNANOTLS_HAVE_RSA_VERIFY -DWOLFNANOTLS_RSA_FULL \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 \
+	   -DWOLFNANO_X509_HOSTNAME=0 -DWOLFNANO_HAVE_RSA_VERIFY -DWOLFNANO_RSA_FULL \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CERTMLDSA_SRC) tests/cert_neg_test.c -o $(BUILD)/cert_neg_pin_test
 	@echo "---- run ----"
 	@./$(BUILD)/cert_neg_pin_test
 
 hybridtest: ## build + run the X25519MLKEM768 hybrid key-share test
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_MLKEM -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_MLKEM -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(HYBRID_SRC) tests/hybrid_test.c -o $(BUILD)/hybrid_test
 	@echo "---- run ----"
 	@./$(BUILD)/hybrid_test
 
 certtest: ## build + run the X.509 cert-verify test (ECC + RSA; needs heap)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CERT_SRC) $(WC)/rsa.c tests/cert_test.c -o $(BUILD)/cert_test
 	@echo "---- run ----"
 	@./$(BUILD)/cert_test
 
 interop: ## live TLS 1.3 PSK handshake vs OpenSSL and wolfSSL
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_SRC) tests/interop_psk_test.c -o $(BUILD)/interop_psk_client
 	@echo "== PSK (X25519) vs OpenSSL =="; sh tests/interop_psk.sh
 	@echo "== PSK (X25519) vs wolfSSL =="; sh tests/interop_wolfssl.sh
 	@echo "== PSK (X25519) vs mbedTLS =="; sh tests/interop_mbedtls.sh
 	@echo "== app-data (wn_Send/wn_Recv/wn_Close) vs OpenSSL =="; sh tests/interop_psk_appdata.sh
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_HAVE_ECDHE_P256 \
-	   -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_HAVE_ECDHE_P256 \
+	   -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_P256_SRC) tests/interop_psk_test.c -o $(BUILD)/interop_psk_p256_client
 	@echo "== PSK (P-256) vs OpenSSL =="; CLIENT=$(BUILD)/interop_psk_p256_client sh tests/interop_psk.sh
 	@echo "== PSK (P-256) vs wolfSSL =="; CLIENT=$(BUILD)/interop_psk_p256_client sh tests/interop_wolfssl.sh
 	@echo "== PSK (P-256) vs mbedTLS =="; CLIENT=$(BUILD)/interop_psk_p256_client sh tests/interop_mbedtls.sh
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_HAVE_MLKEM_HYBRID \
-	   -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_HAVE_MLKEM_HYBRID \
+	   -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(MOCKHYB_SRC) tests/interop_psk_test.c -o $(BUILD)/interop_psk_hybrid_client
 	@echo "== PSK (X25519MLKEM768) vs wolfSSL =="; CLIENT=$(BUILD)/interop_psk_hybrid_client sh tests/interop_wolfssl_hybrid.sh
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_CERT_SRC) $(WC)/rsa.c tests/interop_cert_test.c \
 	   -o $(BUILD)/interop_cert_client
 	@echo "== cert(ECDSA) vs OpenSSL =="; sh tests/interop_cert.sh ecdsa
@@ -497,8 +497,8 @@ interop: ## live TLS 1.3 PSK handshake vs OpenSSL and wolfSSL
 	@echo "== cert(RSA-PSS) vs wolfSSL =="; sh tests/interop_cert_wolfssl.sh rsa
 	@echo "== cert(Ed25519) vs wolfSSL =="; sh tests/interop_cert_wolfssl.sh ed
 	@echo "== cert(chain leaf<-inter<-root) vs wolfSSL =="; sh tests/interop_cert_wolfssl.sh chain
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_FIPS -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_FIPS -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_CERT_SRC) $(WC)/rsa.c tests/interop_cert_test.c \
 	   -o $(BUILD)/interop_cert_fips_client
 	@echo "== cert(ECDSA, approved ECDHE P-256 suites) vs OpenSSL =="; \
@@ -508,14 +508,14 @@ interop: ## live TLS 1.3 PSK handshake vs OpenSSL and wolfSSL
 
 fipsproof: ## Phase 5: same shell sources link against the FIPS backend; CASTs pass
 	@mkdir -p $(BUILD)
-	@test -f $(FIPS_LIB) || { echo "SKIP fipsproof (no FIPS lib at $(FIPS_LIB); set WOLFNANOTLS_FIPS_DIR)"; exit 0; }
+	@test -f $(FIPS_LIB) || { echo "SKIP fipsproof (no FIPS lib at $(FIPS_LIB); set WOLFNANO_FIPS_DIR)"; exit 0; }
 	@echo "== seam crypto vs wolfCrypt FIPS module =="
-	@sh tests/fips_seam_proof.sh $(WOLFNANOTLS_FIPS_DIR)
+	@sh tests/fips_seam_proof.sh $(WOLFNANO_FIPS_DIR)
 	@echo "== shell seam surface is backend-identical (zero source changes) =="
-	@cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	@cc $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   -c src/wn_keyschedule.c -o $(BUILD)/ks_src.o
-	@cc -Os -DWOLFSSL_USE_OPTIONS_H -I$(WOLFNANOTLS_FIPS_DIR) $(SHELL_INC) \
-	   -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	@cc -Os -DWOLFSSL_USE_OPTIONS_H -I$(WOLFNANO_FIPS_DIR) $(SHELL_INC) \
+	   -DWOLFNANO_TARGET_PORTABLE_C \
 	   -c src/wn_keyschedule.c -o $(BUILD)/ks_fips.o
 	@nm -u $(BUILD)/ks_src.o  | grep '_wc_' | sort > $(BUILD)/seam_src.txt
 	@# FIPS headers route each wc_* call to its _fips boundary wrapper; strip the
@@ -526,23 +526,23 @@ fipsproof: ## Phase 5: same shell sources link against the FIPS backend; CASTs p
 	   sed 's/^/    /' $(BUILD)/seam_src.txt; \
 	 else echo "FAIL seam surface differs"; diff $(BUILD)/seam_src.txt $(BUILD)/seam_fips.txt; exit 1; fi
 
-# Build + run the all-algo bench for the active WOLFNANOTLS_ASM arch.
+# Build + run the all-algo bench for the active WOLFNANO_ASM arch.
 benchrun:
 	@mkdir -p $(BUILD)
 	$(ASM_CC) $(CFLAGS_COMMON) $(SHELL_INC) $(ASM_FLAGS) \
-	   -DWOLFNANOTLS_MLKEM -DWOLFNANOTLS_MLDSA -DWOLFNANOTLS_MLDSA_SIGN \
-	   -DWOLFNANOTLS_HAVE_CHACHA -DWOLFNANOTLS_HAVE_RSA_VERIFY -DWOLFNANOTLS_RSA_FULL \
-	   -DWOLFNANOTLS_ALLOW_MALLOC \
+	   -DWOLFNANO_MLKEM -DWOLFNANO_MLDSA -DWOLFNANO_MLDSA_SIGN \
+	   -DWOLFNANO_HAVE_CHACHA -DWOLFNANO_HAVE_RSA_VERIFY -DWOLFNANO_RSA_FULL \
+	   -DWOLFNANO_ALLOW_MALLOC \
 	   $(WC)/sha3.c $(WC)/wc_mlkem.c $(WC)/wc_mlkem_poly.c $(WC)/wc_mldsa.c \
 	   $(WC)/chacha.c $(WC)/poly1305.c $(WC)/chacha20_poly1305.c $(WC)/rsa.c \
-	   $(FLOOR_SRC) $(ASM_SRC) $(BENCHASM_$(WOLFNANOTLS_ASM)) \
+	   $(FLOOR_SRC) $(ASM_SRC) $(BENCHASM_$(WOLFNANO_ASM)) \
 	   tests/bench_all.c tests/wn_host_seed.c \
-	   -o $(BUILD)/bench_$(WOLFNANOTLS_ASM)
-	@./$(BUILD)/bench_$(WOLFNANOTLS_ASM)
+	   -o $(BUILD)/bench_$(WOLFNANO_ASM)
+	@./$(BUILD)/bench_$(WOLFNANO_ASM)
 
 bench: ## crypto speed, all algos: portable C vs Intel asm side by side
-	@$(MAKE) --no-print-directory benchrun WOLFNANOTLS_ASM=none
-	@$(MAKE) --no-print-directory benchrun WOLFNANOTLS_ASM=intel
+	@$(MAKE) --no-print-directory benchrun WOLFNANO_ASM=none
+	@$(MAKE) --no-print-directory benchrun WOLFNANO_ASM=intel
 
 # floor-<arch>: cross-compile the crypto floor + that arch's asm to objects,
 # proving wolfNanoTLS builds from source for the target. (Host arches use `host` /
@@ -577,50 +577,50 @@ test-qemu-%:
 	 if ! command -v $$cc >/dev/null 2>&1; then echo "SKIP test-qemu-$* (no $$cc)"; exit 0; fi; \
 	 if ! command -v $$q  >/dev/null 2>&1; then echo "SKIP test-qemu-$* (no $$q)"; exit 0; fi; \
 	 mkdir -p $(BUILD)/qemu-$*; set -e; \
-	 $$cc $(CFLAGS_COMMON) $$s -DWOLFNANOTLS_TARGET_PORTABLE_C $(FLOOR_SRC) $(WC)/sp_int.c $(TEST_SRC) -o $(BUILD)/qemu-$*/floor && $$q $(BUILD)/qemu-$*/floor; \
-	 $$cc $(CFLAGS_COMMON) $$s $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C $(KS_SRC) tests/keyschedule_test.c -o $(BUILD)/qemu-$*/ks && $$q $(BUILD)/qemu-$*/ks; \
-	 $$cc $(CFLAGS_COMMON) $$s $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C $(KS_SRC) tests/rfc8448_test.c -o $(BUILD)/qemu-$*/rfc && $$q $(BUILD)/qemu-$*/rfc; \
-	 $$cc $(CFLAGS_COMMON) $$s $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C $(HS_SRC) tests/handshake_crypto_test.c -o $(BUILD)/qemu-$*/hs && $$q $(BUILD)/qemu-$*/hs; \
-	 $$cc $(CFLAGS_COMMON) $$s $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C src/wn_msg.c src/wn_serverhello.c tests/parser_negative_test.c -o $(BUILD)/qemu-$*/neg && $$q $(BUILD)/qemu-$*/neg; \
+	 $$cc $(CFLAGS_COMMON) $$s -DWOLFNANO_TARGET_PORTABLE_C $(FLOOR_SRC) $(WC)/sp_int.c $(TEST_SRC) -o $(BUILD)/qemu-$*/floor && $$q $(BUILD)/qemu-$*/floor; \
+	 $$cc $(CFLAGS_COMMON) $$s $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C $(KS_SRC) tests/keyschedule_test.c -o $(BUILD)/qemu-$*/ks && $$q $(BUILD)/qemu-$*/ks; \
+	 $$cc $(CFLAGS_COMMON) $$s $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C $(KS_SRC) tests/rfc8448_test.c -o $(BUILD)/qemu-$*/rfc && $$q $(BUILD)/qemu-$*/rfc; \
+	 $$cc $(CFLAGS_COMMON) $$s $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C $(HS_SRC) tests/handshake_crypto_test.c -o $(BUILD)/qemu-$*/hs && $$q $(BUILD)/qemu-$*/hs; \
+	 $$cc $(CFLAGS_COMMON) $$s $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C src/wn_msg.c src/wn_serverhello.c tests/parser_negative_test.c -o $(BUILD)/qemu-$*/neg && $$q $(BUILD)/qemu-$*/neg; \
 	 echo "OK test-qemu-$* (ran under $$q)"
 
 test-qemu: test-qemu-arm test-qemu-aarch64 test-qemu-riscv64 ## run the suites under qemu-user for arm/aarch64/riscv64
 
 example: ## build the minimal PSK client example (examples/client.c)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_SRC) examples/client.c -o $(BUILD)/example_client
 	@echo "built $(BUILD)/example_client"
 
 example-cert: ## build the X.509 server-cert client example (examples/client_cert.c)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_CERT_SRC) $(WC)/rsa.c examples/client_cert.c \
 	   -o $(BUILD)/example_client_cert
 	@echo "built $(BUILD)/example_client_cert"
 
-cert-notime-build: ## compile-check the clockless cert tier (WOLFNANOTLS_NO_X509_TIME)
+cert-notime-build: ## compile-check the clockless cert tier (WOLFNANO_NO_X509_TIME)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY \
-	   -DWOLFNANOTLS_NO_X509_TIME \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
+	   -DWOLFNANO_NO_X509_TIME \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_CERT_SRC) $(WC)/rsa.c examples/client_cert.c \
 	   -o $(BUILD)/example_client_cert_notime
 	@echo "built $(BUILD)/example_client_cert_notime"
 
 example-https: ## build the live HTTPS client example (examples/client_https.c)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY \
-	   -DWOLFNANOTLS_ALLOW_MALLOC -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
+	   -DWOLFNANO_ALLOW_MALLOC -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(CONN_CERT_SRC) $(WC)/rsa.c examples/client_https.c \
 	   -o $(BUILD)/example_client_https
 	@echo "built $(BUILD)/example_client_https"
 
 example-pqc: ## build the X25519MLKEM768 hybrid PSK client example (examples/client_pqc.c)
 	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANOTLS_HAVE_MLKEM_HYBRID \
-	   -DWOLFNANOTLS_TARGET_PORTABLE_C \
+	$(CC) $(CFLAGS_COMMON) $(SHELL_INC) -DWOLFNANO_HAVE_MLKEM_HYBRID \
+	   -DWOLFNANO_TARGET_PORTABLE_C \
 	   $(MOCKHYB_SRC) examples/client_pqc.c -o $(BUILD)/example_client_pqc
 	@echo "built $(BUILD)/example_client_pqc"
 
@@ -636,8 +636,8 @@ stackcheck: ## fail if any wolfNanoTLS function exceeds the stack budget (-fstac
 	@mkdir -p $(BUILD)/su
 	@for b in $(STACK_SRC); do \
 	  $(CC) -Os -fstack-usage -c $(SHELL_INC) -DWOLFSSL_USER_SETTINGS \
-	    -DWOLFNANOTLS_TARGET_PORTABLE_C -DWOLFNANOTLS_X509 -DWOLFNANOTLS_HAVE_RSA_VERIFY \
-	    -DWOLFNANOTLS_ALLOW_MALLOC -I. -I$(WOLFSSL) src/$$b -o $(BUILD)/su/$${b%.c}.o; \
+	    -DWOLFNANO_TARGET_PORTABLE_C -DWOLFNANO_X509 -DWOLFNANO_HAVE_RSA_VERIFY \
+	    -DWOLFNANO_ALLOW_MALLOC -I. -I$(WOLFSSL) src/$$b -o $(BUILD)/su/$${b%.c}.o; \
 	done
 	@sh scripts/check_stack.sh $(BUILD)/su/*.su
 

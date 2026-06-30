@@ -22,19 +22,19 @@
  * Thumb2 / SP Cortex-M assembly bundle. Supply entropy through wn_seed() from a
  * hardware TRNG (RNG peripheral). Copy to your project as user_settings.h. */
 
-#ifndef WOLFNANOTLS_USER_SETTINGS_H
-#define WOLFNANOTLS_USER_SETTINGS_H
+#ifndef WOLFNANO_USER_SETTINGS_H
+#define WOLFNANO_USER_SETTINGS_H
 
-#ifndef WOLFNANOTLS_TARGET_CORTEXM33
-    #define WOLFNANOTLS_TARGET_CORTEXM33
+#ifndef WOLFNANO_TARGET_CORTEXM33
+    #define WOLFNANO_TARGET_CORTEXM33
 #endif
 
 #define WOLFCRYPT_ONLY
 
-#define WOLFNANOTLS_HAVE_SHA256
-#define WOLFNANOTLS_HAVE_HKDF
-#define WOLFNANOTLS_HAVE_AESGCM
-#define WOLFNANOTLS_HAVE_CURVE25519
+#define WOLFNANO_HAVE_SHA256
+#define WOLFNANO_HAVE_HKDF
+#define WOLFNANO_HAVE_AESGCM
+#define WOLFNANO_HAVE_CURVE25519
 
 #define GCM_SMALL
 #define WOLFSSL_AES_SMALL_TABLES
@@ -43,4 +43,4 @@
 #include "wolfnano_target.h"
 #include "wolfnano_config.h"
 
-#endif /* WOLFNANOTLS_USER_SETTINGS_H */
+#endif /* WOLFNANO_USER_SETTINGS_H */

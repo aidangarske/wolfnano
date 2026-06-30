@@ -33,11 +33,11 @@
 
 /* wn_IoSend / wn_IoRecv transport callbacks are declared in wolfnano.h. */
 
-/* Perform a TLS 1.3 PSK+ECDHE handshake as a client. Returns WOLFNANOTLS_SUCCESS
+/* Perform a TLS 1.3 PSK+ECDHE handshake as a client. Returns WOLFNANO_SUCCESS
  * once the server Finished verifies and the client Finished is sent. The
  * traffic keys are wiped before returning (handshake-only; use the _ex form to
  * keep a session for application data). */
-WOLFNANOTLS_API int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
+WOLFNANO_API int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRecv,
                                 void* ioCtx, const byte* psk, word32 pskLen,
                                 const char* identity, byte* scratch,
                                 word32 scratchLen);
@@ -45,7 +45,7 @@ WOLFNANOTLS_API int wn_Connect_Psk(WC_RNG* rng, wn_IoSend ioSend, wn_IoRecv ioRe
 /* As wn_Connect_Psk, but on success fills sess with the application traffic
  * keys, the transport callbacks, and the scratch buffer, ready for wn_Send /
  * wn_Recv / wn_Close. */
-WOLFNANOTLS_API int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng,
+WOLFNANO_API int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng,
                                    wn_IoSend ioSend, wn_IoRecv ioRecv,
                                    void* ioCtx, const byte* psk, word32 pskLen,
                                    const char* identity, byte* scratch,
@@ -56,8 +56,8 @@ WOLFNANOTLS_API int wn_Connect_Psk_ex(wn_Session* sess, WC_RNG* rng,
  * it and the CertificateVerify signature must verify with the leaf key.
  * The cert path keeps its large working buffers (handshake accumulator, record
  * plaintext, leaf SPKI) in scratch, so scratchLen must be at least ~13 KB.
- * Requires WOLFNANOTLS_X509. Returns WOLFNANOTLS_SUCCESS on a completed handshake. */
-WOLFNANOTLS_API int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend,
+ * Requires WOLFNANO_X509. Returns WOLFNANO_SUCCESS on a completed handshake. */
+WOLFNANO_API int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend,
                                  wn_IoRecv ioRecv, void* ioCtx,
                                  const byte* anchor, word32 anchorLen,
                                  byte* scratch, word32 scratchLen);
@@ -65,17 +65,17 @@ WOLFNANOTLS_API int wn_Connect_Cert(WC_RNG* rng, wn_IoSend ioSend,
 /* As wn_Connect_Cert, but on success fills sess for application data.
  * NOTE: anchor-only mode binds no server identity. Pin the anchor to the exact
  * expected leaf, or prefer wn_Connect_CertName* below to bind by hostname/key. */
-WOLFNANOTLS_API int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng,
+WOLFNANO_API int wn_Connect_Cert_ex(wn_Session* sess, WC_RNG* rng,
                                     wn_IoSend ioSend, wn_IoRecv ioRecv,
                                     void* ioCtx, const byte* anchor,
                                     word32 anchorLen, byte* scratch,
                                     word32 scratchLen);
 
 /* Cert handshake that binds the server identity. Supply serverName (validated
- * against the leaf SAN dNSName / CN per RFC 6125, requires WOLFNANOTLS_X509_HOSTNAME)
+ * against the leaf SAN dNSName / CN per RFC 6125, requires WOLFNANO_X509_HOSTNAME)
  * and/or pinnedKey (exact leaf public-key match). At least one is required.
  * Pass NULL/0 for the option not used. */
-WOLFNANOTLS_API int wn_Connect_CertName(WC_RNG* rng, wn_IoSend ioSend,
+WOLFNANO_API int wn_Connect_CertName(WC_RNG* rng, wn_IoSend ioSend,
                                      wn_IoRecv ioRecv, void* ioCtx,
                                      const byte* anchor, word32 anchorLen,
                                      const char* serverName,
@@ -84,7 +84,7 @@ WOLFNANOTLS_API int wn_Connect_CertName(WC_RNG* rng, wn_IoSend ioSend,
                                      word32 scratchLen);
 
 /* As wn_Connect_CertName, but on success fills sess for application data. */
-WOLFNANOTLS_API int wn_Connect_CertName_ex(wn_Session* sess, WC_RNG* rng,
+WOLFNANO_API int wn_Connect_CertName_ex(wn_Session* sess, WC_RNG* rng,
                                         wn_IoSend ioSend, wn_IoRecv ioRecv,
                                         void* ioCtx, const byte* anchor,
                                         word32 anchorLen, const char* serverName,

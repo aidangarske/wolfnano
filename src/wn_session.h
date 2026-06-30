@@ -58,16 +58,16 @@ typedef struct wn_Session {
 /* A wn_Session is single-threaded: serialize wn_Send/wn_Recv/wn_Close on one
  * session (no internal locking, by design - zero allocation, embedded). */
 
-/* Encrypt and send one application_data record. Returns WOLFNANOTLS_SUCCESS. */
-WOLFNANOTLS_API int wn_Send(wn_Session* s, const byte* data, word32 len);
+/* Encrypt and send one application_data record. Returns WOLFNANO_SUCCESS. */
+WOLFNANO_API int wn_Send(wn_Session* s, const byte* data, word32 len);
 
 /* Receive one application_data record into out (up to outCap bytes), setting
  * *outLen. Transparently skips NewSessionTicket and processes KeyUpdate.
- * Returns WOLFNANOTLS_E_CLOSED with *outLen 0 if the peer sent close_notify. */
-WOLFNANOTLS_API int wn_Recv(wn_Session* s, byte* out, word32 outCap,
+ * Returns WOLFNANO_E_CLOSED with *outLen 0 if the peer sent close_notify. */
+WOLFNANO_API int wn_Recv(wn_Session* s, byte* out, word32 outCap,
                          word32* outLen);
 
 /* Send an encrypted close_notify and wipe all session key material. */
-WOLFNANOTLS_API int wn_Close(wn_Session* s);
+WOLFNANO_API int wn_Close(wn_Session* s);
 
 #endif /* WN_SESSION_H */

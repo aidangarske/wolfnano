@@ -93,29 +93,29 @@ int main(void)
 
     rc = wn_Tls13_ExpandLabel(key, sizeof(key), cHsTraffic, "key", NULL, 0,
                               WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(key, cHsKey, 16),
+    check((rc == WOLFNANO_SUCCESS) && eq(key, cHsKey, 16),
           "client handshake write key");
     rc = wn_Tls13_ExpandLabel(iv, sizeof(iv), cHsTraffic, "iv", NULL, 0,
                               WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(iv, cHsIv, 12),
+    check((rc == WOLFNANO_SUCCESS) && eq(iv, cHsIv, 12),
           "client handshake write iv");
 
     rc = wn_Tls13_ExpandLabel(key, sizeof(key), sApTraffic, "key", NULL, 0,
                               WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(key, sApKey, 16),
+    check((rc == WOLFNANO_SUCCESS) && eq(key, sApKey, 16),
           "server application write key");
     rc = wn_Tls13_ExpandLabel(iv, sizeof(iv), sApTraffic, "iv", NULL, 0,
                               WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(iv, sApIv, 12),
+    check((rc == WOLFNANO_SUCCESS) && eq(iv, sApIv, 12),
           "server application write iv");
 
     rc = wn_Tls13_ExpandLabel(key, sizeof(key), cApTraffic, "key", NULL, 0,
                               WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(key, cApKey, 16),
+    check((rc == WOLFNANO_SUCCESS) && eq(key, cApKey, 16),
           "client application write key");
     rc = wn_Tls13_ExpandLabel(iv, sizeof(iv), cApTraffic, "iv", NULL, 0,
                               WC_SHA256);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(iv, cApIv, 12),
+    check((rc == WOLFNANO_SUCCESS) && eq(iv, cApIv, 12),
           "client application write iv");
 
     (void)sHsTraffic;   /* server handshake key/iv KAT'd in keyschedule_test */

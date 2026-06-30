@@ -51,43 +51,43 @@ int main(void)
     rc |= wn_KeyShare_Init(&b, WN_GROUP_X25519);
     rc |= wn_KeyShare_Generate(&a, &rng, pubA, &pubALen);
     rc |= wn_KeyShare_Generate(&b, &rng, pubB, &pubBLen);
-    check((rc == WOLFNANOTLS_SUCCESS) && (pubALen == 32) && (pubBLen == 32),
+    check((rc == WOLFNANO_SUCCESS) && (pubALen == 32) && (pubBLen == 32),
           "generate two key shares, 32-byte public keys");
 
     rc  = wn_KeyShare_Shared(&a, pubB, pubBLen, sa, &saLen);
     rc |= wn_KeyShare_Shared(&b, pubA, pubALen, sb, &sbLen);
-    check((rc == WOLFNANOTLS_SUCCESS) && (saLen == 32) && (sbLen == 32) &&
+    check((rc == WOLFNANO_SUCCESS) && (saLen == 32) && (sbLen == 32) &&
           (XMEMCMP(sa, sb, 32) == 0), "ECDHE shared secrets agree");
 
     rc = wn_KeyShare_Init(&a, 0x0017);
-    check(rc == WOLFNANOTLS_E_UNSUPPORTED, "unsupported group is rejected");
+    check(rc == WOLFNANO_E_UNSUPPORTED, "unsupported group is rejected");
     rc = wn_KeyShare_Init(&a, WN_GROUP_X25519);
 
     /* NULL / invalid-arg paths */
-    check(wn_KeyShare_Init(NULL, WN_GROUP_X25519) == WOLFNANOTLS_E_INVALID_ARG,
+    check(wn_KeyShare_Init(NULL, WN_GROUP_X25519) == WOLFNANO_E_INVALID_ARG,
           "Init NULL rejected");
     check(wn_KeyShare_Generate(NULL, &rng, pubA, &pubALen)
-          == WOLFNANOTLS_E_INVALID_ARG, "Generate NULL rejected");
+          == WOLFNANO_E_INVALID_ARG, "Generate NULL rejected");
     check(wn_KeyShare_Shared(NULL, pubB, 32, sa, &saLen)
-          == WOLFNANOTLS_E_INVALID_ARG, "Shared NULL rejected");
+          == WOLFNANO_E_INVALID_ARG, "Shared NULL rejected");
     check(wn_KeyShare_Shared(&a, pubB, 31, sa, &saLen)
-          == WOLFNANOTLS_E_INVALID_ARG, "Shared wrong peer length rejected");
-    check(wn_KeyShare_Free(NULL) == WOLFNANOTLS_E_INVALID_ARG, "Free NULL rejected");
+          == WOLFNANO_E_INVALID_ARG, "Shared wrong peer length rejected");
+    check(wn_KeyShare_Free(NULL) == WOLFNANO_E_INVALID_ARG, "Free NULL rejected");
 
     /* degenerate all-zero peer key: wolfSSL's low-order-point rejection is
      * version-dependent, so accept either a clean reject (E_CRYPTO) or a
      * computed secret - wolfNanoTLS must return a valid code and not crash. */
     XMEMSET(pubB, 0, 32);
     rc = wn_KeyShare_Shared(&b, pubB, 32, sa, &saLen);
-    check((rc == WOLFNANOTLS_SUCCESS) || (rc == WOLFNANOTLS_E_CRYPTO),
+    check((rc == WOLFNANO_SUCCESS) || (rc == WOLFNANO_E_CRYPTO),
           "degenerate all-zero peer key handled");
 
     /* bad group reaches the UNSUPPORTED branch in Generate and Shared */
     a.group = 0x9999;
     check(wn_KeyShare_Generate(&a, &rng, pubA, &pubALen)
-          == WOLFNANOTLS_E_UNSUPPORTED, "Generate unsupported group");
+          == WOLFNANO_E_UNSUPPORTED, "Generate unsupported group");
     check(wn_KeyShare_Shared(&a, pubA, 32, sa, &saLen)
-          == WOLFNANOTLS_E_UNSUPPORTED, "Shared unsupported group");
+          == WOLFNANO_E_UNSUPPORTED, "Shared unsupported group");
     a.group = WN_GROUP_X25519;
 
     wn_KeyShare_Free(&a);

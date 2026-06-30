@@ -125,7 +125,7 @@ int main(void)
     spkiLen = sizeof(spki);
     rc = wn_VerifyChain(certs, certLens, 1, caDer, (word32)caLen, spki,
                         &spkiLen, NULL, NULL, 0, 0);
-    check(rc == WOLFNANOTLS_SUCCESS, "valid serverAuth leaf accepted");
+    check(rc == WOLFNANO_SUCCESS, "valid serverAuth leaf accepted");
 
     /* leaf with clientAuth EKU only (no serverAuth) -> rejected */
     leafLen = make_cert(leafDer, sizeof(leafDer), &leafKey, &caKey, caDer,
@@ -135,7 +135,7 @@ int main(void)
     spkiLen = sizeof(spki);
     rc = wn_VerifyChain(certs, certLens, 1, caDer, (word32)caLen, spki,
                         &spkiLen, NULL, NULL, 0, 0);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "leaf without serverAuth EKU rejected");
+    check(rc == WOLFNANO_E_BAD_CERT, "leaf without serverAuth EKU rejected");
 
     /* leaf with keyUsage that omits digitalSignature -> rejected */
     leafLen = make_cert(leafDer, sizeof(leafDer), &leafKey, &caKey, caDer,
@@ -145,7 +145,7 @@ int main(void)
     spkiLen = sizeof(spki);
     rc = wn_VerifyChain(certs, certLens, 1, caDer, (word32)caLen, spki,
                         &spkiLen, NULL, NULL, 0, 0);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "leaf without digitalSignature rejected");
+    check(rc == WOLFNANO_E_BAD_CERT, "leaf without digitalSignature rejected");
 
     /* non-CA intermediate signed by CA, leaf signed by that intermediate */
     midLen = make_cert(midDer, sizeof(midDer), &midKey, &caKey, caDer,
@@ -159,7 +159,7 @@ int main(void)
     spkiLen = sizeof(spki);
     rc = wn_VerifyChain(certs, certLens, 2, caDer, (word32)caLen, spki,
                         &spkiLen, NULL, NULL, 0, 0);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "chain through non-CA intermediate rejected");
+    check(rc == WOLFNANO_E_BAD_CERT, "chain through non-CA intermediate rejected");
 
     /* expired CA intermediate with a current-window leaf: the chain must be
      * rejected by the intermediate validity check, not the leaf's (#35). */
@@ -174,7 +174,7 @@ int main(void)
     spkiLen = sizeof(spki);
     rc = wn_VerifyChain(certs, certLens, 2, caDer, (word32)caLen, spki,
                         &spkiLen, NULL, NULL, 0, 0);
-    check(rc == WOLFNANOTLS_E_BAD_CERT, "expired intermediate rejected (valid leaf)");
+    check(rc == WOLFNANO_E_BAD_CERT, "expired intermediate rejected (valid leaf)");
 
     /* an expired but pinned root that the server redundantly includes in the
      * chain is trusted as-is: its validity window is not checked (#35). */
@@ -189,7 +189,7 @@ int main(void)
     spkiLen = sizeof(spki);
     rc = wn_VerifyChain(certs, certLens, 2, midDer, (word32)midLen, spki,
                         &spkiLen, NULL, NULL, 0, 0);
-    check(rc == WOLFNANOTLS_SUCCESS, "expired pinned root in chain accepted as-is");
+    check(rc == WOLFNANO_SUCCESS, "expired pinned root in chain accepted as-is");
 
     wc_ecc_free(&caKey);
     wc_ecc_free(&leafKey);

@@ -58,16 +58,16 @@ static int wn_session_send_key_update(wn_Session* s)
 
     ret = wn_Record_Protect(rec, &recLen, s->cKey, WN_AEAD_KEY_SZ, s->cIv,
                             s->cSeq, WN_REC_HANDSHAKE, msg, sizeof(msg));
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         s->cSeq++;
         if (s->ioSend(s->ioCtx, rec, recLen) != (int)recLen) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Tls13_KeyUpdate(s->cAppSecret, s->cKey, s->cIv, s->digest);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         s->cSeq = 0;
     }
 
@@ -82,10 +82,10 @@ static int wn_session_posths(wn_Session* s, const byte* msg, word32 msgLen)
     word32 mLen;
     byte mType;
     byte req;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     wn_Reader_Init(&r, msg, msgLen);
-    while ((r.pos < msgLen) && (ret == WOLFNANOTLS_SUCCESS)) {
+    while ((r.pos < msgLen) && (ret == WOLFNANO_SUCCESS)) {
         mType = wn_Read_U8(&r);
         mLen = wn_Read_U24(&r);
         if (mType == WN_HS_NEW_SESSION_TICKET) {
@@ -94,13 +94,13 @@ static int wn_session_posths(wn_Session* s, const byte* msg, word32 msgLen)
         else if (mType == WN_HS_KEY_UPDATE) {
             req = wn_Read_U8(&r);
             if ((r.err != 0) || (mLen != 1u) || (req > WN_KU_REQUESTED)) {
-                ret = WOLFNANOTLS_E_DECODE;   /* RFC 8446 4.6.3: 1-byte enum {0,1} */
+                ret = WOLFNANO_E_DECODE;   /* RFC 8446 4.6.3: 1-byte enum {0,1} */
             }
-            if (ret == WOLFNANOTLS_SUCCESS) {
+            if (ret == WOLFNANO_SUCCESS) {
                 ret = wn_Tls13_KeyUpdate(s->sAppSecret, s->sKey, s->sIv,
                                          s->digest);
             }
-            if (ret == WOLFNANOTLS_SUCCESS) {
+            if (ret == WOLFNANO_SUCCESS) {
                 s->sSeq = 0;
                 if (req == WN_KU_REQUESTED) {
                     ret = wn_session_send_key_update(s);
@@ -108,10 +108,10 @@ static int wn_session_posths(wn_Session* s, const byte* msg, word32 msgLen)
             }
         }
         else {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+            ret = WOLFNANO_E_UNEXPECTED_MSG;
         }
-        if ((ret == WOLFNANOTLS_SUCCESS) && (r.err != 0)) {
-            ret = WOLFNANOTLS_E_DECODE;
+        if ((ret == WOLFNANO_SUCCESS) && (r.err != 0)) {
+            ret = WOLFNANO_E_DECODE;
         }
     }
 
@@ -122,31 +122,31 @@ int wn_Send(wn_Session* s, const byte* data, word32 len)
 {
     word32 recLen = 0;
     word32 overhead = WN_RECORD_HEADER_SZ + 1 + WN_RECORD_TAG_SZ;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if ((s == NULL) || (data == NULL)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && ((s->flags & WN_SESS_CLOSED) != 0)) {
-        ret = WOLFNANOTLS_E_CLOSED;
+    if ((ret == WOLFNANO_SUCCESS) && ((s->flags & WN_SESS_CLOSED) != 0)) {
+        ret = WOLFNANO_E_CLOSED;
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && ((s->flags & WN_SESS_ESTABLISHED) == 0)) {
-        ret = WOLFNANOTLS_E_BAD_STATE;
+    if ((ret == WOLFNANO_SUCCESS) && ((s->flags & WN_SESS_ESTABLISHED) == 0)) {
+        ret = WOLFNANO_E_BAD_STATE;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         if ((len > WN_MAX_PLAINTEXT) || (s->scratchLen < overhead) ||
             (len > (s->scratchLen - overhead))) {
-            ret = WOLFNANOTLS_E_INVALID_ARG;   /* avoid word32 wrap on len */
+            ret = WOLFNANO_E_INVALID_ARG;   /* avoid word32 wrap on len */
         }
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         ret = wn_Record_Protect(s->scratch, &recLen, s->cKey, WN_AEAD_KEY_SZ,
                                 s->cIv, s->cSeq, WN_REC_APPDATA, data, len);
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         s->cSeq++;
         if (s->ioSend(s->ioCtx, s->scratch, recLen) != (int)recLen) {
-            ret = WOLFNANOTLS_E_CRYPTO;
+            ret = WOLFNANO_E_CRYPTO;
         }
     }
 
@@ -160,38 +160,38 @@ int wn_Recv(wn_Session* s, byte* out, word32 outCap, word32* outLen)
     word32 plainLen = 0;
     byte rtype;
     byte ctype;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
     int done = 0;
 
     if ((s == NULL) || (out == NULL) || (outLen == NULL)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && ((s->flags & WN_SESS_CLOSED) != 0)) {
-        ret = WOLFNANOTLS_E_CLOSED;
+    if ((ret == WOLFNANO_SUCCESS) && ((s->flags & WN_SESS_CLOSED) != 0)) {
+        ret = WOLFNANO_E_CLOSED;
     }
-    if ((ret == WOLFNANOTLS_SUCCESS) && ((s->flags & WN_SESS_ESTABLISHED) == 0)) {
-        ret = WOLFNANOTLS_E_BAD_STATE;
+    if ((ret == WOLFNANO_SUCCESS) && ((s->flags & WN_SESS_ESTABLISHED) == 0)) {
+        ret = WOLFNANO_E_BAD_STATE;
     }
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         *outLen = 0;
         plain = s->scratch + WN_RECORD_HEADER_SZ;
     }
 
-    while ((ret == WOLFNANOTLS_SUCCESS) && (done == 0)) {
+    while ((ret == WOLFNANO_SUCCESS) && (done == 0)) {
         ret = wn_RecvRecord(s->ioRecv, s->ioCtx, s->scratch, s->scratchLen,
                             &rtype, &recLen);
-        if ((ret == WOLFNANOTLS_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER)) {
-            ret = WOLFNANOTLS_E_UNEXPECTED_MSG;   /* CCS only valid mid-handshake */
+        if ((ret == WOLFNANO_SUCCESS) && (rtype == WN_REC_CHANGE_CIPHER)) {
+            ret = WOLFNANO_E_UNEXPECTED_MSG;   /* CCS only valid mid-handshake */
         }
-        if (ret == WOLFNANOTLS_SUCCESS) {
+        if (ret == WOLFNANO_SUCCESS) {
             ret = wn_Record_Unprotect(plain, &plainLen, &ctype, s->sKey,
                       WN_AEAD_KEY_SZ, s->sIv, s->sSeq, s->scratch, recLen);
         }
-        if (ret == WOLFNANOTLS_SUCCESS) {
+        if (ret == WOLFNANO_SUCCESS) {
             s->sSeq++;
             if (ctype == WN_REC_APPDATA) {
                 if (plainLen > outCap) {
-                    ret = WOLFNANOTLS_E_INVALID_ARG;
+                    ret = WOLFNANO_E_INVALID_ARG;
                 }
                 else {
                     XMEMCPY(out, plain, plainLen);
@@ -205,14 +205,14 @@ int wn_Recv(wn_Session* s, byte* out, word32 outCap, word32* outLen)
             else if (ctype == WN_REC_ALERT) {
                 if ((plainLen >= 2) && (plain[1] == 0)) {
                     s->flags |= WN_SESS_CLOSED;
-                    ret = WOLFNANOTLS_E_CLOSED;
+                    ret = WOLFNANO_E_CLOSED;
                 }
                 else {
-                    ret = WOLFNANOTLS_E_CRYPTO;
+                    ret = WOLFNANO_E_CRYPTO;
                 }
             }
             else {
-                ret = WOLFNANOTLS_E_UNEXPECTED_MSG;
+                ret = WOLFNANO_E_UNEXPECTED_MSG;
             }
         }
         if (plainLen > 0) {
@@ -229,19 +229,19 @@ int wn_Close(wn_Session* s)
     byte body[2];
     byte rec[WN_RECORD_HEADER_SZ + 2 + 1 + WN_RECORD_TAG_SZ];
     word32 recLen = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if (s == NULL) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if ((ret == WOLFNANOTLS_SUCCESS) && ((s->flags & WN_SESS_CLOSED) == 0) &&
+    if ((ret == WOLFNANO_SUCCESS) && ((s->flags & WN_SESS_CLOSED) == 0) &&
         ((s->flags & WN_SESS_ESTABLISHED) != 0) && (s->ioSend != NULL)) {
         body[0] = 1;                            /* warning */
         body[1] = 0;                            /* close_notify */
         ret = wn_Record_Protect(rec, &recLen, s->cKey, WN_AEAD_KEY_SZ, s->cIv,
                                 s->cSeq, WN_REC_ALERT, body, sizeof(body));
-        if (ret == WOLFNANOTLS_SUCCESS) {
+        if (ret == WOLFNANO_SUCCESS) {
             (void)s->ioSend(s->ioCtx, rec, recLen);
         }
     }

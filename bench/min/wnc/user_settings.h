@@ -7,12 +7,12 @@
 
 #define WOLFCRYPT_ONLY
 
-#define WOLFNANOTLS_HAVE_SHA256
-#define WOLFNANOTLS_HAVE_SHA384       /* shell transcript/keyschedule reference it */
-#define WOLFNANOTLS_HAVE_HKDF
-#define WOLFNANOTLS_HAVE_AESGCM
-#define WOLFNANOTLS_HAVE_ECC
-#define WOLFNANOTLS_HAVE_CURVE25519   /* shell keyshare references X25519 (until gated) */
+#define WOLFNANO_HAVE_SHA256
+#define WOLFNANO_HAVE_SHA384       /* shell transcript/keyschedule reference it */
+#define WOLFNANO_HAVE_HKDF
+#define WOLFNANO_HAVE_AESGCM
+#define WOLFNANO_HAVE_ECC
+#define WOLFNANO_HAVE_CURVE25519   /* shell keyshare references X25519 (until gated) */
 
 /* size knobs */
 #define GCM_SMALL

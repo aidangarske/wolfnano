@@ -65,7 +65,7 @@ int main(void)
     printf("wolfNanoTLS ServerHello parser test (RFC 8448 section 3)\n");
 
     rc = wn_ServerHello_Parse(sh, (word32)sizeof(sh), &s);
-    check(rc == WOLFNANOTLS_SUCCESS, "parse ServerHello");
+    check(rc == WOLFNANO_SUCCESS, "parse ServerHello");
     check(s.cipher == 0x1301, "negotiated cipher TLS_AES_128_GCM_SHA256");
     check(s.version == 0x0304, "selected version TLS 1.3");
     check(s.group == 0x001d, "key_share group x25519");
@@ -75,7 +75,7 @@ int main(void)
     check(s.isHelloRetry == 0, "normal ServerHello not flagged as HelloRetry");
 
     rc = wn_ServerHello_Parse(hrr, (word32)sizeof(hrr), &s);
-    check((rc == WOLFNANOTLS_SUCCESS) && (s.isHelloRetry == 1),
+    check((rc == WOLFNANO_SUCCESS) && (s.isHelloRetry == 1),
           "HelloRetryRequest sentinel detected");
 
     XMEMCPY(buf, sh, sizeof(sh));

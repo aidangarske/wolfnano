@@ -61,50 +61,50 @@ int main(void)
     rc |= wn_Transcript_Update(&t, (const byte*)"abc", 3);
     rc |= wn_Transcript_GetHash(&t, h1, &l1);
     rc |= wn_Transcript_Free(&t);
-    check((rc == WOLFNANOTLS_SUCCESS) && (l1 == 32) && eq(h1, sha256abc, 32),
+    check((rc == WOLFNANO_SUCCESS) && (l1 == 32) && eq(h1, sha256abc, 32),
           "SHA-256 transcript of \"abc\"");
 
     rc  = wn_Transcript_Init(&t, WC_SHA256);
     rc |= wn_Transcript_Update(&t, (const byte*)"ab", 2);
     rc |= wn_Transcript_Update(&t, (const byte*)"c", 1);
     rc |= wn_Transcript_GetHash(&t, h2, &l2);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(h2, sha256abc, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(h2, sha256abc, 32),
           "incremental update matches one-shot");
 
     /* interim digest is non-destructive: a second GetHash with no update is
      * identical, and continuing to add data changes the running hash. */
     rc  = wn_Transcript_GetHash(&t, h1, &l1);
-    check((rc == WOLFNANOTLS_SUCCESS) && eq(h1, h2, 32),
+    check((rc == WOLFNANO_SUCCESS) && eq(h1, h2, 32),
           "interim GetHash is non-destructive");
     rc  = wn_Transcript_Update(&t, (const byte*)"d", 1);
     rc |= wn_Transcript_GetHash(&t, h1, &l1);
     rc |= wn_Transcript_Free(&t);
-    check((rc == WOLFNANOTLS_SUCCESS) && !eq(h1, h2, 32),
+    check((rc == WOLFNANO_SUCCESS) && !eq(h1, h2, 32),
           "transcript continues after interim GetHash");
 
     rc  = wn_Transcript_Init(&t, WC_SHA384);
     rc |= wn_Transcript_Update(&t, (const byte*)"abc", 3);
     rc |= wn_Transcript_GetHash(&t, h1, &l1);
     rc |= wn_Transcript_Free(&t);
-    check((rc == WOLFNANOTLS_SUCCESS) && (l1 == 48) && eq(h1, sha384abc, 48),
+    check((rc == WOLFNANO_SUCCESS) && (l1 == 48) && eq(h1, sha384abc, 48),
           "SHA-384 transcript of \"abc\"");
 
     /* NULL args rejected */
-    check(wn_Transcript_Init(NULL, WC_SHA256) == WOLFNANOTLS_E_INVALID_ARG,
+    check(wn_Transcript_Init(NULL, WC_SHA256) == WOLFNANO_E_INVALID_ARG,
           "Init NULL rejected");
-    check(wn_Transcript_Update(NULL, h1, 1) == WOLFNANOTLS_E_INVALID_ARG,
+    check(wn_Transcript_Update(NULL, h1, 1) == WOLFNANO_E_INVALID_ARG,
           "Update NULL rejected");
-    check(wn_Transcript_GetHash(NULL, h1, &l1) == WOLFNANOTLS_E_INVALID_ARG,
+    check(wn_Transcript_GetHash(NULL, h1, &l1) == WOLFNANO_E_INVALID_ARG,
           "GetHash NULL rejected");
-    check(wn_Transcript_Free(NULL) == WOLFNANOTLS_E_INVALID_ARG,
+    check(wn_Transcript_Free(NULL) == WOLFNANO_E_INVALID_ARG,
           "Free NULL rejected");
 
     /* unsupported digest rejected in init, update, get-hash */
     rc = wn_Transcript_Init(&t, 0x7f);
-    check(rc == WOLFNANOTLS_E_UNSUPPORTED, "Init unsupported digest");
-    check(wn_Transcript_Update(&t, h1, 1) == WOLFNANOTLS_E_UNSUPPORTED,
+    check(rc == WOLFNANO_E_UNSUPPORTED, "Init unsupported digest");
+    check(wn_Transcript_Update(&t, h1, 1) == WOLFNANO_E_UNSUPPORTED,
           "Update unsupported digest");
-    check(wn_Transcript_GetHash(&t, h1, &l1) == WOLFNANOTLS_E_UNSUPPORTED,
+    check(wn_Transcript_GetHash(&t, h1, &l1) == WOLFNANO_E_UNSUPPORTED,
           "GetHash unsupported digest");
 
     printf("\n%s (%d failure%s)\n", fails ? "\033[31mFAILED\033[0m" : "\033[32mALL PASS\033[0m",

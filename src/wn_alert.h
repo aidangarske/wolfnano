@@ -42,11 +42,11 @@ static byte wn_ErrToAlert(int ret)
     byte d;
 
     switch (ret) {
-        case WOLFNANOTLS_E_UNEXPECTED_MSG: d = WN_ALERT_UNEXPECTED_MESSAGE; break;
-        case WOLFNANOTLS_E_BAD_MAC:        d = WN_ALERT_BAD_RECORD_MAC;     break;
-        case WOLFNANOTLS_E_DECODE:         d = WN_ALERT_DECODE_ERROR;       break;
-        case WOLFNANOTLS_E_ILLEGAL_PARAM:  d = WN_ALERT_ILLEGAL_PARAMETER;  break;
-        case WOLFNANOTLS_E_BAD_CERT:       d = WN_ALERT_BAD_CERTIFICATE;    break;
+        case WOLFNANO_E_UNEXPECTED_MSG: d = WN_ALERT_UNEXPECTED_MESSAGE; break;
+        case WOLFNANO_E_BAD_MAC:        d = WN_ALERT_BAD_RECORD_MAC;     break;
+        case WOLFNANO_E_DECODE:         d = WN_ALERT_DECODE_ERROR;       break;
+        case WOLFNANO_E_ILLEGAL_PARAM:  d = WN_ALERT_ILLEGAL_PARAMETER;  break;
+        case WOLFNANO_E_BAD_CERT:       d = WN_ALERT_BAD_CERTIFICATE;    break;
         default:                        d = WN_ALERT_INTERNAL_ERROR;     break;
     }
 

@@ -1,8 +1,8 @@
 # Benchmarks
 
 `make bench` builds the all-algo benchmark (`tests/bench_all.c`) for the
-lightweight portable build (`WOLFNANOTLS_ASM=none`) and the Intel asm build
-(`WOLFNANOTLS_ASM=intel`) and prints both, so each speedup is visible. Every algo
+lightweight portable build (`WOLFNANO_ASM=none`) and the Intel asm build
+(`WOLFNANO_ASM=intel`) and prints both, so each speedup is visible. Every algo
 runs through the `wc_*` seam; disabled algos print `n/a`.
 
 ## Host speedups (Intel Core i7-7920HQ, x86_64, clang `-Os`)
@@ -38,7 +38,7 @@ ratios are the signal and track wolfSSL's own published figures.
 | ML-DSA-65 verify (opt-in) | 4468 ops/s | 10952 ops/s | ~2.5x |
 
 ML-DSA defaults to level 2 (ML-DSA-44), security-balanced with the 128-bit
-suite; set `WOLFNANOTLS_MLDSA_LEVEL=3` (65) or `5` (87) when a higher level is
+suite; set `WOLFNANO_MLDSA_LEVEL=3` (65) or `5` (87) when a higher level is
 required.
 
 The big wins are AES-NI (symmetric) and the SP x86_64 asm (public key). These
@@ -54,7 +54,7 @@ SP file is what lifts it to the thousands.
 
 ## Other architectures
 
-`WOLFNANOTLS_ASM=thumb2|aarch64|armv7|riscv64` build the same speedups for those
+`WOLFNANO_ASM=thumb2|aarch64|armv7|riscv64` build the same speedups for those
 targets, but they cannot run on an x86_64 host. thumb2 and armv7 cross-compile
 from source here; aarch64/riscv64 need a complete toolchain. **Speed numbers for
 those require the target silicon** (the Cortex-M33 / STM32H563 is the priority
@@ -66,7 +66,7 @@ A head-to-head against mbedTLS and stock wolfSSL (speed and size) is in
 ## Method
 
 - Each op runs in a time-bounded loop (~0.3s) and reports MB/s (bulk) or ops/s.
-- The bench links `-DWOLFNANOTLS_ALLOW_MALLOC` (a measurement tool, not the
+- The bench links `-DWOLFNANO_ALLOW_MALLOC` (a measurement tool, not the
   no-alloc product) so ML-DSA keygen/sign and RSA keygen can run in-process.
 - Run it: `make bench`. Footprint comparison: `sh bench/footprint-min.sh`
   (see [Footprint](Footprint.md)).

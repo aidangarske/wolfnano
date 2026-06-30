@@ -50,7 +50,7 @@ SHA-256 + HKDF + DRBG) lands far lower.
 | cert (60 KB) | ~60 KB flash, ~24-40 KB RAM | Cortex-M4/M33 from ~128 KB flash: cloud-IoT endpoints, gateways (STM32L4/U5/H5, nRF53, ESP32) |
 
 The key-exchange floor knob is **X25519** (smallest); set
-`WOLFNANOTLS_HAVE_ECDHE_P256` (or `WOLFNANOTLS_FIPS`) for the P-256 build. PQC and asm
+`WOLFNANO_HAVE_ECDHE_P256` (or `WOLFNANO_FIPS`) for the P-256 build. PQC and asm
 add flash on top of the classical floor.
 
 A size comparison against stock/hard-minimized mbedTLS and full wolfSSL is in

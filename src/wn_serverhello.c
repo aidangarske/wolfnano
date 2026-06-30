@@ -56,13 +56,13 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
     byte seenKs = 0;
     byte seenVer = 0;
     byte seenPsk = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if ((msg == NULL) || (out == NULL)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         out->random = NULL;
         out->keyShare = NULL;
         out->sessionId = NULL;
@@ -145,7 +145,7 @@ int wn_ServerHello_Parse(const byte* msg, word32 msgLen, wn_ServerHello* out)
             if ((r.err != 0) || (type != WN_HS_SERVER_HELLO) ||
                 (hsLen != (msgLen - 4)) || (out->random == NULL) ||
                 (lver != 0x0303u) || (comp != 0u) || (extEnd != msgLen)) {
-                ret = WOLFNANOTLS_E_INVALID_ARG;   /* no trailing after extensions */
+                ret = WOLFNANO_E_INVALID_ARG;   /* no trailing after extensions */
             }
         }
     }

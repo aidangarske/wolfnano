@@ -54,7 +54,7 @@ int wn_ClientHello_Build_ex(byte* out, word32* outLen, word32 outCap,
     word32 extLen;
     word32 saExt, saList;
     word32 nameLen = 0;
-    int ret = WOLFNANOTLS_SUCCESS;
+    int ret = WOLFNANO_SUCCESS;
 
     if (serverName != NULL) {
         nameLen = (word32)XSTRLEN(serverName);
@@ -62,10 +62,10 @@ int wn_ClientHello_Build_ex(byte* out, word32* outLen, word32 outCap,
     if ((out == NULL) || (outLen == NULL) || (random32 == NULL) ||
         (pub == NULL) || (pubLen != WN_DEFAULT_PUB_SZ) || (sessionIdLen > 32) ||
         (nameLen > WN_SNI_MAX_HOST)) {
-        ret = WOLFNANOTLS_E_INVALID_ARG;
+        ret = WOLFNANO_E_INVALID_ARG;
     }
 
-    if (ret == WOLFNANOTLS_SUCCESS) {
+    if (ret == WOLFNANO_SUCCESS) {
         wn_Writer_Init(&w, out, outCap);
 
         wn_Write_U8(&w, WN_HS_CLIENT_HELLO);
@@ -115,9 +115,9 @@ int wn_ClientHello_Build_ex(byte* out, word32* outLen, word32 outCap,
         wn_Write_U16(&w, WN_EXT_SIG_ALGS);
         saExt  = wn_Write_LenStart(&w, 2);
         saList = wn_Write_LenStart(&w, 2);
-#ifndef WOLFNANOTLS_FIPS
+#ifndef WOLFNANO_FIPS
     #ifdef WOLFSSL_HAVE_MLDSA
-        wn_Write_U16(&w, WN_MLDSA_SCHEME);     /* ML-DSA (WOLFNANOTLS_MLDSA_LEVEL) */
+        wn_Write_U16(&w, WN_MLDSA_SCHEME);     /* ML-DSA (WOLFNANO_MLDSA_LEVEL) */
     #endif
         wn_Write_U16(&w, 0x0807);              /* ed25519 */
 #endif
@@ -149,7 +149,7 @@ int wn_ClientHello_Build_ex(byte* out, word32* outLen, word32 outCap,
         wn_Write_LenEnd(&w, hsLen, 3);         /* handshake length */
 
         if (w.err != 0) {
-            ret = WOLFNANOTLS_E_INVALID_ARG;
+            ret = WOLFNANO_E_INVALID_ARG;
         }
         else {
             *outLen = w.len;

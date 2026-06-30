@@ -467,7 +467,7 @@ static int drive_ex(int mode, int failAt, int wrapper)
         XMEMSET(&sess, 0xAA, sizeof(sess));
         rc = wn_Connect_Psk_ex(&sess, &rng, sock_send, sock_recv, &ioc, g_psk,
                                sizeof(g_psk), g_id, scratch, sizeof(scratch));
-        if ((rc != WOLFNANOTLS_SUCCESS) && (sess.flags != 0)) {
+        if ((rc != WOLFNANO_SUCCESS) && (sess.flags != 0)) {
             g_failSessClean = 0;        /* failure left a non-clean session */
         }
     }
@@ -492,54 +492,54 @@ int main(void)
     WC_RNG rng;
 
     signal(SIGPIPE, SIG_IGN);                   /* writes to a closed peer -> EPIPE */
-    check(drive(0) == WOLFNANOTLS_SUCCESS, "PSK handshake completes vs mock server");
+    check(drive(0) == WOLFNANO_SUCCESS, "PSK handshake completes vs mock server");
 
     wc_InitRng(&rng);
     XMEMSET(g_bigid, 'a', sizeof(g_bigid) - 1);
     g_bigid[sizeof(g_bigid) - 1] = '\0';
     check(wn_Connect_Psk_ex(&bsess, &rng, sock_send, sock_recv, NULL, g_psk,
           sizeof(g_psk), g_bigid, bscratch, sizeof(bscratch))
-          == WOLFNANOTLS_E_INVALID_ARG, "over-long PSK identity rejected");
+          == WOLFNANO_E_INVALID_ARG, "over-long PSK identity rejected");
     wc_FreeRng(&rng);
-    check(drive_ex(0, 0, 1) == WOLFNANOTLS_SUCCESS, "handshake via wn_Connect_Psk wrapper");
-    check(drive(1) != WOLFNANOTLS_SUCCESS, "ServerHello not a handshake record rejected");
-    check(drive(2) != WOLFNANOTLS_SUCCESS, "bad server key_share length rejected");
-    check(drive(3) == WOLFNANOTLS_E_BAD_MAC, "corrupt server Finished -> BAD_MAC");
-    check(drive(5) == WOLFNANOTLS_E_DECODE, "malformed flight message -> DECODE");
-    check(drive(6) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(drive_ex(0, 0, 1) == WOLFNANO_SUCCESS, "handshake via wn_Connect_Psk wrapper");
+    check(drive(1) != WOLFNANO_SUCCESS, "ServerHello not a handshake record rejected");
+    check(drive(2) != WOLFNANO_SUCCESS, "bad server key_share length rejected");
+    check(drive(3) == WOLFNANO_E_BAD_MAC, "corrupt server Finished -> BAD_MAC");
+    check(drive(5) == WOLFNANO_E_DECODE, "malformed flight message -> DECODE");
+    check(drive(6) == WOLFNANO_E_UNEXPECTED_MSG,
           "unexpected flight message rejected (PSK grammar)");
-    check(drive(7) == WOLFNANOTLS_E_UNEXPECTED_MSG, "non-appdata record in flight rejected");
-    check(drive(8) == WOLFNANOTLS_E_UNSUPPORTED, "HelloRetryRequest detected and rejected");
-    check(drive(9) == WOLFNANOTLS_E_DECODE, "oversized server flight record rejected");
-    check(drive(10) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(drive(7) == WOLFNANO_E_UNEXPECTED_MSG, "non-appdata record in flight rejected");
+    check(drive(8) == WOLFNANO_E_UNSUPPORTED, "HelloRetryRequest detected and rejected");
+    check(drive(9) == WOLFNANO_E_DECODE, "oversized server flight record rejected");
+    check(drive(10) == WOLFNANO_E_UNEXPECTED_MSG,
           "duplicate EncryptedExtensions rejected");
-    check(drive(11) == WOLFNANOTLS_E_BAD_MAC,
+    check(drive(11) == WOLFNANO_E_BAD_MAC,
           "Finished before EncryptedExtensions rejected");
-    check(drive(12) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(drive(12) == WOLFNANO_E_UNEXPECTED_MSG,
           "non-handshake inner record in flight rejected");
-    check(drive(13) == WOLFNANOTLS_E_UNEXPECTED_MSG,
+    check(drive(13) == WOLFNANO_E_UNEXPECTED_MSG,
           "forbidden EncryptedExtensions extension rejected");
-    check(drive(14) == WOLFNANOTLS_E_DECODE,
+    check(drive(14) == WOLFNANO_E_DECODE,
           "EncryptedExtensions with no extensions vector rejected");
-    check(drive(15) == WOLFNANOTLS_E_DECODE,
+    check(drive(15) == WOLFNANO_E_DECODE,
           "EncryptedExtensions extension length overrun rejected");
-    check(drive(16) == WOLFNANOTLS_SUCCESS,
+    check(drive(16) == WOLFNANO_SUCCESS,
           "fragmented server flight reassembled across records");
-    check(drive(17) == WOLFNANOTLS_SUCCESS,
+    check(drive(17) == WOLFNANO_SUCCESS,
           "EncryptedExtensions with supported_groups accepted");
-    check(drive(18) == WOLFNANOTLS_E_DECODE,
+    check(drive(18) == WOLFNANO_E_DECODE,
           "reassembly rejects a message larger than the buffer after a prior one");
 
     /* transport send failures: ClientHello header, ClientHello body, Finished */
-    check(drive_ex(0, 1, 0) != WOLFNANOTLS_SUCCESS, "ClientHello header send failure");
-    check(drive_ex(0, 2, 0) != WOLFNANOTLS_SUCCESS, "ClientHello body send failure");
-    check(drive_ex(0, 5, 0) != WOLFNANOTLS_SUCCESS, "client Finished send failure");
+    check(drive_ex(0, 1, 0) != WOLFNANO_SUCCESS, "ClientHello header send failure");
+    check(drive_ex(0, 2, 0) != WOLFNANO_SUCCESS, "ClientHello body send failure");
+    check(drive_ex(0, 5, 0) != WOLFNANO_SUCCESS, "client Finished send failure");
     check(g_failSessClean, "failed handshake leaves a clean (zeroed) session");
 
     /* argument validation */
     wc_InitRng(&rng);
     check(wn_Connect_Psk_ex(NULL, &rng, sock_send, sock_recv, NULL, g_psk,
-          sizeof(g_psk), g_id, scratch, sizeof(scratch)) == WOLFNANOTLS_E_INVALID_ARG,
+          sizeof(g_psk), g_id, scratch, sizeof(scratch)) == WOLFNANO_E_INVALID_ARG,
           "NULL session / tiny scratch rejected");
     wc_FreeRng(&rng);
 

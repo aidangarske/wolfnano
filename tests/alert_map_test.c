@@ -40,24 +40,24 @@ static void check(int ok, const char* name)
 
 int main(void)
 {
-    check(wn_ErrToAlert(WOLFNANOTLS_E_UNEXPECTED_MSG) == WN_ALERT_UNEXPECTED_MESSAGE,
+    check(wn_ErrToAlert(WOLFNANO_E_UNEXPECTED_MSG) == WN_ALERT_UNEXPECTED_MESSAGE,
           "unexpected_message -> 10");
-    check(wn_ErrToAlert(WOLFNANOTLS_E_BAD_MAC) == WN_ALERT_BAD_RECORD_MAC,
+    check(wn_ErrToAlert(WOLFNANO_E_BAD_MAC) == WN_ALERT_BAD_RECORD_MAC,
           "bad_record_mac -> 20");
-    check(wn_ErrToAlert(WOLFNANOTLS_E_DECODE) == WN_ALERT_DECODE_ERROR,
+    check(wn_ErrToAlert(WOLFNANO_E_DECODE) == WN_ALERT_DECODE_ERROR,
           "decode_error -> 50");
-    check(wn_ErrToAlert(WOLFNANOTLS_E_ILLEGAL_PARAM) == WN_ALERT_ILLEGAL_PARAMETER,
+    check(wn_ErrToAlert(WOLFNANO_E_ILLEGAL_PARAM) == WN_ALERT_ILLEGAL_PARAMETER,
           "illegal_parameter -> 47");
-    check(wn_ErrToAlert(WOLFNANOTLS_E_BAD_CERT) == WN_ALERT_BAD_CERTIFICATE,
+    check(wn_ErrToAlert(WOLFNANO_E_BAD_CERT) == WN_ALERT_BAD_CERTIFICATE,
           "bad_certificate -> 42");
 
-    check(wn_ErrToAlert(WOLFNANOTLS_E_CRYPTO) == WN_ALERT_INTERNAL_ERROR,
+    check(wn_ErrToAlert(WOLFNANO_E_CRYPTO) == WN_ALERT_INTERNAL_ERROR,
           "generic crypto error -> internal_error 80");
-    check(wn_ErrToAlert(WOLFNANOTLS_E_INVALID_ARG) == WN_ALERT_INTERNAL_ERROR,
+    check(wn_ErrToAlert(WOLFNANO_E_INVALID_ARG) == WN_ALERT_INTERNAL_ERROR,
           "invalid arg -> internal_error 80");
-    check(wn_ErrToAlert(WOLFNANOTLS_E_BAD_STATE) == WN_ALERT_INTERNAL_ERROR,
+    check(wn_ErrToAlert(WOLFNANO_E_BAD_STATE) == WN_ALERT_INTERNAL_ERROR,
           "bad state -> internal_error 80");
-    check(wn_ErrToAlert(WOLFNANOTLS_SUCCESS) == WN_ALERT_INTERNAL_ERROR,
+    check(wn_ErrToAlert(WOLFNANO_SUCCESS) == WN_ALERT_INTERNAL_ERROR,
           "success (should never alert) -> internal_error 80");
 
     if (fails == 0) {

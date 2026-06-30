@@ -41,13 +41,13 @@
 /* Read one TLS record into rec (5-byte header then fragment); cap is the rec
  * buffer size. Sets *type to the record content type and *recLen to the total
  * bytes (header + fragment). Shared by the handshake driver and the session. */
-WOLFNANOTLS_LOCAL int wn_RecvRecord(wn_IoRecv recv, void* ctx, byte* rec,
+WOLFNANO_LOCAL int wn_RecvRecord(wn_IoRecv recv, void* ctx, byte* rec,
                                  word32 cap, byte* type, word32* recLen);
 
 /* Build a TLSCiphertext record into rec (header + AEAD ciphertext + tag).
  * rec must hold WN_RECORD_HEADER_SZ + contentLen + 1 + WN_RECORD_TAG_SZ bytes.
  * iv is the 12-byte write IV; the nonce is iv XOR seq. */
-WOLFNANOTLS_LOCAL int wn_Record_Protect(byte* rec, word32* recLen,
+WOLFNANO_LOCAL int wn_Record_Protect(byte* rec, word32* recLen,
                                    const byte* key, word32 keyLen,
                                    const byte* iv, word64 seq,
                                    byte contentType,
@@ -55,7 +55,7 @@ WOLFNANOTLS_LOCAL int wn_Record_Protect(byte* rec, word32* recLen,
 
 /* Decrypt a TLSCiphertext record. content receives the inner content,
  * contentType the recovered type. content may alias rec + header. */
-WOLFNANOTLS_LOCAL int wn_Record_Unprotect(byte* content, word32* contentLen,
+WOLFNANO_LOCAL int wn_Record_Unprotect(byte* content, word32* contentLen,
                                      byte* contentType,
                                      const byte* key, word32 keyLen,
                                      const byte* iv, word64 seq,

@@ -28,10 +28,10 @@
 
 #include "wolfnano.h"
 #include "wolfnano_crypto.h"
-#ifdef WOLFNANOTLS_HAVE_ECDHE_P256
+#ifdef WOLFNANO_HAVE_ECDHE_P256
     #include <wolfssl/wolfcrypt/ecc.h>
 #endif
-#ifdef WOLFNANOTLS_HAVE_MLKEM_HYBRID
+#ifdef WOLFNANO_HAVE_MLKEM_HYBRID
     #include "wn_hybrid.h"
 #endif
 
@@ -41,13 +41,13 @@
 
 #define WN_X25519_KEY_SZ 32
 
-#if defined(WOLFNANOTLS_HAVE_MLKEM_HYBRID)
+#if defined(WOLFNANO_HAVE_MLKEM_HYBRID)
     #define WN_KEYSHARE_MAX_PUB    WN_HYBRID_CLIENT_SHARE
     #define WN_DEFAULT_GROUP       WN_GROUP_X25519MLKEM768
     #define WN_DEFAULT_PUB_SZ      WN_HYBRID_CLIENT_SHARE
     #define WN_DEFAULT_SRV_SHARE_SZ WN_HYBRID_SERVER_SHARE
     #define WN_DEFAULT_SECRET_SZ   WN_HYBRID_SECRET
-#elif defined(WOLFNANOTLS_HAVE_ECDHE_P256)
+#elif defined(WOLFNANO_HAVE_ECDHE_P256)
     #define WN_SECP256R1_PUB_SZ    65   /* uncompressed point 0x04||X||Y */
     #define WN_SECP256R1_SECRET_SZ 32   /* X coordinate */
     #define WN_KEYSHARE_MAX_PUB    65
@@ -64,9 +64,9 @@
 #endif
 
 typedef struct wn_KeyShare {
-#if defined(WOLFNANOTLS_HAVE_MLKEM_HYBRID)
+#if defined(WOLFNANO_HAVE_MLKEM_HYBRID)
     wn_Hybrid hybrid;
-#elif defined(WOLFNANOTLS_HAVE_ECDHE_P256)
+#elif defined(WOLFNANO_HAVE_ECDHE_P256)
     ecc_key ecc;
 #else
     curve25519_key x25519;
@@ -75,19 +75,19 @@ typedef struct wn_KeyShare {
 } wn_KeyShare;
 
 /* Initialise a key share for the given group. */
-WOLFNANOTLS_API int wn_KeyShare_Init(wn_KeyShare* ks, int group);
+WOLFNANO_API int wn_KeyShare_Init(wn_KeyShare* ks, int group);
 
 /* Generate the ephemeral key pair; pub receives the wire-format public key
  * (little-endian for X25519), pubLen its length. */
-WOLFNANOTLS_API int wn_KeyShare_Generate(wn_KeyShare* ks, WC_RNG* rng,
+WOLFNANO_API int wn_KeyShare_Generate(wn_KeyShare* ks, WC_RNG* rng,
                                       byte* pub, word32* pubLen);
 
 /* Compute the shared secret from the peer public key. */
-WOLFNANOTLS_API int wn_KeyShare_Shared(wn_KeyShare* ks, const byte* peerPub,
+WOLFNANO_API int wn_KeyShare_Shared(wn_KeyShare* ks, const byte* peerPub,
                                     word32 peerPubLen, byte* out,
                                     word32* outLen);
 
 /* Release the key share. */
-WOLFNANOTLS_API int wn_KeyShare_Free(wn_KeyShare* ks);
+WOLFNANO_API int wn_KeyShare_Free(wn_KeyShare* ks);
 
 #endif /* WN_KEYSHARE_H */

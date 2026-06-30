@@ -17,4 +17,4 @@ jobs:
           submodules: recursive
       - uses: ./.github/actions/setup
       - name: make fipsproof (skips cleanly without a FIPS bundle)
-        run: make fipsproof WOLFNANOTLS_FIPS_DIR="${WOLFNANOTLS_FIPS_DIR:-/nonexistent}"
+        run: make fipsproof WOLFNANO_FIPS_DIR="${WOLFNANO_FIPS_DIR:-/nonexistent}"

@@ -14,39 +14,39 @@ locally:
 | Signature | ECDSA P-256/P-384, Ed25519 |
 | RNG | Hash-DRBG, seeded via the `wn_seed` hook |
 
-ChaCha20-Poly1305 is available behind `WOLFNANOTLS_HAVE_CHACHA`.
+ChaCha20-Poly1305 is available behind `WOLFNANO_HAVE_CHACHA`.
 
 ## PQC adders (done)
 
 | Adder | Algorithm | Status |
 |---|---|---|
-| `WOLFNANOTLS_MLKEM` | ML-KEM-768 (KEM) | done, allocation-free |
-| `WOLFNANOTLS_MLKEM` | X25519MLKEM768 hybrid key share (group 0x11ec) | done, client+server agreement |
-| `WOLFNANOTLS_MLDSA` | ML-DSA-65 verify (no-malloc) | done, allocation-free |
-| `WOLFNANOTLS_MLDSA` + `WOLFNANOTLS_MLDSA_SIGN` | ML-DSA-65 keygen/sign | done (needs working memory) |
+| `WOLFNANO_MLKEM` | ML-KEM-768 (KEM) | done, allocation-free |
+| `WOLFNANO_MLKEM` | X25519MLKEM768 hybrid key share (group 0x11ec) | done, client+server agreement |
+| `WOLFNANO_MLDSA` | ML-DSA-65 verify (no-malloc) | done, allocation-free |
+| `WOLFNANO_MLDSA` + `WOLFNANO_MLDSA_SIGN` | ML-DSA-65 keygen/sign | done (needs working memory) |
 
 ML-KEM-768 and ML-DSA-65 verify are both **allocation-free** under
 `WOLFSSL_NO_MALLOC`. ML-DSA keygen/sign (server side) needs working memory, so
-it is gated behind `WOLFNANOTLS_MLDSA_SIGN`. The hybrid concatenation is ML-KEM
+it is gated behind `WOLFNANO_MLDSA_SIGN`. The hybrid concatenation is ML-KEM
 component first, then X25519 (draft-kwiatkowski-tls-ecdhe-mlkem).
 
 ## Cert auth (Phase 4, in progress)
 
 | Adder | Capability | Status |
 |---|---|---|
-| `WOLFNANOTLS_X509` | parse cert + verify signature against issuer key | done |
-| `WOLFNANOTLS_HAVE_RSA_VERIFY` | RSA-signed chains (up to RSA-4096 roots, e.g. ISRG Root X1) | done |
+| `WOLFNANO_X509` | parse cert + verify signature against issuer key | done |
+| `WOLFNANO_HAVE_RSA_VERIFY` | RSA-signed chains (up to RSA-4096 roots, e.g. ISRG Root X1) | done |
 | SNI `server_name` (RFC 6066) | sent in ClientHello for a named connect so virtual-host / CDN endpoints serve the right cert | done, live vs public HTTPS |
 | handshake Certificate / CertVerify | cert-based (non-PSK) handshake | done, live vs OpenSSL + wolfSSL |
 | CertVerify schemes: ECDSA P-256/384 (curve-bound), RSA-PSS SHA-256/384/512, Ed25519 | offered set follows the compiled-in primitives | done, all live vs OpenSSL + wolfSSL |
 | multi-cert chain validation (leaf -> intermediate -> pinned root) | | done, live vs OpenSSL + wolfSSL |
-| server identity: hostname SAN/CN (RFC 6125) + exact key pin | `wn_Connect_CertName*`; hostname behind `WOLFNANOTLS_X509_HOSTNAME` | done |
+| server identity: hostname SAN/CN (RFC 6125) + exact key pin | `wn_Connect_CertName*`; hostname behind `WOLFNANO_X509_HOSTNAME` | done |
 | issuer BasicConstraints CA flag + leaf keyUsage/serverAuth EKU | enforced in `wn_VerifyChain` | done |
-| certificate validity-time (notBefore/notAfter) on leaf + intermediates | clock injected via the `XTIME` seam; opt out with `WOLFNANOTLS_NO_X509_TIME` | done |
+| certificate validity-time (notBefore/notAfter) on leaf + intermediates | clock injected via the `XTIME` seam; opt out with `WOLFNANO_NO_X509_TIME` | done |
 
 **Memory note:** unlike the floor and the PSK/RPK handshake (which are true
 no-allocator), X.509 cert parsing uses a `DecodedCert` and needs working memory.
-`WOLFNANOTLS_X509` therefore requires a heap or a `WOLFSSL_STATIC_MEMORY` pool;
+`WOLFNANO_X509` therefore requires a heap or a `WOLFSSL_STATIC_MEMORY` pool;
 it is not part of the true-no-allocator guarantee.
 
 ## Backend boundary note

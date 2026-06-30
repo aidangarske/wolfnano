@@ -18,25 +18,25 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WOLFNANOTLS_USER_SETTINGS_H
-#define WOLFNANOTLS_USER_SETTINGS_H
+#ifndef WOLFNANO_USER_SETTINGS_H
+#define WOLFNANO_USER_SETTINGS_H
 
 /* The one wolfNanoTLS config file. Provider backend = src (default). */
 
 /* Phase 1: crypto floor only (no TLS shell yet). */
 #define WOLFCRYPT_ONLY
 
-/* ---- wolfNanoTLS feature selection (WOLFNANOTLS_HAVE_*) ---- */
-#define WOLFNANOTLS_HAVE_SHA256
-#define WOLFNANOTLS_HAVE_SHA384
-#define WOLFNANOTLS_HAVE_HKDF
-#define WOLFNANOTLS_HAVE_AESGCM
-#define WOLFNANOTLS_HAVE_ECC
-#define WOLFNANOTLS_HAVE_ECC384
-#define WOLFNANOTLS_HAVE_CURVE25519
-#define WOLFNANOTLS_HAVE_ED25519
+/* ---- wolfNanoTLS feature selection (WOLFNANO_HAVE_*) ---- */
+#define WOLFNANO_HAVE_SHA256
+#define WOLFNANO_HAVE_SHA384
+#define WOLFNANO_HAVE_HKDF
+#define WOLFNANO_HAVE_AESGCM
+#define WOLFNANO_HAVE_ECC
+#define WOLFNANO_HAVE_ECC384
+#define WOLFNANO_HAVE_CURVE25519
+#define WOLFNANO_HAVE_ED25519
 
 #include "wolfnano_target.h"   /* target → asm/SP bundle (one macro selects) */
-#include "wolfnano_config.h"   /* WOLFNANOTLS_HAVE_* → wolfSSL macros + size cuts */
+#include "wolfnano_config.h"   /* WOLFNANO_HAVE_* → wolfSSL macros + size cuts */
 
-#endif /* WOLFNANOTLS_USER_SETTINGS_H */
+#endif /* WOLFNANO_USER_SETTINGS_H */

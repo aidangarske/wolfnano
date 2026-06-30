@@ -19,7 +19,7 @@
  */
 
 /* All-algo crypto speed bench over the wc_* seam. Build for one arch via the
- * Makefile (WOLFNANOTLS_ASM=<arch>); each algo is gated by its enable macro and
+ * Makefile (WOLFNANO_ASM=<arch>); each algo is gated by its enable macro and
  * prints n/a when off. Run the none and intel builds to compare C vs asm. */
 
 #include "wolfnano_crypto.h"
@@ -348,9 +348,9 @@ static void bench_pqc(WC_RNG* rng)
     NA("ML-KEM-768 keygen");
 #endif
 #ifdef WOLFSSL_HAVE_MLDSA
-  #if WOLFNANOTLS_MLDSA_LEVEL == 2
+  #if WOLFNANO_MLDSA_LEVEL == 2
     #define WN_B_MLDSA_PARAM WC_ML_DSA_44
-  #elif WOLFNANOTLS_MLDSA_LEVEL == 3
+  #elif WOLFNANO_MLDSA_LEVEL == 3
     #define WN_B_MLDSA_PARAM WC_ML_DSA_65
   #else
     #define WN_B_MLDSA_PARAM WC_ML_DSA_87
