@@ -10,20 +10,24 @@ needs an mbedTLS tree at `$MBEDTLS_DIR`) and `make bench` (speed).
 
 Linked from source for Cortex-M33 (X25519, AES-128-GCM, SHA-256),
 `arm-none-eabi-gcc -Os -flto -ffunction-sections -fdata-sections
--Wl,--gc-sections` + nano specs (ArmGNU 14.2), with wolfNanoTLS and mbedTLS 3.6
-**both hard-minimized to the identical scope**.
+-Wl,--gc-sections` + nano specs (ArmGNU 14.2), with wolfNanoTLS and mbedTLS 4.1.0
+**both hard-minimized to the identical scope**. (mbedTLS 4.x is markedly leaner
+than 3.6 - the cert client dropped from 101,232 to 70,832 B - so this is a
+tougher comparison than the 3.6 numbers shown in older revisions.)
 
-| Client | wolfNanoTLS | mbedTLS (hard-min) | full wolfSSL | smaller by |
+| Client | wolfNanoTLS | mbedTLS 4.1.0 (hard-min) | full wolfSSL | smaller by |
 |---|--:|--:|--:|--:|
-| PSK + ECDHE, X25519 | **18680** | 42100 | - | 56% |
-| PSK + ECDHE, P-256 | **26604** | 50848 | - | 48% |
-| cert / X.509, P-256 | **54396** | 101232 | 150949 | 46% |
+| PSK + ECDHE, X25519 | **18680** | 36512 | - | 49% |
+| PSK + ECDHE, P-256 | **26604** | 42284 | - | 37% |
+| cert / X.509, P-256 | **54396** | 70832 | 150949 | 23% |
 
 The cert row uses wolfNanoTLS's native `wn_x509` parser (`WOLFNANO_X509_LITE`,
 53.1 KB). The **default** cert backend is wolfSSL's full `asn.c` (complete,
-proven) at 63877 B (62.4 KB), still 37% under mbedTLS; `WOLFNANO_X509_LITE` opts
+proven) at 63877 B (62.4 KB), ~10% under mbedTLS 4.1.0; `WOLFNANO_X509_LITE` opts
 into the smaller native parser. Both use the same crypto floor and shell; only
-the X.509 parser differs. See [Footprint](Footprint.md).
+the X.509 parser differs. Reproduce the mbedTLS 4.x rows with
+`sh bench/footprint-mbedtls4.sh` (cert) and `sh bench/footprint-mbedtls4-psk.sh`
+(PSK). See [Footprint](Footprint.md).
 
 mbedTLS is given its smallest config too (`MBEDTLS_ECP_FIXED_POINT_OPTIM 0`,
 `ECP_WINDOW_SIZE 2`) so the comparison is not inflated in wolfNanoTLS's favor. Both
@@ -37,13 +41,14 @@ layer, and links full AES tables.
 
 The honest framing:
 
-- **Hard-minimized both sides (the fair number): ~48% (PSK) / 47% (cert)
+- **Hard-minimized both sides (the fair number): ~49% / 37% (PSK) / 23% (cert)
   smaller.** Getting mbedTLS this small required a custom minimal `PSA_WANT_*`
-  crypto config (`MBEDTLS_PSA_CRYPTO_CONFIG`) and stripping restartable-ECP,
-  SHA-384/512, and the non-GCM AES modes, because mbedTLS 3.6's PSA layer pulls
-  in RSA, SHA-1/3, Camellia, DES, ChaCha by default (~80 KB stock PSK).
-- **Exact configs:** `bench/min/mbedtls_config_psk_hardmin.h` +
-  `bench/min/mbedtls_crypto_config_psk.h` (mbedTLS),
+  crypto config and stripping restartable-ECP, SHA-384/512, and the non-GCM AES
+  modes, because mbedTLS's PSA layer pulls in RSA, SHA-1/3, Camellia, DES,
+  ChaCha by default.
+- **Exact configs:** `bench/min/mbedtls4_config.h` +
+  `bench/min/mbedtls4_crypto_config.h` (cert), `bench/min/mbedtls4_config_psk.h`
+  + `mbedtls4_crypto_config_psk_*.h` (PSK) for mbedTLS 4.1.0;
   `configs/user_settings_*.h` (wolfNanoTLS).
 - **Both harness clients use opaque (volatile) I/O stubs**, so neither side is
   dead-stripped (making the mbedTLS bio opaque too moved its PSK number by
@@ -52,8 +57,8 @@ The honest framing:
   design strength); wolfNanoTLS's win is the TLS layer plus whole-stack assembly.
 - Full wolfSSL with X.509 is ~147 KB, which is the reason a slim shell exists.
 
-At ~17 KB the X25519 PSK client fits where even a hard-minimized mbedTLS (41 KB)
-cannot, and a stock mbedTLS (~80 KB) is out of the question. mbedTLS and stock
+At ~17 KB the X25519 PSK client fits where even a hard-minimized mbedTLS 4.1.0
+(36 KB) cannot, and a stock mbedTLS is out of the question. mbedTLS and stock
 wolfSSL also ship **no ML-KEM / ML-DSA**, so wolfNanoTLS's PQC client rows have no
 counterpart.
 
@@ -73,6 +78,14 @@ than just `tls13.c` + `tls.c`, and omits `internal.c` and `ssl.c` entirely (the
 `WOLFSSL` object model), which is the bulk of the wolfSSL TLS-layer size.
 
 ## Speed (i7-7920HQ, 1 KB block)
+
+> **Under re-validation (do not cite yet).** A fresh AES-NI-confirmed mbedTLS
+> 3.6.0 benchmark on this host measured ~2-4x higher than the mbedTLS figures
+> below (e.g. AES-128-GCM 279 not 119 MiB/s, SHA-256 223 not 58) - the original
+> mbedTLS numbers appear to have been captured without AES-NI/optimization, so
+> the `faster` ratios here overstate wolfNanoTLS's lead. The wolfNanoTLS SHA rows
+> also need an asm-build recheck. A corrected both-sides table is pending; treat
+> the crypto-speed rows below as provisional.
 
 wolfNanoTLS's `intel` build (= wolfCrypt asm through the seam) vs mbedTLS 3.6.0
 stock fast config (AES-NI + `MBEDTLS_HAVE_ASM`, `-O2 -march=native`), both on the
