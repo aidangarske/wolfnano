@@ -15,9 +15,15 @@ Linked from source for Cortex-M33 (X25519, AES-128-GCM, SHA-256),
 
 | Client | wolfNanoTLS | mbedTLS (hard-min) | full wolfSSL | smaller by |
 |---|--:|--:|--:|--:|
-| PSK + ECDHE, X25519 | **18000** | 42100 | - | 57% |
-| PSK + ECDHE, P-256 | **25840** | 50848 | - | 49% |
-| cert / X.509, P-256 | **62297** | 101232 | 150913 | 38% |
+| PSK + ECDHE, X25519 | **18680** | 42100 | - | 56% |
+| PSK + ECDHE, P-256 | **26604** | 50848 | - | 48% |
+| cert / X.509, P-256 | **54396** | 101232 | 150949 | 46% |
+
+The cert row uses wolfNanoTLS's native `wn_x509` parser (`WOLFNANO_X509_LITE`,
+53.1 KB). The **default** cert backend is wolfSSL's full `asn.c` (complete,
+proven) at 63877 B (62.4 KB), still 37% under mbedTLS; `WOLFNANO_X509_LITE` opts
+into the smaller native parser. Both use the same crypto floor and shell; only
+the X.509 parser differs. See [Footprint](Footprint.md).
 
 mbedTLS is given its smallest config too (`MBEDTLS_ECP_FIXED_POINT_OPTIM 0`,
 `ECP_WINDOW_SIZE 2`) so the comparison is not inflated in wolfNanoTLS's favor. Both
@@ -31,7 +37,7 @@ layer, and links full AES tables.
 
 The honest framing:
 
-- **Hard-minimized both sides (the fair number): 34% (PSK) / 40% (cert)
+- **Hard-minimized both sides (the fair number): ~48% (PSK) / 47% (cert)
   smaller.** Getting mbedTLS this small required a custom minimal `PSA_WANT_*`
   crypto config (`MBEDTLS_PSA_CRYPTO_CONFIG`) and stripping restartable-ECP,
   SHA-384/512, and the non-GCM AES modes, because mbedTLS 3.6's PSA layer pulls
