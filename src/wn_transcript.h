@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 handshake transcript hash (RFC 8446 section 4.4.1). Running hash over
- * handshake messages with a non-destructive interim digest. Caller holds the
- * context; no allocation.
- */
-
 #ifndef WN_TRANSCRIPT_H
 #define WN_TRANSCRIPT_H
 

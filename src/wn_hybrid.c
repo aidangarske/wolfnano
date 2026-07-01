@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * X25519MLKEM768 hybrid key share over the wc_* seam. ML-KEM-768 component
- * first, then X25519, per draft-kwiatkowski-tls-ecdhe-mlkem. No allocation.
- */
-
 #include "wn_hybrid.h"
 
 #ifndef WOLFSSL_MISC_INCLUDED

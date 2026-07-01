@@ -18,16 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Adversarial-server tests for the encrypted-flight ordering gate
- * (wn_FlightOrder, src/wn_flight.h). RFC 8446 4.4 fixes the server flight as
- * EncryptedExtensions, [CertificateRequest], Certificate, CertificateVerify,
- * Finished. This drives whole message sequences through the gate and asserts
- * the legal ones are accepted and every out-of-order / duplicate / unknown
- * sequence is rejected with WOLFNANO_E_UNEXPECTED_MSG, mirroring what a
- * malformed or hostile server would send mid-handshake.
- */
-
 #include "wn_flight.h"
 #include <stdio.h>
 

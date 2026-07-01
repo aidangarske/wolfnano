@@ -18,14 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Negative / malformed-input tests for the TLS 1.3 ServerHello parser.
- * Each case feeds deliberately broken input and asserts a clean rejection
- * (return < 0) with no out-of-bounds read (caught by the ASan job). The
- * sticky-error reader in wn_msg latches r.err on any over-read, which the
- * parser surfaces as WOLFNANO_E_INVALID_ARG. Complements serverhello_test.c.
- */
-
 #include "wn_serverhello.h"
 #include <stdio.h>
 #include <string.h>

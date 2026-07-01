@@ -18,10 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* X.509: parse a CA cert, then verify a server cert's signature against the
- * CA public key (the core chain-link check). Uses wolfSSL's embedded ECC test
- * certs. */
-
 #define USE_CERT_BUFFERS_256
 #define USE_CERT_BUFFERS_2048
 

@@ -18,9 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* TLS 1.3 record-protection tests: seal/open round-trip, tamper detection,
- * sequence-number binding. */
-
 #include "wn_record.h"
 #include "wolfnano_crypto.h"
 #include <stdio.h>

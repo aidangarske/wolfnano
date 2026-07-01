@@ -18,9 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* ClientHello encoder test: build, then parse the bytes back and confirm the
- * structure and that the key_share carries our X25519 public key. */
-
 #include "wn_clienthello.h"
 #include "wn_msg.h"
 #include <stdio.h>

@@ -18,13 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Offline functional coverage for the X25519MLKEM768 hybrid handshake. A forked
- * mock server (built from wolfNanoTLS's own wn_Hybrid_* KEM) completes a full
- * TLS 1.3 PSK + hybrid handshake with wn_Connect_Psk_ex over a socketpair, so
- * the hybrid keyshare + connect integration is exercised end-to-end, no network.
- */
-
 #include "wn_connect.h"
 #include "wn_keyshare.h"
 #include "wn_keyschedule.h"

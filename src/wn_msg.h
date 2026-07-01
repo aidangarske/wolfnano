@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Bounds-checked TLS wire encode/decode primitives. Big-endian integers and
- * length-prefixed vectors per RFC 8446 section 3. Caller-provided buffers; the
- * error sticks so call sites can check once at the end.
- */
-
 #ifndef WN_MSG_H
 #define WN_MSG_H
 

@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS wire encode/decode primitives. Sticky error model: once a write overruns
- * the buffer or a read runs short, err latches and later calls are no-ops, so
- * call sites validate once.
- */
-
 #include "wn_msg.h"
 
 void wn_Writer_Init(wn_Writer* w, byte* buf, word32 cap)

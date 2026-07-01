@@ -18,10 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Provider-seam proof for WOLFNANO_CRYPTO=fips. Exercises the FIPS-boundary
- * crypto the handshake uses, entirely through the wc_* seam header, and asserts
- * the in-core integrity / power-on self-tests passed. */
-
 #include "wolfnano_crypto.h"
 #include <wolfssl/wolfcrypt/fips_test.h>
 #include <stdio.h>

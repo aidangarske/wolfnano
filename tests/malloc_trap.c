@@ -18,14 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Linker-wrap heap interposer for the runtime no-malloc proof. Built with
- * -Wl,--wrap=malloc,--wrap=calloc,--wrap=realloc. While wn_trap_armed is set,
- * every heap allocation is counted in wn_trap_hits; the real allocator is still
- * called so the program runs to completion. The test arms the trap only around
- * the handshake crypto path (no stdio in that window) and asserts zero hits.
- */
-
 #include <stdlib.h>
 
 int wn_trap_armed = 0;

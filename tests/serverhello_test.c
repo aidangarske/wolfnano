@@ -18,8 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* ServerHello parser test against the RFC 8448 section 3 ServerHello bytes. */
-
 #include "wn_serverhello.h"
 #include <stdio.h>
 

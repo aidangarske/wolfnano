@@ -18,8 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* X25519MLKEM768 hybrid key share: client and server derive the same secret. */
-
 #include "wn_hybrid.h"
 #include <stdio.h>
 

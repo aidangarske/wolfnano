@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 X25519 key share over the wc_* seam. Wire format is little-endian
- * (RFC 7748). Ported from wolfSSL curve25519 usage; caller-held context.
- */
-
 #include "wn_keyshare.h"
 
 int wn_KeyShare_Init(wn_KeyShare* ks, int group)

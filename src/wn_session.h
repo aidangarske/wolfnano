@@ -18,13 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 application-data session (RFC 8446 section 4.6 / 5.2). Holds the
- * application traffic keys retained from the handshake and drives record-layer
- * send/receive over the wc_* seam. Post-handshake NewSessionTicket is ignored
- * and KeyUpdate is handled transparently. Caller-provided buffers; no alloc.
- */
-
 #ifndef WN_SESSION_H
 #define WN_SESSION_H
 

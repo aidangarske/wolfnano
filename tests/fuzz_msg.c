@@ -18,13 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * libFuzzer harness for the wire reader (wn_msg) used by every parser. Reads a
- * mix of integers and a length-prefixed vector from arbitrary input; the
- * sticky-error reader must clamp every over-read and never touch memory out of
- * bounds (ASan-instrumented).
- */
-
 #include "wn_msg.h"
 #include <stddef.h>
 #include <stdint.h>

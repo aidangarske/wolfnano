@@ -18,14 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 server-flight message-ordering gate (RFC 8446 4.4): the encrypted
- * flight must be EncryptedExtensions, Certificate, CertificateVerify,
- * Finished, in that order, no duplicates, nothing else. CertificateRequest is
- * rejected: wolfNanoTLS does not offer client authentication (mTLS).
- * Pure logic, header-only so wn_connect.c and the unit test share one copy.
- */
-
 #ifndef WN_FLIGHT_H
 #define WN_FLIGHT_H
 

@@ -18,13 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 external-PSK + ECDHE client handshake (RFC 8446). Drives ClientHello
- * (with PSK binder), ServerHello, the encrypted EncryptedExtensions + Finished
- * flight, server Finished verification, and client Finished. Logic ported from
- * wolfSSL tls13.c; transport via I/O callbacks; no allocation.
- */
-
 #include "wn_connect.h"
 #include "wn_msg.h"
 #include "wn_keyschedule.h"

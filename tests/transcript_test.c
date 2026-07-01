@@ -18,9 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Transcript-hash tests: incremental correctness, non-destructive interim
- * digest, SHA-256 and SHA-384 (FIPS 180-4 "abc" vectors). */
-
 #include "wn_transcript.h"
 #include <stdio.h>
 

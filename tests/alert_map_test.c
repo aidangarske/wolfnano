@@ -18,13 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Tests the internal-error to TLS 1.3 alert-description mapping
- * (wn_ErrToAlert, src/wn_alert.h) against RFC 8446 6.2: each granular error
- * must surface the correct alert a peer can act on, and any unmapped error
- * must fall back to internal_error (80) rather than leaking a wrong alert.
- */
-
 #include "wn_alert.h"
 #include <stdio.h>
 

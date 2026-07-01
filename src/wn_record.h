@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 record protection (RFC 8446 section 5.2) with AES-GCM over the wc_*
- * seam. Caller-provided buffers, in-place AEAD; no allocation.
- */
-
 #ifndef WN_RECORD_H
 #define WN_RECORD_H
 

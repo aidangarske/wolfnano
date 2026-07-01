@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 (EC)DHE key share (RFC 8446 section 4.2.8). X25519 over the wc_* seam.
- * Caller holds the context; no allocation.
- */
-
 #ifndef WN_KEYSHARE_H
 #define WN_KEYSHARE_H
 

@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Runs wolfSSL's own wolfcrypt test (wolfcrypt/test/test.c) against the wolfNanoTLS
- * floor. The test is compiled with the wolfNanoTLS config, so it is trimmed by
- * #ifdef to exactly the algorithms wolfNanoTLS supports. Complements the
- * wolfNanoTLS RFC-vector KATs in floor_test.c. */
-
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/test/test.h>
 #include <stdio.h>

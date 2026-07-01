@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * KAT for the post-handshake key update (RFC 8446 4.6.3 / 7.2): pins the
- * "traffic upd" secret derivation and the re-derived AES-128-GCM key/iv so a
- * regression in wn_Tls13_KeyUpdate (label, order, sizes) fails loudly.
- */
-
 #include "wn_keyschedule.h"
 #include <wolfssl/wolfcrypt/hash.h>
 #include <stdio.h>

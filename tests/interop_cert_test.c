@@ -18,9 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Live interop: wolfNanoTLS TLS 1.3 ECDHE + certificate client against a peer
- * presenting the pinned ECDSA P-256 certificate. */
-
 #include "wn_connect.h"
 #include <stdio.h>
 #include <stdlib.h>

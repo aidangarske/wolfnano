@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 handshake transcript hash over the wc_* seam. Incremental SHA-256 /
- * SHA-384 with a non-destructive interim digest (wc_ShaXxxGetHash).
- */
-
 #include "wn_transcript.h"
 
 int wn_Transcript_Init(wn_Transcript* t, int digest)

@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 client handshake driver (RFC 8446) for the external-PSK + ECDHE
- * (psk_dhe_ke) flow. Transport-agnostic via I/O callbacks; caller-provided
- * scratch buffer; no allocation. Certificates are out of scope (Phase 4).
- */
-
 #ifndef WN_CONNECT_H
 #define WN_CONNECT_H
 

@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* End-to-end cryptographic handshake: two in-process parties run ECDHE, the
- * full key schedule over a shared transcript, derive record keys, and exchange
- * AES-GCM protected records. Proves the shell modules compose into a working
- * TLS 1.3 crypto pipeline (no sockets / no wire encoding yet). */
-
 #include "wn_keyshare.h"
 #include "wn_keyschedule.h"
 #include "wn_transcript.h"

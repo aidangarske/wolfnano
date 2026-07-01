@@ -18,8 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* ML-KEM-768 KEM round-trip: encapsulate/decapsulate shared secrets agree. */
-
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/wc_mlkem.h>
 #include <wolfssl/wolfcrypt/random.h>

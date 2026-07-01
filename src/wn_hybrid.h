@@ -18,13 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 X25519MLKEM768 hybrid key share (group 0x11ec,
- * draft-kwiatkowski-tls-ecdhe-mlkem). Concatenation is ML-KEM component first,
- * then X25519, for the shares and the combined secret. Over the wc_* seam,
- * caller-held context, no allocation. Requires WOLFNANO_MLKEM.
- */
-
 #ifndef WN_HYBRID_H
 #define WN_HYBRID_H
 

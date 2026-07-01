@@ -18,14 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Data-driven negotiation matrix: for every supported (cipher suite x key-share
- * group x PSK/cert) combination wolfNanoTLS can negotiate, encode a ServerHello
- * with those parameters and assert wn_ServerHello_Parse recovers them exactly.
- * Pure shell-level (no network), exercising the negotiation-relevant parsing
- * across the whole kept parameter space in one table.
- */
-
 #include "wn_serverhello.h"
 #include "wn_msg.h"
 #include <stdio.h>

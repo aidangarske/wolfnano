@@ -18,14 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * RFC 8448 section 3 record-key KATs: HKDF-Expand-Label of each traffic secret
- * into the "key"/"iv" the record layer uses. keyschedule_test.c covers the
- * secret derivations and the server handshake key/iv; this completes the set
- * with the client handshake keys and both application-data keys, so all four
- * (client/server x handshake/application) write keys are vector-checked.
- */
-
 #include "wolfnano_crypto.h"
 #include "wn_keyschedule.h"
 #include <stdio.h>

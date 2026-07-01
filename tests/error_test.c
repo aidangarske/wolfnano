@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Tests wn_ErrorToString: every defined code maps to a non-empty, distinct
- * string, and an unknown code falls back to a generic string (never NULL).
- */
-
 #include "wolfnano.h"
 #include <stdio.h>
 #include <string.h>

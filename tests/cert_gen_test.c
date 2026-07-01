@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Generated-PKI coverage for wn_VerifyChain's constraint checks: build certs
- * with controlled CA flag, keyUsage, and extendedKeyUsage, then assert the
- * chain verifier accepts a well-formed leaf and rejects a non-serverAuth leaf,
- * a no-digitalSignature leaf, and a chain through a non-CA intermediate.
- */
-
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/ecc.h>
 #include <wolfssl/wolfcrypt/asn_public.h>

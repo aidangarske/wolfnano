@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 ServerHello parser (RFC 8446 section 4.1.3). Extracts the negotiated
- * cipher suite, the server key_share, the selected version, and (for PSK) the
- * selected pre_shared_key identity. Pointers reference the caller's input.
- */
-
 #ifndef WN_SERVERHELLO_H
 #define WN_SERVERHELLO_H
 

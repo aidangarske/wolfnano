@@ -18,13 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * wolfNanoTLS crypto-floor self-test, run on an emulated Cortex-M33 (STM32H563)
- * under m33mu. Exercises the Thumb2 wolfcrypt floor with deterministic KATs,
- * prints results over UART, and traps bkpt #0x7e on success so m33mu's
- * --expect-bkpt=0x7e gates the run. No entropy or transport needed.
- */
-
 #include <stdio.h>
 #include <string.h>
 #include "emu_app.h"

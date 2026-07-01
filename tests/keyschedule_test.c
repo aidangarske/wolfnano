@@ -18,8 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* TLS 1.3 key-schedule KATs from RFC 8448 section 3 (SHA-256). */
-
 #include "wolfnano_crypto.h"
 #include "wn_keyschedule.h"
 #include <stdio.h>

@@ -18,10 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* All-algo crypto speed bench over the wc_* seam. Build for one arch via the
- * Makefile (WOLFNANO_ASM=<arch>); each algo is gated by its enable macro and
- * prints n/a when off. Run the none and intel builds to compare C vs asm. */
-
 #include "wolfnano_crypto.h"
 #include <wolfssl/wolfcrypt/ecc.h>
 #include <wolfssl/wolfcrypt/ed25519.h>

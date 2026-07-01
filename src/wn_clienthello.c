@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 ClientHello encoder over wn_msg. Structure per RFC 8446 4.1.2; logic
- * mirrors wolfSSL tls13.c SendTls13ClientHello. No allocation.
- */
-
 #include "wn_clienthello.h"
 #include "wn_keyshare.h"
 #include "wn_msg.h"

@@ -18,14 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Runtime proof of the zero-allocation guarantee: run the full handshake crypto
- * path (ECDHE, key schedule, transcript, AES-GCM record protect/unprotect) with
- * the malloc trap armed and assert it made zero heap allocations. Complements
- * the static nm/grep no-alloc checks with a dynamic one. No stdio runs while
- * the trap is armed. Built with the --wrap interposer in malloc_trap.c.
- */
-
 #include "wn_keyshare.h"
 #include "wn_keyschedule.h"
 #include "wn_transcript.h"

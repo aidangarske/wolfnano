@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Negative authentication coverage for the X.509 cert path: a tampered chain
- * must fail wn_VerifyChain, and a tampered ECDSA CertificateVerify (0x0403)
- * must fail wn_CertVerify. Guards against the auth checks being silently
- * neutralized (mutation survival).
- */
-
 #define USE_CERT_BUFFERS_256
 #define USE_CERT_BUFFERS_2048
 

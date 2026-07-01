@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 record protection (RFC 8446 section 5.2) over the wc_* seam.
- * AES-GCM, in-place, caller-provided buffers, no allocation.
- */
-
 #include "wn_record.h"
 #include "wolfnano_crypto.h"
 

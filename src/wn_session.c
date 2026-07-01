@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 application-data session (RFC 8446 5.2 record layer, 4.6 post-
- * handshake). Sends/receives application_data over the wc_* seam, ignores
- * NewSessionTicket, and processes KeyUpdate (4.6.3). Caller buffers; no alloc.
- */
-
 #include "wn_session.h"
 #include "wn_record.h"
 #include "wn_keyschedule.h"

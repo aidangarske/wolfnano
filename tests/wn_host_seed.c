@@ -18,9 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Host seed-hook implementation for the PORTABLE_C self-test. The embedded
- * target supplies its own wn_seed (STM32 TRNG / wolfHAL RNG). */
-
 #include <stdlib.h>
 
 int wn_seed(unsigned char* output, unsigned int sz)

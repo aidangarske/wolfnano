@@ -18,8 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* X25519 key-share tests: ephemeral agreement and public-key wire length. */
-
 #include "wn_keyshare.h"
 #include <stdio.h>
 

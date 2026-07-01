@@ -18,8 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Live interop: wolfNanoTLS TLS 1.3 PSK+ECDHE client against openssl s_server. */
-
 #include "wn_connect.h"
 #include <stdio.h>
 #include <stdlib.h>

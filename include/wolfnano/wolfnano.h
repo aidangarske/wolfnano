@@ -18,10 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * wolfNanoTLS public API surface: shared types and return codes.
- */
-
 #ifndef WOLFNANO_H
 #define WOLFNANO_H
 

@@ -18,12 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Maps a wolfNanoTLS internal error to a TLS 1.3 alert description
- * (RFC 8446 6.2). Pure logic, header-only so wn_connect.c and the unit test
- * share one copy.
- */
-
 #ifndef WN_ALERT_H
 #define WN_ALERT_H
 

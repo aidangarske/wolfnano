@@ -18,14 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Offline unit tests for the application-data session (wn_Send / wn_Recv /
- * wn_Close, src/wn_session.c). A mock transport feeds crafted, peer-encrypted
- * records into wn_Recv and captures wn_Send output for decryption, so the whole
- * record-layer + post-handshake dispatch (app-data, NewSessionTicket skip,
- * KeyUpdate rekey, close_notify, buffer bounds) is exercised without a network.
- */
-
 #include "wn_session.h"
 #include "wn_record.h"
 #include "wn_keyschedule.h"

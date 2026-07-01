@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 key schedule over the wc_* seam. Ported from wolfSSL tls13.c
- * (DeriveKey / Tls13_HKDF_Expand_Label usage), buffers caller-provided.
- */
-
 #include "wn_keyschedule.h"
 #include "wolfnano_crypto.h"
 

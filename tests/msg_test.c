@@ -18,9 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* Wire encode/decode primitive tests: integers, byte vectors, length backfill,
- * round-trip, and bounds checking. */
-
 #include "wn_msg.h"
 #include <stdio.h>
 

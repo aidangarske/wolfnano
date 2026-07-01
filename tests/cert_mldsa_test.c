@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/* ML-DSA TLS 1.3 CertificateVerify (level via WOLFNANO_MLDSA_LEVEL): keygen + sign
- * a CertificateVerify TBS, export the public key to SPKI DER, then drive the
- * client's wn_CertVerify path and assert accept (good sig) + reject (tampered).
- */
-
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/wc_mldsa.h>
 #include <wolfssl/wolfcrypt/random.h>

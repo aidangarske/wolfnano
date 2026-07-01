@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Maps a wolfNanoTLS return code to a short human-readable string for logging and
- * diagnostics. Returns a static string (no allocation); never NULL.
- */
-
 #include "wolfnano.h"
 
 const char* wn_ErrorToString(int err)

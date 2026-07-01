@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 ServerHello parser over wn_msg. Structure per RFC 8446 4.1.3; logic
- * mirrors wolfSSL tls13.c DoTls13ServerHello. Pointers reference the input.
- */
-
 #include "wn_serverhello.h"
 #include "wn_msg.h"
 

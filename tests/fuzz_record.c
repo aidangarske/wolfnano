@@ -18,13 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * libFuzzer harness for the TLS 1.3 record decryptor. Feeds arbitrary bytes as
- * a TLSCiphertext to wn_Record_Unprotect with a fixed key/iv; almost all inputs
- * fail the AEAD tag, but the parser must never read or write out of bounds on
- * any input (ASan-instrumented). This is the session's untrusted-input entry.
- */
-
 #include "wn_record.h"
 #include <stddef.h>
 #include <stdint.h>

@@ -18,11 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * TLS 1.3 key schedule (RFC 8446 section 7.1) over the wc_* seam.
- * Logic ported from wolfSSL tls13.c; all buffers caller-provided (no alloc).
- */
-
 #ifndef WN_KEYSCHEDULE_H
 #define WN_KEYSCHEDULE_H
 

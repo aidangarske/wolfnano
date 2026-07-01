@@ -18,15 +18,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Deterministic offline coverage for the TLS 1.3 client handshake driver
- * (wn_Connect_Psk_ex). A minimal PSK+ECDHE server is run in a forked process
- * over a socketpair and built from wolfNanoTLS's own primitives (key share, key
- * schedule, transcript, record), so the client completes a full handshake with
- * no network and no third-party peer. Error cases inject malformed server
- * responses to drive the client's rejection paths.
- */
-
 #include "wn_connect.h"
 #include "wn_keyshare.h"
 #include "wn_keyschedule.h"
